@@ -36,11 +36,34 @@ for(i in 1:length(forecasts)){
   forecasts[[i]] <- forecasts[[i]][,order(names(forecasts[[i]]))]
 }
 
-# Discard years for which no actual value and name similar to Zidong columns:
+# Discard years for which no actual value:
+
 
 forecasts <- forecasts %>% 
   discard(~ unique(.x$year_forecasted) >= 2019)
 
+
+# Naming similar to Zidong and bind together:
+
+
+final_forecasts <-  forecasts %>% 
+  map(~ if(length(names(.x)) == 14){
+    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country","year_forecasted"))
+  } else if(length(names(.x)) == 12){
+    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country","year_forecasted"))
+  } else if(length(names(.x)) == 10){
+    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country","year_forecasted"))
+  } else if(length(names(.x)) == 8){
+    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country","year_forecasted"))
+  } else if(length(names(.x)) == 6){
+    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country","year_forecasted"))
+  } else if(length(names(.x)) == 4){
+    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country","year_forecasted"))
+  }
+  ) %>% 
+  bind_rows() %>% 
+  select(country, year_forecasted, everything())
+  
 
 # Now just need to re-name columns and bind!
 
