@@ -1,8 +1,10 @@
 # DESCRIPTION: the script produces the final dataframe for the comparison between forecasted values in WEO
 # and actual values and saves it in the output directory of the project.
 
-path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx"
-  
+
+wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx"){
+
+path = path
   
 # Wrangle forecasts -----
 
@@ -15,9 +17,9 @@ sheets_year <- getSheetNames(path) %>%
 
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
-  map(~ .x %>% gather("year_forecasted","rgdp",`1989`:`2030`)) %>% 
+  map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
   map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>% 
-  map(~ .x %>% select(Series_code, year_forecasted, rgdp)) %>% 
+  map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
   map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
   map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
   map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5))) %>%
@@ -25,7 +27,7 @@ forecasts <- sheets_name %>%
   bind_rows() %>% 
   group_split(year_forecasted) %>% 
   map(~ .x %>% select(-year_publication)) %>% 
-  map(~ .x %>% spread(date_publication,rgdp)) %>% 
+  map(~ .x %>% spread(date_publication,variable)) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
   map(~ .x %>% rename_at(vars(starts_with("oct")), ~ paste0(.,"oct"))) %>% 
@@ -49,17 +51,17 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(12:1)),"country_code","year"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(10:1)),"country_code","year"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(8:1)),"country_code","year"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(6:1)),"country_code","year"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(4:1)),"country_code","year"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country_code","year"))
+    .x %>% setNames(c(paste0("variable",seq(2:1)),"country_code","year"))
   }
   ) %>% 
   bind_rows() %>% 
@@ -67,7 +69,9 @@ final_forecasts <-  forecasts %>%
   filter(complete.cases(country)) %>% 
   select(country_code, country, year, everything()) %>% 
   arrange(country)
+}
 
+a <- wrangle_weo_forecasts()
 
 
 # Actual -----
