@@ -88,7 +88,7 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
 
 # Combine and export ------
 
-# Set paramaters
+# Set paramaters:
 
 paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
           "../IEO_forecasts_material/raw_data/cagdp.xlsx",
@@ -98,8 +98,13 @@ last_edition = c("apr2020","apr2020","Apr2020")
 
 name_variables = c("growth","cagdp","deficitgdp")
 
+export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData",
+               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RData",
+               "../IEO_forecasts_material/intermediate_data/deficitgdp_cleaned.RData"
+)
 
-# Run
+
+# Run:
 
 forecasts <- paths %>% 
   map(~ wrangle_weo_forecasts(.x))
@@ -108,7 +113,7 @@ actual <- paths %>%
   map2(last_edition, ~ get_last_weo(.x,.y))
 
 
-# Merge
+# Merge:
 
 final <- actual %>% 
   map2(forecasts, ~ merge(.x,.y, by = c("country_code","year"))) %>% 
@@ -118,6 +123,12 @@ final <- actual %>%
   map(~ .x %>% as.tibble())
 
 names(final) <- name_variables
+
+
+# Export:
+
+final %>% 
+  walk2(export_names, ~ rio::export(.x, file = .y))
 
 
 # Complete.cases removes some countries forgotten by Zidong in the last sheets. 
