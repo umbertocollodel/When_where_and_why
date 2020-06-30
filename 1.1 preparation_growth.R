@@ -49,23 +49,23 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country_code","year"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country_code","year"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country_code","year"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country_code","year"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country_code","year"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country_code","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country_code","year"))
   }
   ) %>% 
   bind_rows() %>% 
   mutate(country = countrycode(country_code,"imf","country.name")) %>% 
   filter(complete.cases(country)) %>% 
-  select(country_code, country, year_forecasted, everything()) %>% 
+  select(country_code, country, year, everything()) %>% 
   arrange(country)
 
 
@@ -73,14 +73,28 @@ final_forecasts <-  forecasts %>%
 # Actual -----
 
 actual <- read_xlsx(path, sheet = "apr2020gr") %>% 
-  select(-EcDatabase, -Series_code, -Indicator, -Frequency, -Scale, -`2020`:-`2030`) %>% 
+  select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-`2030`) %>% 
   gather("year","targety",`1989`:`2019`) %>% 
-  filter(complete.cases(Country)) 
+  filter(complete.cases(Series_code)) %>% 
+  rename(country_code = Series_code)
 
-# Combine ------
 
 
-merge(actual, forecasts)
+# Combine and export ------
+
+
+final_gdp <- merge(actual, final_forecasts, by = c("country_code","year")) %>% 
+  arrange(country,year) %>% 
+  select(country_code, country, year, targety, everything()) %>% 
+  filter(complete.cases(targety)) %>% 
+  as.tibble() 
+
+
+# Complete.cases removes some countries forgotten by Zidong in the last sheets. 
+# We can decide later on what to do with those.
+
+
+
 
 
 
