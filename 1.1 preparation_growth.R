@@ -48,17 +48,17 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:12)),"country","year_forecasted"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:10)),"country","year_forecasted"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:8)),"country","year_forecasted"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:6)),"country","year_forecasted"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:4)),"country","year_forecasted"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(1:2)),"country","year_forecasted"))
   }
   ) %>% 
   bind_rows() %>% 
@@ -66,6 +66,10 @@ final_forecasts <-  forecasts %>%
   
 
 # Now just need to re-name columns and bind!
+
+duplicated(final_forecasts[,1:2]) %>% 
+  as.tibble() %>% 
+  print(n = Inf)
 
 
 # Actual -----
@@ -79,3 +83,29 @@ actual <- read_xlsx(path, sheet = "apr2020gr") %>%
 
 
 merge(actual, forecasts)
+
+
+
+
+
+
+paths = c("../IEO_forecasts_material/raw_data/cagdp.xlsx","../IEO_forecasts_material/raw_data/weo_pcpi.xlsx","../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
+destination_paths = c("../IEO_forecasts_material/raw_data/cagdp.xlsx","../IEO_forecasts_material/raw_data/weo_pcpi.xlsx","../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
+
+
+sheets <- getSheetNames("../IEO_forecasts_material/raw_data/weo_pcpi.xlsx")
+
+sheets %>% 
+  map(~ read_xlsx("../IEO_forecasts_material/raw_data/weo_pcpi.xlsx",sheet = .x)) %>% 
+  map(~ .x %>% select(-ends_with("Q\\d")))
+
+paths %>% 
+  map(~ getSheetNames(.x)) %>% 
+  map(~ read_xlsx(paths[1], sheet = .x)) %>% 
+  map2(destination_paths,~ rio::export(.x, file = .y))
+
+library(rio)
+?rio::export
+
+
+
