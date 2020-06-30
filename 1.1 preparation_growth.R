@@ -48,17 +48,17 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("gdp",seq(1:12)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country","year_forecasted"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("gdp",seq(1:10)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country","year_forecasted"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("gdp",seq(1:8)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country","year_forecasted"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("gdp",seq(1:6)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country","year_forecasted"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("gdp",seq(1:4)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country","year_forecasted"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("gdp",seq(1:2)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country","year_forecasted"))
   }
   ) %>% 
   bind_rows() %>% 
