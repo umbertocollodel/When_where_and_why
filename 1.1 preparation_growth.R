@@ -90,23 +90,53 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
 
 # Combine and export ------
 
+# Set paramaters
+
 paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
           "../IEO_forecasts_material/raw_data/cagdp.xlsx",
           "../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
 
+last_edition = c("apr2020","apr2020","Apr2020")
+
+name_variables = c("growth","cagdp","deficitgdp")
+
+
+# Run
+
 forecasts <- paths %>% 
+  map(~ wrangle_weo_forecasts(.x))
   
+actual <- paths %>% 
+  map2(last_edition, ~ get_last_weo(.x,.y))
 
 
-final_gdp <- merge(actual, final_forecasts, by = c("country_code","year")) %>% 
-  arrange(country,year) %>% 
-  select(country_code, country, year, targety, everything()) %>% 
-  filter(complete.cases(targety)) %>% 
-  as.tibble() 
+# Merge
+
+final <- actual %>% 
+  map2(forecasts, ~ merge(.x,.y, by = c("country_code","year"))) %>% 
+  map(~ .x %>% arrange(country,year)) %>% 
+  map(~ .x %>% select(country_code, country,year, targety, everything())) %>% 
+  map(~ .x %>% filter(complete.cases(targety))) %>% 
+  map(~ .x %>% as.tibble())
 
 
 # Complete.cases removes some countries forgotten by Zidong in the last sheets. 
 # We can decide later on what to do with those.
+
+
+##########################
+
+# Things to check: order of the forecasts (apr-october), target y
+# why afghanistan actual is so wrong when compared to world bank??
+
+
+
+
+
+
+
+
+
 
 
 
