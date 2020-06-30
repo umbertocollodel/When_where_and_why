@@ -4,7 +4,7 @@
 path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx"
   
   
-# Wrangle orecasts -----
+# Wrangle forecasts -----
 
 
 sheets_name <- getSheetNames(path)
@@ -16,11 +16,12 @@ sheets_year <- getSheetNames(path) %>%
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
   map(~ .x %>% gather("year_forecasted","rgdp",`1989`:`2030`)) %>% 
-  map(~ .x %>% select(Country, year_forecasted, rgdp)) %>% 
+  map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>% 
+  map(~ .x %>% select(Series_code, year_forecasted, rgdp)) %>% 
   map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
   map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
   map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5))) %>%
-  map(~ .x %>% filter(complete.cases(Country))) %>% 
+  map(~ .x %>% filter(complete.cases(Series_code))) %>% 
   bind_rows() %>% 
   group_split(year_forecasted) %>% 
   map(~ .x %>% select(-year_publication)) %>% 
@@ -40,7 +41,7 @@ for(i in 1:length(forecasts)){
 
 
 forecasts <- forecasts %>% 
-  discard(~ unique(.x$year_forecasted) >= 2019)
+  discard(~ unique(.x$year_forecasted) > 2019)
 
 
 # Naming similar to Zidong and bind together:
@@ -48,28 +49,25 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(12:1)),"country_code","year_forecasted"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(10:1)),"country_code","year_forecasted"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(8:1)),"country_code","year_forecasted"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(6:1)),"country_code","year_forecasted"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(4:1)),"country_code","year_forecasted"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country","year_forecasted"))
+    .x %>% setNames(c(paste0("gdp",seq(2:1)),"country_code","year_forecasted"))
   }
   ) %>% 
   bind_rows() %>% 
-  select(country, year_forecasted, everything())
-  
+  mutate(country = countrycode(country_code,"imf","country.name")) %>% 
+  filter(complete.cases(country)) %>% 
+  select(country_code, country, year_forecasted, everything()) %>% 
+  arrange(country)
 
-# Now just need to re-name columns and bind!
-
-duplicated(final_forecasts[,1:2]) %>% 
-  as.tibble() %>% 
-  print(n = Inf)
 
 
 # Actual -----
@@ -107,5 +105,5 @@ paths %>%
 library(rio)
 ?rio::export
 
-
+library(countrycode)
 
