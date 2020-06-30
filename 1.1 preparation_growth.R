@@ -52,19 +52,19 @@ forecasts <- forecasts %>%
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 14){
-    .x %>% setNames(c(paste0("variable",seq(12:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(12:1))),"country_code","year"))
   } else if(length(names(.x)) == 12){
-    .x %>% setNames(c(paste0("variable",seq(10:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(10:1))),"country_code","year"))
   } else if(length(names(.x)) == 10){
-    .x %>% setNames(c(paste0("variable",seq(8:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(8:1))),"country_code","year"))
   } else if(length(names(.x)) == 8){
-    .x %>% setNames(c(paste0("variable",seq(6:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(6:1))),"country_code","year"))
   } else if(length(names(.x)) == 6){
-    .x %>% setNames(c(paste0("variable",seq(4:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(4:1))),"country_code","year"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(paste0("variable",seq(2:1)),"country_code","year"))
+    .x %>% setNames(c(rev(paste0("variable",seq(2:1))),"country_code","year"))
   }
-  ) %>% 
+  ) %>%  
   bind_rows() %>% 
   mutate(country = countrycode(country_code,"imf","country.name")) %>% 
   filter(complete.cases(country)) %>% 
@@ -84,8 +84,6 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
   rename(country_code = Series_code) %>% 
   mutate(country_code = str_extract(country_code,"\\d{3}"))
 }
-
-
 
 
 # Combine and export ------
@@ -119,6 +117,8 @@ final <- actual %>%
   map(~ .x %>% filter(complete.cases(targety))) %>% 
   map(~ .x %>% as.tibble())
 
+names(final) <- name_variables
+
 
 # Complete.cases removes some countries forgotten by Zidong in the last sheets. 
 # We can decide later on what to do with those.
@@ -126,8 +126,14 @@ final <- actual %>%
 
 ##########################
 
-# Things to check: order of the forecasts (apr-october), target y
-# why afghanistan actual is so wrong when compared to world bank??
+# Things to check: 
+#### - invert order columns
+#### - target y:  why afghanistan actual is so wrong when compared to world bank??
+#### - check that the order of sheets does not mess up the deficit data
+#### - change target y variables and entire variables (PCPI_H)
+
+
+# Ca/GDP complete!
 
 
 
