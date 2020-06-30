@@ -2,7 +2,7 @@
 # and actual values and saves it in the output directory of the project.
 
 
-wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx"){
+wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx") {
 
 path = path
   
@@ -27,6 +27,7 @@ forecasts <- sheets_name %>%
   bind_rows() %>% 
   group_split(year_forecasted) %>% 
   map(~ .x %>% select(-year_publication)) %>% 
+  map(~ .x %>% distinct(Series_code, date_publication, .keep_all = T)) %>% 
   map(~ .x %>% spread(date_publication,variable)) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
@@ -69,22 +70,32 @@ final_forecasts <-  forecasts %>%
   filter(complete.cases(country)) %>% 
   select(country_code, country, year, everything()) %>% 
   arrange(country)
-}
 
-a <- wrangle_weo_forecasts()
+}
 
 
 # Actual -----
 
-actual <- read_xlsx(path, sheet = "apr2020gr") %>% 
-  select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-`2030`) %>% 
-  gather("year","targety",`1989`:`2019`) %>% 
+get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
+  read_xlsx(path, sheet = last_edition) %>% 
+  select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-ncol(.)) %>% 
+  gather("year","targety",2:`2019`) %>% 
   filter(complete.cases(Series_code)) %>% 
-  rename(country_code = Series_code)
+  rename(country_code = Series_code) %>% 
+  mutate(country_code = str_extract(country_code,"\\d{3}"))
+}
+
 
 
 
 # Combine and export ------
+
+paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
+          "../IEO_forecasts_material/raw_data/cagdp.xlsx",
+          "../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
+
+forecasts <- paths %>% 
+  
 
 
 final_gdp <- merge(actual, final_forecasts, by = c("country_code","year")) %>% 
@@ -98,30 +109,4 @@ final_gdp <- merge(actual, final_forecasts, by = c("country_code","year")) %>%
 # We can decide later on what to do with those.
 
 
-
-
-
-
-
-
-
-paths = c("../IEO_forecasts_material/raw_data/cagdp.xlsx","../IEO_forecasts_material/raw_data/weo_pcpi.xlsx","../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
-destination_paths = c("../IEO_forecasts_material/raw_data/cagdp.xlsx","../IEO_forecasts_material/raw_data/weo_pcpi.xlsx","../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
-
-
-sheets <- getSheetNames("../IEO_forecasts_material/raw_data/weo_pcpi.xlsx")
-
-sheets %>% 
-  map(~ read_xlsx("../IEO_forecasts_material/raw_data/weo_pcpi.xlsx",sheet = .x)) %>% 
-  map(~ .x %>% select(-ends_with("Q\\d")))
-
-paths %>% 
-  map(~ getSheetNames(.x)) %>% 
-  map(~ read_xlsx(paths[1], sheet = .x)) %>% 
-  map2(destination_paths,~ rio::export(.x, file = .y))
-
-library(rio)
-?rio::export
-
-library(countrycode)
 
