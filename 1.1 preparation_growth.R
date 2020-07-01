@@ -118,7 +118,10 @@ actual <- paths %>%
 final <- actual %>% 
   map2(forecasts, ~ merge(.x,.y, by = c("country_code","year"))) %>% 
   map(~ .x %>% arrange(country,year)) %>% 
-  map(~ .x %>% select(country_code, country,year, targety, everything())) %>% 
+  map(~ .x %>% select(country_code, country,year, targety,
+                      variable1, variable2, variable3, variable4, variable5,
+                      variable6,variable7,variable8,variable9,variable10,
+                      variable11, variable12)) %>% 
   map(~ .x %>% filter(complete.cases(targety))) %>% 
   map(~ .x %>% as.tibble())
 
@@ -138,7 +141,6 @@ final %>%
 ##########################
 
 # Things to check: 
-#### - invert order columns
 #### - target y:  why afghanistan actual is so wrong when compared to world bank??
 #### - check that the order of sheets does not mess up the deficit data
 #### - change target y variables and entire variables (PCPI_H)
