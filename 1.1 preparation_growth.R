@@ -2,11 +2,27 @@
 # and actual values and saves it in the output directory of the project.
 
 
+# Wrangling weo forecasts function ----
+
+#' Wrangling weo forecasts
+#' 
+#' Wrangling weo forecasts from excel sheet format for every issue (single variable) to a 
+#' more user-friendly database.
+#' 
+#' @param path path to the xlsx workbook in the locale.
+#' 
+#' @return tibble with three identifiers (imf code, country name and year forecasted) and
+#' variable1 to 12 that correspond to the five years horizon forecast i.e. from Oct at t
+#' to Apr at t-5
+#' 
+#' @details Missing obs for first year forecasted because for first year no forecasts other than same year issues
+#' and so on...
+
+
+
 wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx") {
 
 path = path
-  
-# Wrangle forecasts -----
 
 
 sheets_name <- getSheetNames(path)
@@ -18,7 +34,7 @@ sheets_year <- getSheetNames(path) %>%
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
   map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
-  map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>% 
+  map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
   map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
   map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
   map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
@@ -27,7 +43,7 @@ forecasts <- sheets_name %>%
   bind_rows() %>% 
   group_split(year_forecasted) %>% 
   map(~ .x %>% select(-year_publication)) %>% 
-  map(~ .x %>% distinct(Series_code, date_publication, .keep_all = T)) %>% 
+  map(~ .x %>% distinct(Series_code, date_publication, .keep_all = T)) %>%   # solve problems with composite series (repeated identifiers)
   map(~ .x %>% spread(date_publication,variable)) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
@@ -71,10 +87,24 @@ final_forecasts <-  forecasts %>%
   select(country_code, country, year, everything()) %>% 
   arrange(country)
 
+return(final_forecasts)
+
 }
 
 
-# Actual -----
+# Getting weo actual value function -----
+
+#' Getting weo actual values
+#' 
+#' From excel sheets with all issues of weo publication, gets a specied sheet and manipulates it
+#' in user-friendly format.
+#' 
+#' @param path path to the xlsx workbook in the locale.
+#' @param last_edition name of the sheet in the workbook.
+#' 
+#' @return tibble with two identifiers (imf code and year) and actual value of variable
+#' 
+
 
 get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
   read_xlsx(path, sheet = last_edition) %>% 
@@ -85,8 +115,9 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
   mutate(country_code = str_extract(country_code,"\\d{3}"))
 }
 
+# Here still included duplicates of composite indicators: exclude with later merge.
 
-# Combine and export ------
+# Create final dataframes ----
 
 # Set paramaters:
 
@@ -94,14 +125,13 @@ paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
           "../IEO_forecasts_material/raw_data/cagdp.xlsx",
           "../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
 
-last_edition = c("apr2020","apr2020","Apr2020")
+last_edition = c(rep("apr2020",3))
 
 name_variables = c("growth","cagdp","deficitgdp")
 
 export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData",
                "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RData",
-               "../IEO_forecasts_material/intermediate_data/deficitgdp_cleaned.RData"
-)
+               "../IEO_forecasts_material/intermediate_data/deficitgdp_cleaned.RData")
 
 
 # Run:
@@ -139,19 +169,13 @@ final %>%
 
 
 ##########################
+# Ca/GDP complete!
+# Deficit/GDP complete!
+
 
 # Things to check: 
 #### - target y:  why afghanistan actual is so wrong when compared to world bank??
-#### - check that the order of sheets does not mess up the deficit data
-#### - change target y variables and entire variables (PCPI_H)
-
-
-# Ca/GDP complete!
-
-
-
-
-
+#### - change target y variables and entire variables (PCPI_H) and add inflation
 
 
 
