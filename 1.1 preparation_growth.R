@@ -1,5 +1,5 @@
 # DESCRIPTION: the script produces the final dataframe for the comparison between forecasted values in WEO
-# and actual values and saves it in the output directory of the project.
+# and actual values and saves it in the intermediate_data directory of the project.
 
 
 # Wrangling weo forecasts function ----
