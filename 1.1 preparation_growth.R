@@ -34,6 +34,14 @@ sheets_year <- getSheetNames(path) %>%
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
   map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
+  # Calculate growth rates only for real Gdp and inflation:
+  map(~ if(unique(.x$Indicator) == "NGDP_R" | unique(.x$Indicator) == "PCPI"){
+    .x %>% 
+      group_by(Series_code) %>% 
+      mutate(variable = as.numeric(variable)) %>% 
+      mutate(variable = ((variable - dplyr::lag(variable,1))/dplyr::lag(variable,1))*100)
+  }
+  ) %>% 
   map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
   map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
   map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
@@ -92,6 +100,7 @@ return(final_forecasts)
 }
 
 
+
 # Getting weo actual value (last edition) function -----
 
 #' Getting weo actual values
@@ -107,13 +116,26 @@ return(final_forecasts)
 
 
 get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
-  read_xlsx(path, sheet = last_edition) %>% 
+  
+  last_actual <- read_xlsx(path, sheet = last_edition) %>% 
   select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-ncol(.)) %>% 
   gather("year","targety_last",2:`2019`) %>% 
   filter(complete.cases(Series_code)) %>% 
   rename(country_code = Series_code) %>% 
-  mutate(country_code = str_extract(country_code,"\\d{3}"))
+  mutate(country_code = str_extract(country_code,"\\d{3}")) %>% 
+  mutate(targety_last = as.numeric(targety_last))
+
+  
+  if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
+    last_actual <- last_actual %>% 
+      group_by(country_code) %>%
+      mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) 
+  }
+  
+  return(last_actual)
+    
 }
+
 
 # Here still included duplicates of composite indicators: exclude with later merge.
 
@@ -145,8 +167,6 @@ first_actual <- sheets_name %>%
 return(first_actual)   
 }
               
-
-# Calculate growth rates ----
 
 # Create final dataframes ----
 
