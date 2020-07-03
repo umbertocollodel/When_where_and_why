@@ -29,22 +29,24 @@ sheets_name <- getSheetNames(path)
 sheets_year <- getSheetNames(path) %>%
   str_extract("\\d{4}")
 
-
-
-forecasts <- sheets_name %>% 
-  map(~ read_xlsx(path,sheet = .x)) %>%
-  map(~ .x %>% slice(1:which(Country == "Zimbabwe"))) %>% 
-  map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
   # Calculate growth rates only for real Gdp and inflation:
-  map(~ if(unique(.x$Indicator) == "NGDP_R" | unique(.x$Indicator) == "PCPI"){
-    .x %>% 
-      group_by(Series_code) %>% 
-      mutate(variable = as.numeric(variable)) %>% 
-      mutate(variable = ((variable - dplyr::lag(variable,1))/dplyr::lag(variable,1))*100)
+
+if(str_detect(path, paste(c("rgdp","pcpi"),collapse = "|"))){
+
+  forecasts <- sheets_name %>% 
+    map(~ read_xlsx(path,sheet = .x)) %>%
+    map(~ .x %>% slice(1:which(Country == "Zimbabwe"))) %>% 
+    map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
+    map(~ .x %>% group_by(Series_code) %>% mutate(variable = as.numeric(variable)) %>% mutate(variable = ((variable - dplyr::lag(variable,1))/dplyr::lag(variable,1))*100)) %>% 
+    map(~ .x %>% ungroup())
   } else {
-    .x
+    forecasts <- sheets_name %>% 
+      map(~ read_xlsx(path,sheet = .x)) %>%
+      map(~ .x %>% slice(1:which(Country == "Zimbabwe"))) %>% 
+      map(~ .x %>% gather("year_forecasted","variable",7:ncol(.)))
   }
-  ) %>% 
+
+forecasts <- forecasts %>% 
   map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
   map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
   map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
@@ -54,7 +56,6 @@ forecasts <- sheets_name %>%
   bind_rows() %>% 
   group_split(year_forecasted) %>% 
   map(~ .x %>% select(-year_publication)) %>% 
-  map(~ .x %>% distinct(Series_code, date_publication, .keep_all = T)) %>%   # solve problems with composite series (repeated identifiers)
   map(~ .x %>% spread(date_publication,variable)) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
   map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
@@ -127,14 +128,16 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
   filter(complete.cases(Series_code)) %>% # sometimes NA's at the end of sheet 
   rename(country_code = Series_code) %>% 
   mutate(country_code = str_extract(country_code,"\\d{3}")) %>% 
-  mutate(targety_last = as.numeric(targety_last))
+  mutate(targety_last = as.numeric(targety_last)) %>% 
+  arrange(country_code, year)
 
   
-  if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
+  if(str_detect(path, paste(c("pcpi"),collapse = "|"))){
     last_actual <- last_actual %>% 
       group_by(country_code) %>%
       mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) %>% 
-      filter(complete.cases(targety_last))
+      filter(complete.cases(targety_last)) %>% 
+      arrange(country_code, year)
   }
   
   return(last_actual)
@@ -166,7 +169,7 @@ first_actual <- sheets_name %>%
   map2(sheets_year, ~ .x %>% mutate(year_publication = .y))
 
 
-if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
+if(str_detect(path, paste(c("rgdp","pcpi"),collapse = "|"))){
   
   first_actual <- first_actual %>%
     map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1 | as.numeric(year_forecasted) == as.numeric(year_publication) - 2)) %>% 
@@ -175,7 +178,8 @@ if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
     bind_rows() %>% 
     select(-year_publication) %>% 
     rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
-    mutate(targety_first = as.numeric(targety_first))
+    mutate(targety_first = as.numeric(targety_first)) %>% 
+    arrange(country_code, year)
   }
 
 else {
@@ -185,7 +189,8 @@ else {
     bind_rows() %>% 
     select(-year_publication) %>% 
     rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
-    mutate(targety_first = as.numeric(targety_first))
+    mutate(targety_first = as.numeric(targety_first)) %>% 
+    arrange(country_code, year)
 
   }
 return(first_actual)
@@ -199,37 +204,42 @@ return(first_actual)
 # Set paramaters:
 
 paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
-          "../IEO_forecasts_material/raw_data/cagdp.xlsx",
-          "../IEO_forecasts_material/raw_data/weo_ggxcnl_ngdp_Post2010.xlsx")
+          "../IEO_forecasts_material/raw_data/weo_pcpi.xlsx",
+          "../IEO_forecasts_material/raw_data/cagdp.xlsx")
 
 last_edition = c(rep("apr2020",3))
 
-name_variables = c("growth","cagdp","deficitgdp")
+name_variables = c("growth","inflation","cagdp")
 
 export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData",
-               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RData",
-               "../IEO_forecasts_material/intermediate_data/deficitgdp_cleaned.RData")
+                 "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RData",
+               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RData")
 
+               
 
 # Run:
 
 forecasts <- paths %>% 
   map(~ wrangle_weo_forecasts(.x))
   
-actual <- paths %>% 
+last_actual <- paths %>% 
   map2(last_edition, ~ get_last_weo(.x,.y))
+
+first_actual <- paths %>% 
+  map(~ get_first_settled_weo(.x))
+
 
 
 # Merge:
 
-final <- actual %>% 
+final <- first_actual %>% 
+  map2(last_actual, ~ merge(.x,.y, by = c("country_code","year"))) %>% 
   map2(forecasts, ~ merge(.x,.y, by = c("country_code","year"))) %>% 
   map(~ .x %>% arrange(country,year)) %>% 
-  map(~ .x %>% select(country_code, country,year, targety,
+  map(~ .x %>% select(country_code, country,year, targety_first,targety_last,
                       variable1, variable2, variable3, variable4, variable5,
                       variable6,variable7,variable8,variable9,variable10,
                       variable11, variable12)) %>% 
-  map(~ .x %>% filter(complete.cases(targety))) %>% 
   map(~ .x %>% as.tibble())
 
 names(final) <- name_variables
@@ -240,23 +250,12 @@ names(final) <- name_variables
 final %>% 
   walk2(export_names, ~ rio::export(.x, file = .y))
 
-
-# Complete.cases removes some countries forgotten by Zidong in the last sheets. 
-# We can decide later on what to do with those.
-
-
-##########################
-# Ca/GDP complete!
-# Deficit/GDP complete!
+# If I want a thruthful comparison between forecast errors using different target, should add complete.cases(targety_last).
+# sometimes revised series start much later (data quality before not considered good enough).
 
 
-# Things to check: 
-#### - target y:  why afghanistan actual is so wrong when compared to world bank??
-#### - change target y variables and entire variables (PCPI_H) and add inflation
+####################################################
 
 
-
-
-
-
+# The first actual seems always worse for recessions compared to the last actual
 
