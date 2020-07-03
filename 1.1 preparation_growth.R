@@ -92,7 +92,7 @@ return(final_forecasts)
 }
 
 
-# Getting weo actual value function -----
+# Getting weo actual value (last edition) function -----
 
 #' Getting weo actual values
 #' 
@@ -109,13 +109,44 @@ return(final_forecasts)
 get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
   read_xlsx(path, sheet = last_edition) %>% 
   select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-ncol(.)) %>% 
-  gather("year","targety",2:`2019`) %>% 
+  gather("year","targety_last",2:`2019`) %>% 
   filter(complete.cases(Series_code)) %>% 
   rename(country_code = Series_code) %>% 
   mutate(country_code = str_extract(country_code,"\\d{3}"))
 }
 
 # Here still included duplicates of composite indicators: exclude with later merge.
+
+# Getting weo actual value (first settled actual ) ----
+
+get_first_settled_weo <- function(path){
+
+path = path
+
+
+sheets_name <- getSheetNames(path) %>% 
+  str_subset("oct")
+
+sheets_year <- getSheetNames(path) %>%
+  str_subset("oct") %>% 
+  str_extract("\\d{4}")
+              
+first_actual <- sheets_name %>% 
+  map(~ read_xlsx(path, sheet = .x)) %>% 
+  map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
+  map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
+  map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
+  map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
+  map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1)) %>% 
+  bind_rows() %>% 
+  select(-year_publication) %>% 
+  rename(country_code = Series_code, year = year_forecasted, targety_first = variable)
+
+return(first_actual)   
+}
+              
+
+# Calculate growth rates ----
 
 # Create final dataframes ----
 
