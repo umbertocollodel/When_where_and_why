@@ -33,6 +33,7 @@ sheets_year <- getSheetNames(path) %>%
 
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
+  map(~ .x %>% slice(1:which(Country == "Zimbabwe"))) %>% 
   map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
   # Calculate growth rates only for real Gdp and inflation:
   map(~ if(unique(.x$Indicator) == "NGDP_R" | unique(.x$Indicator) == "PCPI"){
@@ -40,6 +41,8 @@ forecasts <- sheets_name %>%
       group_by(Series_code) %>% 
       mutate(variable = as.numeric(variable)) %>% 
       mutate(variable = ((variable - dplyr::lag(variable,1))/dplyr::lag(variable,1))*100)
+  } else {
+    .x
   }
   ) %>% 
   map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
@@ -118,9 +121,10 @@ return(final_forecasts)
 get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
   
   last_actual <- read_xlsx(path, sheet = last_edition) %>% 
-  select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-ncol(.)) %>% 
+  slice(1: which(Country == "Zimbabwe")) %>% # remove composite indicators
+  select(-EcDatabase, -Country, -Indicator, -Frequency, -Scale, -`2020`:-ncol(.)) %>%
   gather("year","targety_last",2:`2019`) %>% 
-  filter(complete.cases(Series_code)) %>% 
+  filter(complete.cases(Series_code)) %>% # sometimes NA's at the end of sheet 
   rename(country_code = Series_code) %>% 
   mutate(country_code = str_extract(country_code,"\\d{3}")) %>% 
   mutate(targety_last = as.numeric(targety_last))
@@ -130,7 +134,7 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
     last_actual <- last_actual %>% 
       group_by(country_code) %>%
       mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) %>% 
-      complete.cases(targety_last)
+      filter(complete.cases(targety_last))
   }
   
   return(last_actual)
@@ -138,9 +142,8 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
 }
 
 
-# Here still included duplicates of composite indicators: exclude with later merge.
 
-# Getting weo actual value (first settled actual ) ----
+# Getting weo actual value (first settled actual) function ----
 
 get_first_settled_weo <- function(path){
 
@@ -156,27 +159,39 @@ sheets_year <- getSheetNames(path) %>%
               
 first_actual <- sheets_name %>% 
   map(~ read_xlsx(path, sheet = .x)) %>% 
+  map(~ .x %>% slice(1: which(Country == "Zimbabwe"))) %>%  # solve problem of composite countries
   map(~ .x %>% gather("year_forecasted","variable",7:ncol(.))) %>% 
   map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
   map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
-  map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
-  map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1)) %>% 
-  bind_rows() %>% 
-  select(-year_publication) %>% 
-  rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
-  mutate(targety_first = as.numeric(targety_first))
+  map2(sheets_year, ~ .x %>% mutate(year_publication = .y))
 
 
-  if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
-  first_actual <- first_actual %>% 
-    group_by(country_code) %>%
-    mutate(targety_first = ((targety_first - dplyr::lag(targety_first,1))/dplyr::lag(targety_first,1))*100) %>% 
-    filter(complete.cases(targety_first))
+if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
+  
+  first_actual <- first_actual %>%
+    map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1 | as.numeric(year_forecasted) == as.numeric(year_publication) - 2)) %>% 
+    map(~ .x %>% group_by(Series_code) %>% mutate(variable = ((variable - dplyr::lag(variable,1))/dplyr::lag(variable,1))*100)) %>% 
+    map(~ .x %>% filter(as.numeric(year_publication) - as.numeric(year_forecasted) == 1)) %>% 
+    bind_rows() %>% 
+    select(-year_publication) %>% 
+    rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
+    mutate(targety_first = as.numeric(targety_first))
   }
 
-return(first_actual)   
+else {
+  
+  first_actual <- first_actual %>% 
+    map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1)) %>% 
+    bind_rows() %>% 
+    select(-year_publication) %>% 
+    rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
+    mutate(targety_first = as.numeric(targety_first))
+
+  }
+return(first_actual)
+
 }
-       
+
 
 
 # Create final dataframes ----
