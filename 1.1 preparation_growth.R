@@ -129,7 +129,8 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
   if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
     last_actual <- last_actual %>% 
       group_by(country_code) %>%
-      mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) 
+      mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) %>% 
+      complete.cases(targety_last)
   }
   
   return(last_actual)
@@ -162,11 +163,21 @@ first_actual <- sheets_name %>%
   map(~ .x %>% filter(as.numeric(year_forecasted) == as.numeric(year_publication) -1)) %>% 
   bind_rows() %>% 
   select(-year_publication) %>% 
-  rename(country_code = Series_code, year = year_forecasted, targety_first = variable)
+  rename(country_code = Series_code, year = year_forecasted, targety_first = variable) %>% 
+  mutate(targety_first = as.numeric(targety_first))
+
+
+  if(str_detect(path, paste(c("gdp","pcpi"),collapse = "|"))){
+  first_actual <- first_actual %>% 
+    group_by(country_code) %>%
+    mutate(targety_first = ((targety_first - dplyr::lag(targety_first,1))/dplyr::lag(targety_first,1))*100) %>% 
+    filter(complete.cases(targety_first))
+  }
 
 return(first_actual)   
 }
-              
+       
+
 
 # Create final dataframes ----
 
