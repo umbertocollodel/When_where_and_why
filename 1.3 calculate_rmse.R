@@ -9,12 +9,25 @@ sample_last <- final %>%
 sample <- sample_first %>% 
   map2(sample_last, ~ merge(.x,.y, by=c("year")))
 
-sample %>% 
-  map(~ .x %>% gather("type","value",n_first:ncol(.)) %>%  ggplot(aes(year,value,col = type, group = type))+
+figures_sample <- sample %>% 
+  map(~ .x %>% 
+        rename(`Last (apr 2020)` = n, `First settled` = n_first) %>% 
+        gather("type","value",2:ncol(.)) %>% 
+        ggplot(aes(year,value,col = type, group = type))+
         geom_line() +
         theme_minimal() +
-        theme())
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+        labs(color = "Actual") +
+        xlab("") +
+        ylab("") 
+        ) 
 
+names(figures_sample)
+
+# Export:
+
+figures_sample %>% 
+  map2(names(figures_sample),~ ggsave(paste0("../IEO_forecasts_material/output/figures/sample/",.y,".pdf"),.x))
 
 
 # Calculation RMSE 
