@@ -33,16 +33,10 @@ figures_sample %>%
 
 # Forecast errors: (replication of Figure 7 of the previous report) -----
 
-# Calculate mean and median by year:
-
-expected_fe2 <- final %>% 
-  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>% 
-  map(~ .x %>% summarise(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T)))
-
 
 figures_fe <- final %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
-  map2(expected_fe2, ~ .x %>% merge(.y, by = c("year"))) %>% 
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
   map(~ .x %>% ggplot(aes(year)) +
   geom_point(aes(y = fe2), alpha = 0.1) +
   geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
@@ -88,23 +82,13 @@ final %>%
 
 country_group <- read_xlsx("../IEO_forecasts_material/raw_data/country_group.xlsx") %>% 
   rename(country_code = ifscode) %>% 
-  select(country_code, adv, eme, lidc) %>% 
-  mutate(income_group = case_when(adv == 1 ~ "adv", eme == 1 ~ "eme"))
-
-expected_fe2_group <- final %>% 
-  map(~ .x %>% mutate(fe2 = targety_first - variable2)) %>% 
-  map(~ .x %>% merge(country_group, by = "country_code")) %>% 
-  map(~ .x %>% split(.x$income_group)) %>% 
-  modify_depth(2, ~ .x %>% group_by(year) %>%  summarise(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T)))
-
-
-
+  select(country_code, adv, eme, lidc)
 
 
 figures_fe_adv <- final %>%
   map(~ .x %>% merge(country_group, by = "country_code")) %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(adv == 1) %>% select(country_code,country, year, fe2)) %>%
-  map2(expected_fe2_group, ~ .x %>% merge(.y[["adv"]], by = c("year"))) %>% 
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
   map(~ .x %>% ggplot(aes(year)) +
         geom_point(aes(y = fe2), alpha = 0.1) +
         geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
@@ -122,7 +106,7 @@ figures_fe_adv <- final %>%
 figures_fe_eme <- final %>%
   map(~ .x %>% merge(country_group, by = "country_code")) %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(eme == 1) %>% select(country_code,country, year, fe2)) %>%
-  map2(expected_fe2_group, ~ .x %>% merge(.y[["eme"]], by = c("year"))) %>% 
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
   map(~ .x %>% ggplot(aes(year)) +
         geom_point(aes(y = fe2), alpha = 0.1) +
         geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
@@ -136,10 +120,6 @@ figures_fe_eme <- final %>%
         ylab("") +
         ylim(-15,15)
   )
-  
-
-
-# Least developed countries:
   
 figures_fe_lidc <- final %>%
     map(~ .x %>% merge(country_group, by = "country_code")) %>% 
@@ -161,7 +141,7 @@ figures_fe_lidc <- final %>%
   
   
   
-
+# Maybe I can substitute with a function?
 
 
 ##########################
