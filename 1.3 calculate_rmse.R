@@ -55,6 +55,42 @@ final %>%
                 xlab("") +
                 ylab(""))
 
+rmse_adv <- final[["growth"]] %>% 
+  merge(country_group, by = c("country_code")) %>%
+  filter(adv ==1) %>% 
+  group_by(year) %>% 
+  summarise(rmse_2_adv = hydroGOF::rmse(targety_first, variable2, na.rm = T))
+
+
+rmse_eme <- final[["growth"]] %>% 
+  merge(country_group, by = c("country_code")) %>%
+  filter(eme ==1) %>% 
+  group_by(year) %>% 
+  summarise(rmse_2_eme = hydroGOF::rmse(targety_first, variable2, na.rm = T))
+
+
+rmse_lidc <- final[["growth"]] %>% 
+  merge(country_group, by = c("country_code")) %>%
+  filter(lidc ==1) %>% 
+  group_by(year) %>% 
+  summarise(rmse_2_lidc = hydroGOF::rmse(targety_first, variable2, na.rm = T))
+
+
+rmse_figure <- list(rmse_adv, rmse_eme, rmse_lidc) %>% 
+  reduce(merge, by=c("year")) %>% 
+  ggplot(aes(year)) +
+  geom_line(aes(y=rmse_2_adv, color = "Advanced", group = 1)) +
+  geom_line(aes(y=rmse_2_eme, color = "Emerging", group = 1)) +
+  geom_line(aes(y=rmse_2_lidc, color = "Low-income", group = 1)) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+  xlab("") +
+  ylab("RMSE") +
+  labs(colour = "Group")
+  
+
+ggsave("../IEO_forecasts_material/output/figures/rmse/comparison_rmse.pdf", rmse_figure)
+
 
 
 
@@ -182,3 +218,65 @@ figures_fe_lidc %>%
   
   
 # Maybe I can substitute with a function?
+
+
+# RMSE for different horizons: (Table 1 Timmerman) -----
+
+rmse_horizon_group <- final %>%
+  map(~ .x %>% merge(country_group,by =c("country_code"))) %>%
+  map(~ .x %>% group_by(adv)) %>% 
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(adv = case_when(adv == 1 ~ "AE",
+                                      TRUE ~ "EME"))) %>% 
+  map(~ .x %>% rename(`Income group` = adv)) %>% 
+  .$growth  
+
+rmse_horizon_lidc <- final %>%
+  map(~ .x %>% merge(country_group,by =c("country_code")) %>% filter(lidc == 1)) %>%
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(`Income group` = "Low-income") %>% select(`Income group`, everything())) %>%  
+  .$growth  
+
+
+rmse_horizon <- final %>%
+  map(~ .x %>% merge(country_group,by =c("country_code"))) %>%
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(`Income group` = "Full") %>% select(`Income group`, everything())) %>% 
+  .$growth  
+
+list(rmse_horizon, rmse_horizon_group, rmse_horizon_lidc) %>% 
+  reduce(rbind) %>%   
+  stargazer(summary = F, rownames = F)
+
+# Additionally, we can focus on the derivative. Which adjacent forecast horizon brings
+# the highest reduction in RMSE?
+
+# Bias -----
+
+individual_bias <- final %>% 
+  map(~ .x %>% mutate(fe1 = targety_first - variable1) %>% select(country_code,country, year, fe1)) %>% 
+  map(~ split(.x,.x$country)) %>% 
+  modify_depth(2, ~ lm(fe1 ~ 1, .x)) %>% 
+  modify_depth(2, ~ summary(.x)) %>% 
+  .$growth %>% 
+  map( ~ .x$coefficients) %>%
+  map( ~ data.frame(coef = .x[1], `t value` = .x[3])) %>%
+  bind_rows(.id = "country") 
+
+
+individual_bias %>%
+  mutate(bias = case_when(`t.value` >= 1.65 | `t.value` <= -1.65 ~ 1,
+                          TRUE ~ 0)) %>% 
+  summarise(share_country = mean(bias, na.rm = T)) %>%
+  mutate(forecast_h = "0,F") %>% 
+  ggplot(aes(x = forecast_h,y = share_country)) +
+  geom_col()
+  
+
+# Would be nice a figure with the stacked bars, one bar for positive and the second for negative bias
+# X-axis the different publicati
+
+
+
+
+
