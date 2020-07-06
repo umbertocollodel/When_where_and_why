@@ -29,6 +29,33 @@ names(figures_sample)
 figures_sample %>% 
   walk2(names(figures_sample),~ ggsave(paste0("../IEO_forecasts_material/output/figures/sample/",.y,".pdf"),.x))
 
+# Root mean squared error: ----
+
+# Calculation RMSE 
+
+a <- final %>% 
+  map(~ .x %>% select(year, targety_first, variable1) %>%  group_by(year) %>% summarise(rmse_first = hydroGOF::rmse(targety_first, variable1, na.rm = T))) 
+
+b <- final %>% 
+  map(~ .x %>% select(year, targety_last, variable1) %>%  group_by(year) %>% summarise(rmse_last = hydroGOF::rmse(targety_last, variable1, na.rm = T))) 
+
+a[[1]] %>%
+  merge(b[[1]]) %>%
+  gather("actual","rmse",rmse_first:ncol(.)) %>% 
+  ggplot(aes(year,rmse,col = actual)) +
+  geom_point() 
+
+
+final %>% 
+  map(~ .x %>% group_by(year) %>% summarise(rmse_first = hydroGOF::rmse(targety_first, variable1, na.rm = T))) %>% 
+  map(~ .x %>% ggplot(aes(year, rmse_first, group = 1)) +
+                geom_line() +
+                theme_minimal() +
+                theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+                xlab("") +
+                ylab(""))
+
+
 
 
 # Forecast errors: (replication of Figure 7 of the previous report) -----
@@ -53,7 +80,7 @@ figures_fe <- final %>%
 
 
 figures_fe %>% 
-  walk2(names(figures_fe),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/",.y,".pdf"),.x))
+  walk2(names(figures_fe),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/all/",.y,".pdf"),.x))
 
 
 
@@ -62,20 +89,20 @@ figures_fe %>%
 
 
 # Forecast errors with boxplots: (to see distributions) ----
-
-final %>% 
-  map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
-  map(~ .x %>% ggplot(aes(year, fe2)) +
-        geom_boxplot(outlier.size = 0) +
-        geom_hline(yintercept = 0) +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-              legend.position = "bottom") +
-        labs(color = "") +
-        xlab("") +
-        ylab("") +
-        ylim(-5,5)
-  )
+# 
+# final %>% 
+#   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
+#   map(~ .x %>% ggplot(aes(year, fe2)) +
+#         geom_boxplot(outlier.size = 0) +
+#         geom_hline(yintercept = 0) +
+#         theme_minimal() +
+#         theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+#               legend.position = "bottom") +
+#         labs(color = "") +
+#         xlab("") +
+#         ylab("") +
+#         ylim(-5,5)
+#   )
 
 
 # Forecast errors by type of economy ----
@@ -103,6 +130,10 @@ figures_fe_adv <- final %>%
         ylim(-15,15)
   )
 
+figures_fe_adv %>% 
+  walk2(names(figures_fe_adv),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/ae/",.y,".pdf"),.x))
+
+
 figures_fe_eme <- final %>%
   map(~ .x %>% merge(country_group, by = "country_code")) %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(eme == 1) %>% select(country_code,country, year, fe2)) %>%
@@ -120,6 +151,10 @@ figures_fe_eme <- final %>%
         ylab("") +
         ylim(-15,15)
   )
+
+figures_fe_eme %>% 
+  walk2(names(figures_fe_eme),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/eme/",.y,".pdf"),.x))
+
   
 figures_fe_lidc <- final %>%
     map(~ .x %>% merge(country_group, by = "country_code")) %>% 
@@ -139,23 +174,11 @@ figures_fe_lidc <- final %>%
           ylim(-15,15)
     )
   
+figures_fe_lidc %>% 
+  walk2(names(figures_fe_lidc),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/lidc/",.y,".pdf"),.x))
+
+
+
   
   
 # Maybe I can substitute with a function?
-
-
-##########################
-
-# Calculation RMSE 
-
-a <- final %>% 
-  map(~ .x %>% select(year, targety_first, variable1) %>%  group_by(year) %>% summarise(rmse_first = hydroGOF::rmse(targety_first, variable1, na.rm = T))) 
-
-b <- final %>% 
-  map(~ .x %>% select(year, targety_last, variable1) %>%  group_by(year) %>% summarise(rmse_last = hydroGOF::rmse(targety_last, variable1, na.rm = T))) 
-
-a[[1]] %>%
-  merge(b[[1]]) %>%
-  gather("actual","rmse",rmse_first:ncol(.)) %>% 
-  ggplot(aes(year,rmse,col = actual)) +
-  geom_point() 
