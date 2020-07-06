@@ -137,12 +137,14 @@ figures_fe_eme <- final %>%
         ylim(-15,15)
   )
   
+
+
+# Least developed countries:
   
 figures_fe_lidc <- final %>%
     map(~ .x %>% merge(country_group, by = "country_code")) %>% 
-    map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
-    map(~ .x %>% gather("income_group",""))
-  map2(expected_fe2, ~ .x %>% merge(.y, by = c("year"))) %>% 
+    map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% filter(lidc == 1) %>% select(country_code,country, year, fe2)) %>%
+    map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
     map(~ .x %>% ggplot(aes(year)) +
           geom_point(aes(y = fe2), alpha = 0.1) +
           geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
@@ -154,13 +156,15 @@ figures_fe_lidc <- final %>%
           labs(color = "") +
           xlab("") +
           ylab("") +
-          ylim(-5,5)
+          ylim(-15,15)
     )
+  
+  
   
 
 
 
-
+##########################
 
 # Calculation RMSE 
 
