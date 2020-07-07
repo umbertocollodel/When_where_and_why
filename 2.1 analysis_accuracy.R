@@ -91,4 +91,4 @@ rmse_horizon <- final_sr %>%
 list(rmse_horizon, rmse_horizon_group, rmse_horizon_lidc) %>% 
   reduce(rbind) %>%   
   stargazer(summary = F, rownames = F) %>% 
-  save(file = "../IEO_forecasts_material/output/tables/short-run forecasts/accuracy/rmse_forecast_horizon.tex")
+  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/accuracy/rmse_forecast_horizon.tex")
