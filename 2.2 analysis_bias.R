@@ -1,0 +1,194 @@
+# Figure 2 - Evolution of forecast errors: (replication of Figure 7 of the previous report) -----
+
+
+figures_fe <- final_sr %>% 
+  map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
+  map(~ .x %>% ggplot(aes(year)) +
+        geom_point(aes(y = fe2), alpha = 0.1) +
+        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+        geom_hline(yintercept = 0) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+              legend.position = "bottom") +
+        labs(color = "") +
+        xlab("") +
+        ylab("") +
+        ylim(-5,5)
+  )
+
+
+figures_fe %>% 
+  walk2(names(figures_fe),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/all/",.y,".pdf"),.x))
+
+
+# Forecast errors with boxplots: (to see distributions) ----
+# 
+# final %>% 
+#   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
+#   map(~ .x %>% ggplot(aes(year, fe2)) +
+#         geom_boxplot(outlier.size = 0) +
+#         geom_hline(yintercept = 0) +
+#         theme_minimal() +
+#         theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+#               legend.position = "bottom") +
+#         labs(color = "") +
+#         xlab("") +
+#         ylab("") +
+#         ylim(-5,5)
+#   )
+
+
+# Figure 3: Forecast errors by type of economy ----
+
+
+figures_fe_adv <- final_sr %>%
+  map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(adv == 1) %>% select(country_code,country, year, fe2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
+  map(~ .x %>% ggplot(aes(year)) +
+        geom_point(aes(y = fe2), alpha = 0.1) +
+        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+        geom_hline(yintercept = 0) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+              legend.position = "bottom") +
+        labs(color = "") +
+        xlab("") +
+        ylab("") +
+        ylim(-15,15)
+  )
+
+figures_fe_adv %>% 
+  walk2(names(figures_fe_adv),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/ae/",.y,".pdf"),.x))
+
+
+figures_fe_eme <- final_sr %>%
+  map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(eme == 1) %>% select(country_code,country, year, fe2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
+  map(~ .x %>% ggplot(aes(year)) +
+        geom_point(aes(y = fe2), alpha = 0.1) +
+        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+        geom_hline(yintercept = 0) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+              legend.position = "bottom") +
+        labs(color = "") +
+        xlab("") +
+        ylab("") +
+        ylim(-15,15)
+  )
+
+figures_fe_eme %>% 
+  walk2(names(figures_fe_eme),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/eme/",.y,".pdf"),.x))
+
+
+figures_fe_lidc <- final_sr %>%
+  map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% filter(lidc == 1) %>% select(country_code,country, year, fe2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
+  map(~ .x %>% ggplot(aes(year)) +
+        geom_point(aes(y = fe2), alpha = 0.1) +
+        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+        geom_hline(yintercept = 0) +
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+              legend.position = "bottom") +
+        labs(color = "") +
+        xlab("") +
+        ylab("") +
+        ylim(-15,15)
+  )
+
+figures_fe_lidc %>% 
+  walk2(names(figures_fe_lidc),~ ggsave(paste0("../IEO_forecasts_material/output/figures/forecast_errors/lidc/",.y,".pdf"),.x))
+
+
+
+
+
+
+# Table 2: Median forecast errors by income group and horizon (focusing on growth) ----
+
+median_ws <- final_sr[["growth"]] %>%
+  filter(year < 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  mutate(group = "Full sample") %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>% 
+  select(group, everything())
+  
+  
+
+
+median_bg <- final_sr[["growth"]] %>% 
+  filter(year < 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(adv, recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  ungroup() %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>% 
+  mutate(adv = case_when(adv == 0 ~ "Emerging market economies",
+                               adv == 1 ~ "Advanced economies")) %>%
+  rename(group = adv)
+  
+
+previous_evaluation <- rbind(median_ws, median_bg) %>% 
+  stargazer(summary = F, 
+            out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/previous_evaluation.tex",
+            rownames = F)
+
+# Table 2 highlighting performance over the last period ----
+
+median_ws <- final_sr[["growth"]] %>% 
+  filter(year > 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  mutate(group = "Full sample") %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>% 
+  select(group, everything())
+
+
+
+
+median_bg <- final_sr[["growth"]] %>%
+  filter(year > 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(adv, recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  ungroup() %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>% 
+  mutate(adv = case_when(adv == 0 ~ "Emerging market economies",
+                         adv == 1 ~ "Advanced economies")) %>%
+  rename(group = adv)
+
+
+current_evaluation <- rbind(median_ws,median_bg) %>% 
+  stargazer(summary = F,
+            out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/current_evaluation.tex",
+            rownames = F)
+
+
+
+
+
