@@ -259,3 +259,7 @@ final %>%
 
 # The first actual seems always worse for recessions compared to the last actual
 
+
+
+# Comment on European commission AMECO historical: gross domestic product at 2000 market prices in the 6th sheet
+
