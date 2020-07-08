@@ -69,6 +69,7 @@ cat(footnote, file = "../IEO_forecasts_material/output/figures/short-run forecas
 # Figure 2: evolution of RMSE over different horizons:  -----
 
 rmse_horizon_group <- final_sr %>%
+  map(~ .x %>% filter(year <= 2011)) %>% 
   map(~ .x %>% group_by(adv)) %>% 
   map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
   map(~ .x %>% mutate(adv = case_when(adv == 1 ~ "AE",
@@ -77,6 +78,7 @@ rmse_horizon_group <- final_sr %>%
   .$growth  
 
 rmse_horizon_lidc <- final_sr %>%
+  map(~ .x %>% filter(year <= 2011)) %>% 
   map(~ .x %>% filter(lidc == 1)) %>%
   map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
   map(~ .x %>% mutate(`Income group` = "Low-income") %>% select(`Income group`, everything())) %>%  
@@ -84,11 +86,39 @@ rmse_horizon_lidc <- final_sr %>%
 
 
 rmse_horizon <- final_sr %>%
+  map(~ .x %>% filter(year <= 2011)) %>% 
   map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
   map(~ .x %>% mutate(`Income group` = "Full") %>% select(`Income group`, everything())) %>% 
   .$growth  
 
 list(rmse_horizon, rmse_horizon_group, rmse_horizon_lidc) %>% 
   reduce(rbind) %>%   
-  stargazer(summary = F, rownames = F) %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/accuracy/rmse_forecast_horizon.tex")
+  stargazer(summary = F, rownames = F, out = "../IEO_forecasts_material/output/tables/short-run forecasts/accuracy/rmse_forecast_horizon_1990_2011.tex") 
+
+
+rmse_horizon_group <- final_sr %>%
+  map(~ .x %>% filter(year > 2011)) %>% 
+  map(~ .x %>% group_by(adv)) %>% 
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(adv = case_when(adv == 1 ~ "AE",
+                                      TRUE ~ "EME"))) %>% 
+  map(~ .x %>% rename(`Income group` = adv)) %>% 
+  .$growth  
+
+rmse_horizon_lidc <- final_sr %>%
+  map(~ .x %>% filter(year > 2011)) %>% 
+  map(~ .x %>% filter(lidc == 1)) %>%
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(`Income group` = "Low-income") %>% select(`Income group`, everything())) %>%  
+  .$growth  
+
+
+rmse_horizon <- final_sr %>%
+  map(~ .x %>% filter(year > 2011)) %>% 
+  map(~ .x %>% summarise_at(vars(starts_with("variable")), ~ round(rmse(.,targety_first, na.rm = T),2))) %>%
+  map(~ .x %>% mutate(`Income group` = "Full") %>% select(`Income group`, everything())) %>% 
+  .$growth 
+
+list(rmse_horizon, rmse_horizon_group, rmse_horizon_lidc) %>% 
+  reduce(rbind) %>%   
+  stargazer(summary = F, rownames = F, out = "../IEO_forecasts_material/output/tables/short-run forecasts/accuracy/rmse_forecast_horizon_2012_2018.tex")
