@@ -66,7 +66,7 @@ footnote = c("Root mean squared error of current year Spring WEO issue forecasts
 cat(footnote, file = "../IEO_forecasts_material/output/figures/short-run forecasts/accuracy/footnote.tex")
 
 
-# Figure 2: evolution of RMSE over different horizons:  -----
+# Figure 2: evolution of RMSE over different horizons: (modify code of this section)  -----
 
 rmse_horizon_group <- final_sr %>%
   map(~ .x %>% filter(year <= 2011)) %>% 
