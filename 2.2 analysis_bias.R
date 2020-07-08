@@ -126,13 +126,11 @@ bias_test_ae <- final_sr %>%
 bias_test_eme <- final_sr %>% 
   map(~ .x %>% filter(adv == 0)) %>% 
   map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
-  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
   map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
   map(~ lm(median ~ 1, .x)) 
 
 bias_test_lidc <- final_sr %>% 
   map(~ .x %>% filter(lidc == 1)) %>% 
-  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
   map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
   map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
   map(~ lm(median ~ 1, .x)) 
