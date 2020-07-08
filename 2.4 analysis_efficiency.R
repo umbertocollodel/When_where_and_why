@@ -22,12 +22,16 @@ df <- centre_countries %>%
 
 
 list_models <- df[["United States"]] %>% 
-  split(.$adv) %>%
-  map(~ .x %>% mutate(dummy = case_when(year > 2011 ~ 1,
-                                        TRUE ~ 0))) %>% 
+  split(.$group) %>% 
   map(~ lm(variable1 ~ centre1, .x)) %>% 
   map(~ summary(.x))
 
+
+a <- df[["United States"]] %>% 
+  filter(adv ==1) 
+
+lm(variable4 ~ centre4, a) %>% 
+  summary()
 
 models_dummy <- df[["United States"]] %>% 
   split(.$adv) %>%
@@ -37,7 +41,6 @@ models_dummy <- df[["United States"]] %>%
   map(~ summary(.x))
 
   
-# Optimistic!
 
 # Efficiency: -----
 
@@ -49,14 +52,10 @@ centre_countries <- final_sr$growth %>%
 
 
 final_sr[["growth"]] %>% 
-  split(.$country) %>% 
+  split(.$group) %>% 
   map(~ merge(.x,centre_countries[["United States"]], by=c("year"))) %>% 
   map(~ as.tibble(.x)) %>% 
-  discard(~ nrow(.x) == 0) %>% 
-  map(~ .x %>% filter(complete.cases(variable1))) %>% 
-  map(~ tryCatch(lm(variable2 ~ centre2, .x),
-                 error = function(e){
-                   print("problem")
-                 })) %>% 
-  map(~ summary(.x)["coefficients"])
-  stargazer(omit.stat = c("rsq","adj.rsq","ser"))
+  map(~ tryCatch(lm(variable2 ~ centre2, .x), error = function(e){
+    print("problem")}
+    )) %>% 
+  stargazer(omit.stat = c("rsq","adj.rsq","ser","f"))
