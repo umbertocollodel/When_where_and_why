@@ -6,7 +6,7 @@
 remove(list = ls())
 
 packages <- c("openxlsx","purrr","tidyverse", "readxl","countrycode","roxygen2",
-              "stargazer","hydroGOF") 
+              "stargazer","hydroGOF","rio") 
 
 
 lapply(packages, function(x){
