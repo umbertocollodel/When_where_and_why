@@ -110,6 +110,53 @@ figures_fe_lidc %>%
 
 
 
+# Formal testing: aggregate -----
+
+bias_test_aggregate <- final_sr %>% 
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
+  map(~ lm(median ~ 1, .x)) 
+
+bias_test_ae <- final_sr %>% 
+  map(~ .x %>% filter(adv == 1)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
+  map(~ lm(median ~ 1, .x)) 
+
+bias_test_eme <- final_sr %>% 
+  map(~ .x %>% filter(adv == 0)) %>% 
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
+  map(~ lm(median ~ 1, .x)) 
+
+bias_test_lidc <- final_sr %>% 
+  map(~ .x %>% filter(lidc == 1)) %>% 
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% group_by(year) %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ .x %>% summarise(median = median(fe2, na.rm = T))) %>% 
+  map(~ lm(median ~ 1, .x)) 
+
+
+
+
+stargazer(bias_test_aggregate$growth, bias_test_ae$growth, bias_test_eme$growth, bias_test_lidc$growth,
+          dep.var.caption = "Median forecast error GDP growth",
+          omit.stat = c("rsq","adj.rsq","ser"),
+          object.names = TRUE,
+          column.labels = c("Full sample","AE","EME","Low-income"),
+          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/formal_test_aggregate.tex")
+
+
+
+# Formal testing: individual ----
+
+final_sr %>% 
+  map(~ .x %>% mutate(fe2 = targety_first - variable2)) %>%
+  map(~ split(.x,.x$country)) # TO finish!
+
+
+
 # Table 2: Median forecast errors by income group and horizon (focusing on growth) ----
 
 median_ws <- final_sr[["growth"]] %>%
