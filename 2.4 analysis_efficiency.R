@@ -1,7 +1,5 @@
 # Efficiency and explaining forecast errors
 
-
-
 # Compute forecast errors:
 
 fe <- final_sr$growth %>% 
@@ -61,45 +59,4 @@ centre_countries %>%
 
 
 
-
-# Explaining forecast errors: ----
-
-fe <- final_sr$growth %>% 
-  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .))  
-
-centre_countries <- final_sr$growth %>%
-  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>% 
-  filter(country == "United States" | country == "China") %>%
-  split(.$country) %>% 
-  map(~ .x %>% rename_at(vars(starts_with("variable")),.funs = funs(str_replace(.,"variable","centre")))) %>% 
-  map(~ .x %>% select(year, centre1, centre2, centre3, centre4))
-
-df <- centre_countries %>% 
-  map(~ merge(.x,fe,by=c("year"))) %>% 
-  map(~ as.tibble(.x)) %>% 
-  map(~ .x %>% filter(year > 1990))
-
-
-list_models <- df[["China"]] %>% 
-  split(.$group) %>% 
-  map(~ lm(variable4 ~ centre4, .x)) %>% 
-  map(~ summary(.x))
-
-
-a <- df[["United States"]] %>% 
-  filter(adv ==1) %>%
-  mutate(dummy = case_when(year > 2011 ~ 1,
-                           TRUE ~ 0))
-  
-lm(variable3 ~ centre3 + centre3*dummy, a) %>% 
-  summary()
-
-models_dummy <- df[["United States"]] %>% 
-  split(.$adv) %>%
-  map(~ .x %>% mutate(dummy = case_when(year > 2011 ~ 1,
-                                        TRUE ~ 0))) %>% 
-  map(~ lm(variable1 ~ centre1 + centre1*dummy, .x)) %>% 
-  map(~ summary(.x))
-
-  
 
