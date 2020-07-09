@@ -155,13 +155,13 @@ final_sr %>%
   map(~ .x %>% mutate(fe2 = targety_first - variable2)) %>%
   map(~ split(.x,.x$country)) %>% 
   modify_depth(2, ~ tryCatch(lm(fe2 ~ 1,.x), error = function(e){
-    cat(crayon::red("Could not run regression. Check dataframe"))
+    cat(crayon::red("Could not run regression. Check dataframe \n"))
   })) %>% 
   modify_depth(2, ~ tryCatch(summary(.x), error = function(e){
-    cat(crayon::red("Could not run regression. Check dataframe"))
+    cat(crayon::red("Could not run regression. Check dataframe \n"))
   })) %>% 
   modify_depth(2, ~ tryCatch(.x[["coefficients"]], error = function(e){
-    cat(crayon::red("Could not run regression. Check dataframe"))
+    cat(crayon::red("Could not run regression. Check dataframe \n"))
   })) %>% 
   map(~ discard(.x, ~ length(.x) != 4)) %>% 
   modify_depth(2, ~ as.data.frame(.x)) %>% 
@@ -171,6 +171,7 @@ final_sr %>%
                                            TRUE ~ as.character(Estimate)))) %>% 
   map(~ .x %>% select(country, Estimate)) %>% 
   map(~ .x %>% rename(Constant = Estimate)) %>% 
+  .$inflation
   #map2(name_variables, ~ stargazer(summary = F,
   #         out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/by_country/",.y,".tex")))
   
