@@ -149,9 +149,35 @@ stargazer(bias_test_aggregate$growth, bias_test_ae$growth, bias_test_eme$growth,
 
 # Formal testing: individual ----
 
+# The export of tables with different names is not working - to check
+
 final_sr %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2)) %>%
-  map(~ split(.x,.x$country)) # TO finish!
+  map(~ split(.x,.x$country)) %>% 
+  modify_depth(2, ~ tryCatch(lm(fe2 ~ 1,.x), error = function(e){
+    cat(crayon::red("Could not run regression. Check dataframe"))
+  })) %>% 
+  modify_depth(2, ~ tryCatch(summary(.x), error = function(e){
+    cat(crayon::red("Could not run regression. Check dataframe"))
+  })) %>% 
+  modify_depth(2, ~ tryCatch(.x[["coefficients"]], error = function(e){
+    cat(crayon::red("Could not run regression. Check dataframe"))
+  })) %>% 
+  map(~ discard(.x, ~ length(.x) != 4)) %>% 
+  modify_depth(2, ~ as.data.frame(.x)) %>% 
+  map(~ bind_rows(.x, .id = "country")) %>% 
+  map(~ .x %>% mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
+                                           (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
+                                           TRUE ~ as.character(Estimate)))) %>% 
+  map(~ .x %>% select(country, Estimate)) %>% 
+  map(~ .x %>% rename(Constant = Estimate)) %>% 
+  #map2(name_variables, ~ stargazer(summary = F,
+  #         out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/by_country/",.y,".tex")))
+  
+
+
+
+# TO finish!
 
 
 
