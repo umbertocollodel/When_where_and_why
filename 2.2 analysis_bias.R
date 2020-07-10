@@ -369,6 +369,29 @@ current_evaluation <- rbind(median_ws,median_bg, median_lidc) %>%
             rownames = F)
 
 
+# More on recessions ----
+
+
+final_sr$growth %>% 
+  mutate(recession = case_when(targety_first < 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(recession) %>% 
+  filter(year > 2011) %>% 
+  summarise_at(vars(matches("variable")), median, na.rm = T) %>% 
+  slice(2) %>% 
+  gather("forecast_horizon","forecast",variable1:variable4) %>% 
+  mutate(forecast_horizon = seq(1:4)) %>% 
+  ggplot(aes(forecast_horizon, forecast)) +
+  geom_col() +
+  theme_minimal()
+  
+
+
+
+
+
+
+
 
 
 
