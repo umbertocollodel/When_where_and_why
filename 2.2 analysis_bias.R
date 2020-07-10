@@ -292,9 +292,24 @@ median_bg <- final_sr[["growth"]] %>%
   mutate(adv = case_when(adv == 0 ~ "Emerging market economies",
                                adv == 1 ~ "Advanced economies")) %>%
   rename(group = adv)
+
+median_lidc <- final_sr[["growth"]] %>% 
+  filter(year < 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(lidc, recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  ungroup() %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>%
+  filter(lidc ==1) %>% 
+  mutate(lidc = "Low-income") %>%
+  rename(group = lidc)
   
 
-previous_evaluation <- rbind(median_ws, median_bg) %>% 
+previous_evaluation <- rbind(median_ws, median_bg, median_lidc) %>% 
   stargazer(summary = F, 
             out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/previous_evaluation.tex",
             rownames = F)
@@ -332,8 +347,23 @@ median_bg <- final_sr[["growth"]] %>%
                          adv == 1 ~ "Advanced economies")) %>%
   rename(group = adv)
 
+median_lidc <- final_sr[["growth"]] %>% 
+  filter(year > 2011) %>% 
+  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
+  mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0)) %>% 
+  group_by(lidc, recession) %>% 
+  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
+  mutate_at(vars(starts_with("variable")),round, 2) %>% 
+  ungroup() %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")) %>%
+  filter(lidc ==1) %>% 
+  mutate(lidc = "Low-income") %>%
+  rename(group = lidc)
 
-current_evaluation <- rbind(median_ws,median_bg) %>% 
+
+current_evaluation <- rbind(median_ws,median_bg, median_lidc) %>% 
   stargazer(summary = F,
             out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/current_evaluation.tex",
             rownames = F)
