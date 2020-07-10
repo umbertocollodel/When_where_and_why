@@ -4,9 +4,11 @@
 figures_fe <- final_sr %>% 
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% select(country_code,country, year, fe2)) %>%
   map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
-  map(~ .x %>% ggplot(aes(year)) +
+  imap(~ .x %>%  mutate(meta_information = .y)) %>% 
+  map(~ if(unique(.x$meta_information) == "inflation"){
+    .x %>% 
+      ggplot(aes(year)) +
         geom_point(aes(y = fe2), alpha = 0.1) +
-        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
         geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
         geom_hline(yintercept = 0) +
         theme_minimal() +
@@ -16,6 +18,22 @@ figures_fe <- final_sr %>%
         xlab("") +
         ylab("") +
         ylim(-5,5)
+  }
+  else {
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-5,5)
+  }
   )
 
 
@@ -173,6 +191,7 @@ final_sr %>%
   map(~ .x %>% rename(Constant = Estimate)) %>% 
   .$inflation
   #map2(name_variables, ~ stargazer(summary = F,
+  #         rownames = F,
   #         out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/by_country/",.y,".tex")))
   
 
