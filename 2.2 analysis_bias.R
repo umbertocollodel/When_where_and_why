@@ -64,18 +64,36 @@ figures_fe %>%
 figures_fe_adv <- final_sr %>%
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(adv == 1) %>% select(country_code,country, year, fe2)) %>%
   map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
-  map(~ .x %>% ggplot(aes(year)) +
-        geom_point(aes(y = fe2), alpha = 0.1) +
-        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
-        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
-        geom_hline(yintercept = 0) +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-              legend.position = "bottom") +
-        labs(color = "") +
-        xlab("") +
-        ylab("") +
-        ylim(-15,15)
+  imap(~ .x %>%  mutate(meta_information = .y)) %>% 
+  map(~ if(unique(.x$meta_information) == "inflation"){
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
+  else {
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
   )
 
 figures_fe_adv %>% 
@@ -85,18 +103,36 @@ figures_fe_adv %>%
 figures_fe_eme <- final_sr %>%
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>%  filter(eme == 1) %>% select(country_code,country, year, fe2)) %>%
   map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
-  map(~ .x %>% ggplot(aes(year)) +
-        geom_point(aes(y = fe2), alpha = 0.1) +
-        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
-        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
-        geom_hline(yintercept = 0) +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-              legend.position = "bottom") +
-        labs(color = "") +
-        xlab("") +
-        ylab("") +
-        ylim(-15,15)
+  imap(~ .x %>%  mutate(meta_information = .y)) %>% 
+  map(~ if(unique(.x$meta_information) == "inflation"){
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
+  else {
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
   )
 
 figures_fe_eme %>% 
@@ -106,18 +142,36 @@ figures_fe_eme %>%
 figures_fe_lidc <- final_sr %>%
   map(~ .x %>% mutate(fe2 = targety_first - variable2) %>% filter(lidc == 1) %>% select(country_code,country, year, fe2)) %>%
   map(~ .x %>% group_by(year) %>% mutate(mean_fe2 = mean(fe2, na.rm = T), median_fe2 = median(fe2, na.rm = T))) %>% 
-  map(~ .x %>% ggplot(aes(year)) +
-        geom_point(aes(y = fe2), alpha = 0.1) +
-        geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
-        geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
-        geom_hline(yintercept = 0) +
-        theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-              legend.position = "bottom") +
-        labs(color = "") +
-        xlab("") +
-        ylab("") +
-        ylim(-15,15)
+  imap(~ .x %>%  mutate(meta_information = .y)) %>% 
+  map(~ if(unique(.x$meta_information) == "inflation"){
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
+  else {
+    .x %>% 
+      ggplot(aes(year)) +
+      geom_point(aes(y = fe2), alpha = 0.1) +
+      geom_line(aes(y = mean_fe2, group = 1, color = "Mean"),size = 1) +
+      geom_line(aes(y = median_fe2, group = 1, color = "Median"), size = 1) +
+      geom_hline(yintercept = 0) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      labs(color = "") +
+      xlab("") +
+      ylab("") +
+      ylim(-10,10)
+  }
   )
 
 figures_fe_lidc %>% 
@@ -154,14 +208,19 @@ bias_test_lidc <- final_sr %>%
   map(~ lm(median ~ 1, .x)) 
 
 
-
-
 stargazer(bias_test_aggregate$growth, bias_test_ae$growth, bias_test_eme$growth, bias_test_lidc$growth,
           dep.var.caption = "Median forecast error GDP growth",
           omit.stat = c("rsq","adj.rsq","ser"),
           object.names = TRUE,
           column.labels = c("Full sample","AE","EME","Low-income"),
-          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/formal_test_aggregate.tex")
+          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/formal_test_aggregate_growth.tex")
+
+stargazer(bias_test_aggregate$inflation, bias_test_ae$inflation, bias_test_eme$inflation, bias_test_lidc$inflation,
+          dep.var.caption = "Median forecast error Inflation",
+          omit.stat = c("rsq","adj.rsq","ser"),
+          object.names = TRUE,
+          column.labels = c("Full sample","AE","EME","Low-income"),
+          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/formal_test_aggregate_inflation.tex")
 
 
 
