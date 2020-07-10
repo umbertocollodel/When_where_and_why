@@ -384,6 +384,25 @@ final_sr$growth %>%
   ggplot(aes(forecast_horizon, forecast)) +
   geom_col() +
   theme_minimal()
+
+
+# Taper tantrum
+
+
+final_sr$growth %>% 
+  filter(year == 2013) %>% 
+  filter(adv == 0) %>% 
+  group_by(country) %>% 
+  summarise_at(vars(matches("variable")), median, na.rm = T) %>% 
+  mutate(rev = ((variable1 - variable4)/variable4)*100) %>% 
+  arrange(rev) %>% 
+  filter(country %in% c("Mexico","China","Russia","Brazil","India","Argentina","Indonesia","Poland","South Africa","South Korea","Turkey")) %>% 
+  gather("forecast_horizon","forecast",variable1:variable4) %>% 
+  arrange(country, forecast_horizon) %>% 
+  mutate(forecast_horizon = rep(seq(1:4),10)) %>% 
+  ggplot(aes(forecast_horizon, forecast, col = country)) +
+  geom_line() +
+  theme_minimal()
   
 
 
