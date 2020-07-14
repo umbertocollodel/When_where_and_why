@@ -59,13 +59,15 @@ final_sr %>%
   filter(rank < 10) %>% 
   unite("label",country:year, sep= " ") %>%
   mutate(label = factor(label, label)) %>% 
-  ggplot(aes(label, wb2, fill = country_code)) +
+  ggplot(aes(label, wb2, fill = group)) +
   geom_col() +
   theme_minimal() +
   coord_flip() +
   xlab("") +
   ylab("") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  labs(fill = "Country group") +
+  ylim(0,-6)
 
 final_sr %>% 
   .$gdp %>% 
@@ -77,15 +79,39 @@ final_sr %>%
   filter(rank < 10) %>% 
   unite("label",country:year, sep= " ") %>%
   mutate(label = factor(label, label)) %>% 
-  ggplot(aes(label, variable2, fill = country_code)) +
+  ggplot(aes(label, variable2, fill = group)) +
   geom_col() +
   theme_minimal() +
   coord_flip() +
   xlab("") +
   ylab("") +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") +
+  labs(fill = "Country group") +
+  ylim(0,-6)
 
-  
+# Let's focus on the tails: 
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  arrange(targety_first) %>% 
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank < 30) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  ggplot(aes(variable2, wb2)) +
+  geom_point() +
+  theme_minimal() +
+  geom_abline(intercept = 0, col = "red", size = 1) +
+  xlim(-4,0) +
+  ylim(-4,0) +
+  xlab("WEO Forecast error") +
+  ylab("GEP Forecast error")
+
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_negative.pdf")
+ 
+
+# Relative table: 
 
 
 
