@@ -96,22 +96,112 @@ final_sr %>%
   merge(gep_data, by=c("country","year")) %>% 
   arrange(targety_first) %>% 
   mutate(rank = 1:nrow(.)) %>% 
-  filter(rank < 30) %>% 
+  filter(rank <= 6) %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   ggplot(aes(variable2, wb2)) +
-  geom_point() +
+  geom_point(size = 4) +
   theme_minimal() +
-  geom_abline(intercept = 0, col = "red", size = 1) +
-  xlim(-4,0) +
-  ylim(-4,0) +
+  geom_abline(intercept = 0, col = "red", size = 1.5) +
+  xlim(-6,2) +
+  ylim(-6,2) +
   xlab("WEO Forecast error") +
-  ylab("GEP Forecast error")
+  ylab("GEP Forecast error") +
+  theme(axis.text = element_text(size = 18),
+  axis.title = element_text(size = 21))
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_negative.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_negative_current.pdf")
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  arrange(targety_first) %>% 
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank <= 6) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  ggplot(aes(variable4, wb4)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  geom_abline(intercept = 0, col = "red", size = 1.5) +
+  xlim(-7,1) +
+  ylim(-7,1) +
+  xlab("WEO Forecast error") +
+  ylab("GEP Forecast error") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21))
+
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_negative_yearahead.pdf")
+
+footnote=c("The figure shows the forecast error in the ")
  
 
-# Relative table: 
+# Booms:
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  arrange(targety_first) %>% 
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank > 6) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  ggplot(aes(variable2, wb2)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  geom_abline(intercept = 0, col = "red", size = 1.5) +
+  xlim(-4,10) +
+  ylim(-4,10) +
+  xlab("WEO Forecast error") +
+  ylab("GEP Forecast error") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21))
+
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_negative_current.pdf")
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  arrange(targety_first) %>% 
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank > 6) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  ggplot(aes(variable4, wb4)) +
+  geom_point(size = 4) +
+  theme_minimal() +
+  geom_abline(intercept = 0, col = "red", size = 1.5) +
+  xlim(-6,10) +
+  ylim(-6,10) +
+  xlab("WEO Forecast error") +
+  ylab("GEP Forecast error") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21))
+
+
+# Relative table:
+
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>%
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  mutate(recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0)) %>% 
+  group_by(recession) %>% 
+  summarise(wb2 = round(median(wb2, na.rm = T),2), imf2 = round(median(variable2, na.rm = T),2),
+            wb4 = round(median(wb4, na.rm = T),2),imf4 = round(median(variable4, na.rm = T),2)) %>%
+  setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)")) %>% 
+  stargazer(rownames = F,
+            summary = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/WB/recession_forecast_error.tex")
+  
+  
+  
+  
+
+
 
 
 
