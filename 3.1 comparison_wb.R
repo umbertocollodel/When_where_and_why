@@ -20,10 +20,11 @@ final_sr %>%
   xlab("") +
   ylab("") +
   labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "bottom") +
   ylim(-4,4)
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB/current_year_comparison")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/current_year_comparison.pdf")
 
 
 final_sr %>% 
@@ -41,10 +42,50 @@ final_sr %>%
   xlab("") +
   ylab("") +
   labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+        legend.position = "bottom") +
   ylim(-4,4)
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB/year_ahead_comparison")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB/year_ahead_comparison.pdf")
+
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  arrange(wb2) %>%
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank < 10) %>% 
+  unite("label",country:year, sep= " ") %>%
+  mutate(label = factor(label, label)) %>% 
+  ggplot(aes(label, wb2, fill = country_code)) +
+  geom_col() +
+  theme_minimal() +
+  coord_flip() +
+  xlab("") +
+  ylab("") +
+  theme(legend.position = "bottom")
+
+final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year")) %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  arrange(variable2) %>%
+  mutate(rank = 1:nrow(.)) %>% 
+  filter(rank < 10) %>% 
+  unite("label",country:year, sep= " ") %>%
+  mutate(label = factor(label, label)) %>% 
+  ggplot(aes(label, variable2, fill = country_code)) +
+  geom_col() +
+  theme_minimal() +
+  coord_flip() +
+  xlab("") +
+  ylab("") +
+  theme(legend.position = "bottom")
+
+  
 
 
 
