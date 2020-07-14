@@ -3,13 +3,15 @@
 
 gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/wb_gep.xlsx") %>% 
   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) 
+
+comparison_wb <- final_sr %>% 
+  .$gdp %>% 
+  merge(gep_data, by=c("country","year"))
   
 
 # Comparison of median forecast error: ----
 
-final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year")) %>% 
+comparison_wb %>%  
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   group_by(year) %>% 
@@ -29,9 +31,7 @@ final_sr %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/current_year_comparison.pdf")
 
 
-final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year")) %>% 
+comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   group_by(year) %>% 
@@ -51,11 +51,9 @@ final_sr %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/year_ahead_comparison.pdf")
 
 
-# Forecast errors during recessions and expansions: ----- 
+# Forecast errors during recessions and expansions: (table) ----- 
 
-final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year")) %>%
+comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   mutate(recession = case_when(targety_first < 0 ~ 1,
@@ -75,9 +73,7 @@ final_sr %>%
 
 # Detail of recession episodes: -----
 
-final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year")) %>% 
+comparison_wb %>% 
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
   filter(recession == 1) %>%
@@ -104,28 +100,6 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_recess
 
 
 
-
-
-final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year")) %>%
-  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
-  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
-  mutate(recession = case_when(targety_first < 0 ~ 1,
-                               T ~ 0)) %>% 
-  group_by(recession) %>% 
-  summarise(wb2 = round(median(wb2, na.rm = T),2), imf2 = round(median(variable2, na.rm = T),2),
-            wb4 = round(median(wb4, na.rm = T),2),imf4 = round(median(variable4, na.rm = T),2)) %>%
-  setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)")) %>%
-  mutate(Recession = case_when(Recession == 1 ~ "Recession",
-                               T ~ "Non-recession")) %>% 
-  stargazer(rownames = F,
-            summary = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/WB/recession_forecast_error.tex")
-  
-  
-  
-  
 
 
 
