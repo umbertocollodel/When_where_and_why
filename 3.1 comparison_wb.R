@@ -108,7 +108,8 @@ comparison_wb %>%
     labs(col = "") +
     theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
     theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21))
+        axis.title = element_text(size = 21)) +
+    theme(legend.position = "bottom")
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions.pdf")
   
