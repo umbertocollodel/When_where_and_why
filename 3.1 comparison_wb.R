@@ -40,8 +40,13 @@ comparison_wb %>%
   xlab("") +
   ylab("") +
   labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
         legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)
+  ) +
   ylim(-4,4)
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/current_year_comparison.pdf")
@@ -60,9 +65,15 @@ comparison_wb %>%
   xlab("") +
   ylab("") +
   labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1),
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
         legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)
+  ) +
   ylim(-4,4)
+
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/year_ahead_comparison.pdf")
 
@@ -108,10 +119,18 @@ comparison_wb %>%
     labs(col = "") +
     theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
     theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21)) +
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16))+
+    ylim(-4,4) +
     theme(legend.position = "bottom")
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions.pdf")
+
+footnote = c("IEO calculations. WEO and GEP forecasts refer to current-year forecasts released in the January
+             issue of each publication") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions_footnote.tex")
+
   
     
 
