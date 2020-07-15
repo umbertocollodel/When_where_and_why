@@ -1,12 +1,28 @@
 # Script to compare IMF WEO forecasts with World Bank GEP:
 
+# World Bank data:
 
 gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/wb_gep.xlsx") %>% 
-  rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) 
+  rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) %>% 
+  select(country, year, wb2, wb4) %>% 
+  rename(wb1 = wb2, wb2 = wb4)
 
-comparison_wb <- final_sr %>% 
-  .$gdp %>% 
-  merge(gep_data, by=c("country","year"))
+# IMF WEO January update data:
+
+
+load("../IEO_forecasts_material/intermediate_data/rgdp_jan_update.RData")
+
+# Actual values: (fall issue of next year WEO)
+
+target <- final_sr$gdp %>% 
+  select(country_code, year, targety_first)
+
+# Bind together:
+
+comparison_wb <- x %>%   
+  merge(gep_data, by=c("country","year")) %>% 
+  merge(target, by=c("country_code","year")) %>% 
+  select(country_code, country, year, targety_first, variable1, wb1, variable2, wb2)
   
 
 # Comparison of median forecast error: ----
@@ -15,11 +31,11 @@ comparison_wb %>%
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   group_by(year) %>% 
-  mutate(median_2wb = median(wb2, na.rm = T), median_4wb = median(wb4, na.rm = T)) %>% 
-  mutate(median_2imf = median(variable2, na.rm = T), median_4imf = median(variable4, na.rm = T)) %>% 
+  mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T)) %>% 
+  mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T)) %>% 
   ggplot(aes(year)) +
-  geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
-  geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
+  geom_line(aes(y = median_1wb, group = 1, col = "WB"), size = 1) +
+  geom_line(aes(y = median_1imf, group = 1, col = "IMF" ), size = 1) +
   theme_minimal() +
   xlab("") +
   ylab("") +
@@ -35,11 +51,11 @@ comparison_wb %>%
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   group_by(year) %>% 
-  mutate(median_2wb = median(wb2, na.rm = T), median_4wb = median(wb4, na.rm = T)) %>% 
-  mutate(median_2imf = median(variable2, na.rm = T), median_4imf = median(variable4, na.rm = T)) %>% 
+  mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T)) %>% 
+  mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T)) %>% 
   ggplot(aes(year)) +
-  geom_line(aes(y = median_4wb, group = 1, col = "WB"), size = 1) +
-  geom_line(aes(y = median_4imf, group = 1, col = "IMF" ), size = 1) +
+  geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
+  geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
   theme_minimal() +
   xlab("") +
   ylab("") +
@@ -59,8 +75,8 @@ comparison_wb %>%
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
   group_by(recession) %>% 
-  summarise(wb2 = round(median(wb2, na.rm = T),2), imf2 = round(median(variable2, na.rm = T),2),
-            wb4 = round(median(wb4, na.rm = T),2),imf4 = round(median(variable4, na.rm = T),2)) %>%
+  summarise(wb1 = round(median(wb1, na.rm = T),2), imf1 = round(median(variable1, na.rm = T),2),
+            wb2 = round(median(wb2, na.rm = T),2),imf2 = round(median(variable2, na.rm = T),2)) %>%
   setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)")) %>%
   mutate(Recession = case_when(Recession == 1 ~ "Recession",
                                T ~ "Non-recession")) %>% 
@@ -77,11 +93,11 @@ comparison_wb %>%
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
   filter(recession == 1) %>%
-  select(country, year, targety_first, variable2, wb2) %>%
+  select(country, year, targety_first, variable1, wb1) %>%
   unite("label", country:year, sep = " ", remove = F) %>% 
-  gather("var","value",targety_first:wb2) %>% 
+  gather("var","value",targety_first:wb1) %>% 
   mutate(var = case_when(var == "targety_first" ~ "Actual",
-         var == "variable2" ~ "WEO Forecast",
+         var == "variable1" ~ "WEO Forecast",
          T ~ "GEP Forecast")) %>% 
   ggplot(aes(label, value, col = var, group = var)) +
     geom_line(size = 2) +
