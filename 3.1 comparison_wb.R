@@ -126,14 +126,17 @@ raw <- comparison_wb %>%
                                   T ~ "IMF")) %>%
     mutate(n_significant = case_when(better_imf == "WB" ~ 3,
                                      T ~ 2)) %>% 
-    ggplot(aes(better_imf, fill = better_imf, width = 0.3)) +
+    ggplot(aes(better_imf, fill = better_imf, width = 0.2)) +
     geom_col(aes(y=n),alpha = 0.3) +
     geom_col(aes(y=n_significant), alpha = 0.7) +
     theme_minimal() +
     ylab("Number of countries") +
     xlab("") +
     labs(fill = "Lower RMSE for:") +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    theme(panel.grid.major.x = element_blank(),
+          panel.grid.minor.y = element_blank())
+    
     
   
   comparison_wb %>% 
