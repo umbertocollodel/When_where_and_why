@@ -135,8 +135,13 @@ raw <- comparison_wb %>%
     labs(fill = "Lower RMSE for:") +
     theme(legend.position = "bottom") +
     theme(panel.grid.major.x = element_blank(),
-          panel.grid.minor.y = element_blank())
+          panel.grid.minor.y = element_blank()) +
+    theme(axis.text = element_text(size = 18),
+          axis.title = element_text(size = 21),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16)) 
     
+    ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
     
   
   comparison_wb %>% 
