@@ -204,8 +204,13 @@ comparison_wb %>%
   mutate(var = case_when(var == "targety_first" ~ "Actual",
          var == "variable1" ~ "WEO Forecast",
          T ~ "GEP Forecast")) %>% 
+  filter(country != "Ecuador" & country != "Tunisia" & 
+         country != "Vanuatu" & country != "Romania" &
+          country != "Papua New Guinea" & country != "Latvia" &
+           country!= "Argentina" ) %>%
+  filter(year != 2010) %>% 
   ggplot(aes(label, value, col = var, group = var)) +
-    geom_line(size = 2) +
+    geom_line(aes(group = paste(country,var)),size = 2) +
     geom_point(size = 3) +
     theme_minimal() +
     xlab("") +
@@ -216,10 +221,10 @@ comparison_wb %>%
         axis.title = element_text(size = 21),
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16))+
-    ylim(-4,4) +
+    ylim(-17,17) +
     theme(legend.position = "bottom")
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_recessions.pdf")
 
 footnote = c("IEO calculations. WEO and GEP forecasts refer to current-year forecasts released in the January
              issue of each publication") %>% 
