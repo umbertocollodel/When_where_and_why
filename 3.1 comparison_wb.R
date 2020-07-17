@@ -104,31 +104,51 @@ comparison_wb %>%
         ylim(-4,4))
 
 
-# Raw country comparison:
+# Comparison of forecast accuracy: ----
 
+
+# Diebold-Mariano (version in Timmerman paper)
+# Note: very few observations, we ascribe the absence of significant differences to the low statistical 
+# power of the test
+
+comparison_wb %>% 
+    mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+    mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+    mutate(diff = wb1^2 - variable1^2) %>% 
+    split(.$country) %>% 
+    map(~ lm(diff ~ 1, .x)) %>%
+    map(~ summary(.x)) %>% 
+    map(~ coef(.x))
+
+# Raw comparison (with no significance) of RMSE for countries and institution:
+  
 raw <- comparison_wb %>% 
   group_by(country) %>% 
-  summarise(rmse_imf = hydroGOF::rmse(variable1, targety_first),
-            rmse_wb = hydroGOF::rmse(wb1, targety_first)) %>% 
+  summarise(rmse_imf1 = hydroGOF::rmse(variable1, targety_first),
+            rmse_wb1 = hydroGOF::rmse(wb1, targety_first),
+            rmse_imf2 = hydroGOF::rmse(variable2, targety_first),
+            rmse_wb2 = hydroGOF::rmse(wb2, targety_first)) %>% 
   ungroup() %>% 
-  mutate(ratio = (rmse_imf/rmse_wb)- 1) %>%
-  mutate(better_imf = case_when(ratio < 0 ~ 1,
-                                T ~ 0)) %>% 
+  mutate(ratio1 = (rmse_imf1/rmse_wb1)- 1,
+         ratio2 = (rmse_imf2/rmse_wb2) - 1) %>%
+  mutate(better_imf1 = case_when(ratio1 < 0 ~ 1,
+                                T ~ 0),
+         better_imf2 = case_when(ratio2 < 0 ~ 1,
+                                 T ~ 0)) %>% 
   ungroup() 
 
-  list(raw %>% group_by(better_imf) %>% count(), raw %>% filter(better_imf == 0) %>% .$country %>% unique())
+# list(raw %>% group_by(better_imf) %>% count(), raw %>% filter(better_imf == 0) %>% .$country %>% unique())
   
   raw %>% 
-    group_by(better_imf) %>% 
+    gather("better_imf","value",better_imf1:better_imf2) %>% 
+    group_by(better_imf, value) %>% 
     count() %>% 
     ungroup() %>% 
     mutate(better_imf = case_when(better_imf == 0 ~ "WB",
                                   T ~ "IMF")) %>%
-    mutate(n_significant = case_when(better_imf == "WB" ~ 3,
-                                     T ~ 2)) %>% 
     ggplot(aes(better_imf, fill = better_imf, width = 0.2)) +
-    geom_col(aes(y=n),alpha = 0.3) +
-    geom_col(aes(y=n_significant), alpha = 0.7) +
+    geom_col(aes(y=n),alpha = 0.8) +
+    geom_text(aes(y = n,label=n), position=position_dodge(width=0.9), vjust=-0.25, size = 5) +
     theme_minimal() +
     ylab("Number of countries") +
     xlab("") +
@@ -144,33 +164,7 @@ raw <- comparison_wb %>%
     ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
     
   
-  comparison_wb %>% 
-    split(.$country) %>% 
-    map(~ .x %>% filter(complete.cases(targety_first)) %>% filter(complete.cases(wb1)) %>% filter(complete.cases(variable1))) %>% 
-    map(~ dm.test(.x$variable1, .x$wb1, alternative = "two.sided")) %>% 
-    map(~ .x$statistic) %>% 
-    unlist() %>% 
-    enframe() %>% 
-    mutate(name = str_remove(name,"\\.DM")) %>% 
-    mutate(different = case_when(value > 1.96 | value < -1.96 ~ 1,
-                                 T ~ 0))
 
-
-# Diebold-Mariano: ----
-
-comparison_wb %>% 
-  split(.$country) %>% 
-  map(~ .x %>% filter(complete.cases(targety_first)) %>% filter(complete.cases(wb1)) %>% filter(complete.cases(variable1))) %>% 
-  map(~ dm.test(.x$variable1, .x$wb1, alternative = "two.sided")) %>% 
-  map(~ .x$statistic) %>% 
-  unlist() %>% 
-  enframe() %>% 
-  mutate(name = str_remove(name,"\\.DM")) %>% 
-  mutate(sign = case_when(value >= 1.96 | value <= -1.96 ~ 1,
-                          T ~ 0)) %>% 
-  print(n = Inf)
-  group_by(sign) %>% 
-  count()
 
 # Forecast errors during recessions and expansions: (table) ----- 
 
