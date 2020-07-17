@@ -1,4 +1,7 @@
-# Script to compare IMF WEO forecasts with World Bank GEP:
+################ Script to compare IMF WEO forecasts with World Bank GEP:
+
+# Note: we are using the updated version of gep transcribed manually, needs
+# to be changed with the total dataset received from WB.
 
 # World Bank data:
 
@@ -213,23 +216,28 @@ comparison_wb %>%
 
 
 
-# Detail of recession episodes: -----
+# Evolution forecast errors during periods of consecutive recessions: -----
+# Note: evolution of current-year forecasts
 
-comparison_wb %>% 
+recession <- comparison_wb %>% 
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
-  filter(recession == 1) %>%
+  filter(recession == 1) %>% 
   select(country, year, targety_first, variable1, wb1) %>%
-  unite("label", country:year, sep = " ", remove = F) %>% 
   gather("var","value",targety_first:wb1) %>% 
   mutate(var = case_when(var == "targety_first" ~ "Actual",
          var == "variable1" ~ "WEO Forecast",
          T ~ "GEP Forecast")) %>% 
-  filter(country != "Ecuador" & country != "Tunisia" & 
-         country != "Vanuatu" & country != "Romania" &
-          country != "Papua New Guinea" & country != "Latvia" &
-           country!= "Argentina" ) %>%
-  filter(year != 2010) %>% 
+  mutate(year = as.numeric(year)) %>% 
+  group_by(country, var, grp = cumsum(c(1, diff(year) != 1))) %>%  # have to understand this line!
+  filter(n() > 1) %>% 
+  ungroup() %>% 
+  mutate(year = as.character(year))
+    
+  
+ 
+    
+  recession %>% 
   ggplot(aes(year, value, col = var, group = var)) +
     geom_line(aes(group = paste(country,var)),size = 2) +
     geom_point(size = 3) +
