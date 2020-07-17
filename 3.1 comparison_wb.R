@@ -56,6 +56,7 @@ comparison_wb %>%
   ggplot(aes(year)) +
   geom_line(aes(y = median_1wb, group = 1, col = "WB"), size = 1) +
   geom_line(aes(y = median_1imf, group = 1, col = "IMF" ), size = 1) +
+  geom_hline(yintercept = 0) +
   theme_minimal() +
   xlab("") +
   ylab("") +
@@ -65,8 +66,9 @@ comparison_wb %>%
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21),
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16)
-  ) +
+        legend.text = element_text(size = 16)) +
+  theme(panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
   ylim(-4,4)
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/current_year_comparison.pdf")
@@ -81,6 +83,7 @@ comparison_wb %>%
   ggplot(aes(year)) +
   geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
   geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
+  geom_hline(yintercept = 0) +
   theme_minimal() +
   xlab("") +
   ylab("") +
@@ -92,6 +95,8 @@ comparison_wb %>%
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16)
   ) +
+  theme(panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank()) +
   ylim(-4,4)
 
 
@@ -169,7 +174,7 @@ raw <- comparison_wb %>%
     mutate(better_imf = case_when(better_imf == "better_imf1" ~ "Current Year",
                              T ~ "Year Ahead")) %>% 
     ggplot(aes(better_imf, n)) +
-    geom_col(aes(fill=value),position = "dodge", alpha = 0.8, width = 0.3) +
+    geom_col(aes(fill=value),position = "dodge", alpha = 0.8, width = 0.3, col = "white") +
     geom_text(aes(y = n,label=n, fill = value), position=position_dodge(width=0.3), size = 7, vjust = -0.25) +
     theme_minimal() +
     ylab("Number of countries") +
@@ -233,7 +238,7 @@ comparison_wb %>%
     ylab("") +
     labs(col = "") +
     facet_wrap(~country, strip.position = "bottom", scales = "free_x", nrow = 1) +
-    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 12)) +
+    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
     theme(axis.text.y = element_text(size = 18),
         axis.title = element_text(size = 21),
         legend.title = element_text(size = 18),
@@ -247,8 +252,7 @@ comparison_wb %>%
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_recessions.pdf")
 
-footnote = c("IEO calculations. WEO and GEP forecasts refer to current-year forecasts released in the January
-             issue of each publication") %>% 
+footnote = c("IEO calculations.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions_footnote.tex")
 
   
