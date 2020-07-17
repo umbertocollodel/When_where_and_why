@@ -18,12 +18,32 @@ target <- final_sr$gdp %>%
   select(country_code, year, group, targety_first)
 
 # Bind together:
+# Note: removed Latvia, Lithuania and Vanatu because have important gap years after entering the sample 
+# in 2010. In the future, check this automatically and remove countries.
 
 comparison_wb <- x %>%   
   merge(gep_data, by=c("country","year")) %>% 
   merge(target, by=c("country_code","year")) %>% 
-  select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2)
+  select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2) %>% 
+  filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu")
   
+
+# Table with list countries comparison:----
+
+comparison_wb %>% 
+  group_by(country) %>% 
+  slice(1) %>% 
+  select(country, group) %>% 
+  arrange(group) %>%
+  mutate(group = case_when(group == "emerging_asia" ~ "Emerging Asia",
+                           group == "emerging_europe" ~ "Emerging Europe",
+                           group == "latin_america" ~ "Latin America",
+                           group == "middle_east" ~ "Middle East")) %>% 
+  rename(Country = country, `Geo. group` = group) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/country_sample.tex"
+            )
 
 # Comparison of median forecast error: ----
 
@@ -232,7 +252,7 @@ footnote = c("IEO calculations. WEO and GEP forecasts refer to current-year fore
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions_footnote.tex")
 
   
-    
+
 
 
 
