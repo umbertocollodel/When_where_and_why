@@ -144,11 +144,13 @@ raw <- comparison_wb %>%
     group_by(better_imf, value) %>% 
     count() %>% 
     ungroup() %>% 
-    mutate(better_imf = case_when(better_imf == 0 ~ "WB",
+    mutate(value = case_when(value == 0 ~ "WB",
                                   T ~ "IMF")) %>%
-    ggplot(aes(better_imf, fill = better_imf, width = 0.2)) +
-    geom_col(aes(y=n),alpha = 0.8) +
-    geom_text(aes(y = n,label=n), position=position_dodge(width=0.9), vjust=-0.25, size = 5) +
+    mutate(better_imf = case_when(better_imf == "better_imf1" ~ "Current Year",
+                             T ~ "Year Ahead")) %>% 
+    ggplot(aes(better_imf, n)) +
+    geom_col(aes(fill=value),position = "dodge", alpha = 0.8, width = 0.3) +
+    geom_text(aes(y = n,label=n, fill = value), position=position_dodge(width=0.3), size = 7, vjust = -0.25) +
     theme_minimal() +
     ylab("Number of countries") +
     xlab("") +
