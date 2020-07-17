@@ -205,20 +205,25 @@ comparison_wb %>%
           country != "Papua New Guinea" & country != "Latvia" &
            country!= "Argentina" ) %>%
   filter(year != 2010) %>% 
-  ggplot(aes(label, value, col = var, group = var)) +
+  ggplot(aes(year, value, col = var, group = var)) +
     geom_line(aes(group = paste(country,var)),size = 2) +
     geom_point(size = 3) +
     theme_minimal() +
     xlab("") +
     ylab("") +
     labs(col = "") +
-    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
-    theme(axis.text = element_text(size = 18),
+    facet_wrap(~country, strip.position = "bottom", scales = "free_x", nrow = 1) +
+    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 12)) +
+    theme(axis.text.y = element_text(size = 18),
         axis.title = element_text(size = 21),
         legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16))+
+        legend.text = element_text(size = 16),
+        strip.text.x = element_text(size = 18))+
     ylim(-17,17) +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    theme(panel.spacing = unit(0, "lines"), 
+            strip.background = element_blank(),
+            strip.placement = "outside")
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_recessions.pdf")
 
