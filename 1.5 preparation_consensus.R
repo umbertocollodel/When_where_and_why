@@ -132,9 +132,6 @@ consensus_clean <- consensus_clean %>%
 
 rio::export(consensus_clean, file = "../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
 
-
-
-
 cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory:"
                          ," ../IEO_forecasts_material/intermediate_data/consensus")))
 
