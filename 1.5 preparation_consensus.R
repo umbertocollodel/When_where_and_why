@@ -4,6 +4,8 @@
 # Note2: for 2007 and 2008, we are missing some variables given that previous report are not
 # available in this format.
 
+
+# Wrangling consensus forecasts function: ----
   
 wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"){
 
@@ -98,6 +100,17 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
   
   return(final)
 }
+
+# Create final dataframe: -----
+
+wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx") %>% 
+  rio::export(file = "../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
+
+
+
+
+cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory"
+                         ," ../IEO_forecasts_material/intermediate_data/consensus")))
 
 
 
