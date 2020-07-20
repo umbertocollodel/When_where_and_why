@@ -3,6 +3,7 @@
 # instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
 # Note2: for 2007 and 2008, we are missing some variables given that previous report are not
 # available in this format.
+# Note3: downloaded every month second week of data because larger country availability. 
 
 
 # Wrangling consensus forecasts function: ----
@@ -111,6 +112,15 @@ wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_20
 
 cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory:"
                          ," ../IEO_forecasts_material/intermediate_data/consensus")))
+
+
+# Analyze consensus forecasts -----
+
+
+
+x %>% 
+  group_by(year) %>% 
+  summarise(count = length(unique(country)))
 
 
 
