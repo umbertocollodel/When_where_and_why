@@ -1,6 +1,8 @@
 # Script to prepare consensus forecast data ----
-# Note: for India, forecast are for the previous and current year
-# instead of current and year-ahead in April 2008 and April 2010.
+# Note1: for India, forecast are for the previous and current year
+# instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
+# Note2: for 2007 and 2008, we are missing some variables given that previous report are not
+# available in this format.
 
   
 wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"){
@@ -41,7 +43,7 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
       modify_depth(2, ~ .x %>% gather("year_forecasted","variable",12:ncol(.))) %>% 
       map(~ .x %>% bind_rows())
   
- forecasts <-  forecasts %>% 
+  forecasts <-  forecasts %>% 
     map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
     map(~ .x %>% select(Series_code, `Data Type/ Forecaster`,year_forecasted, variable)) %>% 
     map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
