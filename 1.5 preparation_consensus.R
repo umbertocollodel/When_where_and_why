@@ -14,21 +14,46 @@
   forecasts <- sheets_name %>% 
       map(~ read_xlsx(path,sheet = .x)) %>%
       map(~ .x %>% filter(Country != "Euro Area")) %>%
-      map(~ .x %>% split(.$`Forecast Length`)) %>% 
-      modify_depth(2, ~ .x %>% remove_empty("cols")) %>% 
-      modify_depth(2, ~ .x %>% filter(complete.cases(variable)))
-  }
+      map(~ .x %>% remove_empty("cols"))
+  
+  ### Correct problematic features of dataframe (see initial note):
   
   forecasts <- forecasts %>% 
+      map(~ if(any(.x$`Survey Date` == "2008 Apr 14" | .x$`Survey Date` == "2010 Apr 12")){
+        .x %>% select(-(ncol(.)-2))
+      } else{
+        .x
+      }) %>% 
+      map(~ if(any(.x$`Survey Date` == "2015 Sep 07")){
+        .x %>% 
+          mutate(iso3 = countrycode(Country, "country.name","iso3c")) %>% 
+          select(EcDatabase, Series_code, Country, iso3, everything())
+      } else {
+        .x
+      })
+  ###
+  
+  
+  forecasts <- forecasts %>% 
+      map(~ .x %>% split(.$`Forecast Length`)) %>%
+      modify_depth(2, ~ .x %>% remove_empty("cols")) %>% 
+      modify_depth(2, ~ .x %>% gather("year_forecasted","variable",12:ncol(.))) %>% 
+      map(~ .x %>% bind_rows())
+  
+  forecasts %>% 
     map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
-    map(~ .x %>% select(Series_code, year_forecasted, variable)) %>% 
+    map(~ .x %>% select(Series_code, `Data Type/ Forecaster`,year_forecasted, variable)) %>% 
     map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
     map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
-    map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5))) %>%
-    map(~ .x %>% filter(complete.cases(Series_code))) %>% 
     bind_rows() %>% 
     group_split(year_forecasted) %>% 
-    map(~ .x %>% select(-year_publication)) %>% 
+    map(~ .x %>% select(-year_publication)) 
+  
+  
+  
+  
+  %>% 
+    map(~ .x %>% filter(`Data Type/Forecaster == "Consensus (Mean`))
     map(~ .x %>% spread(date_publication,variable)) %>% 
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
