@@ -1,14 +1,16 @@
 ##### Script to prepare consensus forecast data ----
 
-## Note1: many emerging markets available in Timmerman (2016) are not available in the first week of
-# Consensus. Likewise, advanced economies are not available in the second week. Some countries, mainly
-# emerging europe, are overlapping. We take the first week for advanced and the second for emerging.
+## Note1: Latin American countries available in Timmerman (2016) are not available in the first week of
+# Consensus. Likewise, advanced and Asian economies are not available in the second week. Overlapping in 2007/2008
+# for some countries with forecasts released both first and second week. Kept first week.
 
 ## Note2: for India, forecast are for the previous and current year instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
 # This is included in the correction parameter of the function.
 
 ## Note3: for 2007 and 2008, we are missing some horizons given that previous report are not
 # available in this format.
+
+# TO SOLVE: ncol problem in the function (12 first week, 11 second) and then vectorize the call and export.
 
 
 # Wrangling consensus forecasts function: ----
