@@ -109,7 +109,7 @@ wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_20
 
 
 
-cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory"
+cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory:"
                          ," ../IEO_forecasts_material/intermediate_data/consensus")))
 
 
