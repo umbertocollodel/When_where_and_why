@@ -20,7 +20,7 @@
   
   forecasts <- forecasts %>% 
       map(~ if(any(.x$`Survey Date` == "2008 Apr 14" | .x$`Survey Date` == "2010 Apr 12")){
-        .x %>% select(-(ncol(.)-2))
+        .x %>% filter(Country != "India")
       } else{
         .x
       }) %>% 
@@ -47,14 +47,11 @@
     map2(sheets_year, ~ .x %>% mutate(year_publication = .y)) %>% 
     bind_rows() %>% 
     group_split(year_forecasted) %>% 
-    map(~ .x %>% select(-year_publication)) 
+    map(~ .x %>% select(-year_publication)) %>% 
+    map(~ .x %>% spread())
+
   
-  
-  
-  
-  %>% 
-    map(~ .x %>% filter(`Data Type/Forecaster == "Consensus (Mean`))
-    map(~ .x %>% spread(date_publication,variable)) %>% 
+
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
     map(~ .x %>% rename_at(vars(starts_with("oct")), ~ paste0(.,"oct"))) %>% 
