@@ -1,6 +1,6 @@
 # Script to prepare consensus forecast data ----
-# Note: for some countries and survey dates, forecast are for the previous and current year
-# instead of current and year-ahead
+# Note: for India, forecast are for the previous and current year
+# instead of current and year-ahead in April 2008 and April 2010.
 
   
   path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"
