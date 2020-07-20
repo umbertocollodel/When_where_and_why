@@ -3,8 +3,9 @@
 # instead of current and year-ahead in April 2008 and April 2010.
 
   
-  path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"
-  
+wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"){
+
+  path = path
   
   sheets_name <- getSheetNames(path)
   sheets_year <- getSheetNames(path) %>%
@@ -40,7 +41,7 @@
       modify_depth(2, ~ .x %>% gather("year_forecasted","variable",12:ncol(.))) %>% 
       map(~ .x %>% bind_rows())
   
-  forecasts %>% 
+ forecasts <-  forecasts %>% 
     map(~ .x %>% mutate(Series_code = str_extract(Series_code, "\\d{3}"))) %>%  
     map(~ .x %>% select(Series_code, `Data Type/ Forecaster`,year_forecasted, variable)) %>% 
     map2(sheets_name, ~ .x %>% mutate(date_publication = .y)) %>% 
@@ -48,14 +49,11 @@
     bind_rows() %>% 
     group_split(year_forecasted) %>% 
     map(~ .x %>% select(-year_publication)) %>% 
-    map(~ .x %>% spread())
-
-  
-
+    map(~ .x %>% spread(date_publication, variable)) %>% 
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ paste0(.,"apr"))) %>% 
     map(~ .x %>% rename_at(vars(starts_with("apr")), ~ str_remove(.,"^apr"))) %>% 
-    map(~ .x %>% rename_at(vars(starts_with("oct")), ~ paste0(.,"oct"))) %>% 
-    map(~ .x %>% rename_at(vars(starts_with("oct")), funs(str_remove(.,"^oct"))))
+    map(~ .x %>% rename_at(vars(starts_with("sep")), ~ paste0(.,"sep"))) %>% 
+    map(~ .x %>% rename_at(vars(starts_with("sep")), funs(str_remove(.,"^sep"))))
   
   # Order names of the columns:
   
@@ -74,26 +72,31 @@
   
   
   final_forecasts <-  forecasts %>% 
-    map(~ if(length(names(.x)) == 14){
-      .x %>% setNames(c(rev(paste0("variable",seq(12:1))),"country_code","year"))
-    } else if(length(names(.x)) == 12){
-      .x %>% setNames(c(rev(paste0("variable",seq(10:1))),"country_code","year"))
-    } else if(length(names(.x)) == 10){
-      .x %>% setNames(c(rev(paste0("variable",seq(8:1))),"country_code","year"))
-    } else if(length(names(.x)) == 8){
-      .x %>% setNames(c(rev(paste0("variable",seq(6:1))),"country_code","year"))
+    map(~ if(length(names(.x)) == 7){
+      .x %>% setNames(c(rev(paste0("variable",seq(4:1))),"forecaster","country_code","year"))
     } else if(length(names(.x)) == 6){
-      .x %>% setNames(c(rev(paste0("variable",seq(4:1))),"country_code","year"))
+      .x %>% setNames(c(rev(paste0("variable",seq(3:1))),"forecaster","country_code","year"))
     } else if(length(names(.x)) == 4){
-      .x %>% setNames(c(rev(paste0("variable",seq(2:1))),"country_code","year"))
-    }
-    ) %>%  
+      .x %>% setNames(c(paste0("variable",1),"forecaster","country_code","year"))
+    })  %>%  
     bind_rows() %>% 
-    mutate(country = countrycode(country_code,"imf","country.name")) %>% 
+    mutate(country = countrycode(country_code,"imf","country.name")) %>%
     filter(complete.cases(country)) %>% 
-    select(country_code, country, year, everything()) %>% 
-    arrange(country)
+    select(country_code, country, year, forecaster, everything()) %>% 
+    arrange(country,year)
   
-  return(final_forecasts)
   
+  # Final step - remove unnecessary summary stats:
+  
+  unnecessary_stat <- c("High","Low","Number of Forecasts","Standard Deviation",
+                        "Total","Ref.")
+  
+  final <- final_forecasts %>% 
+    filter(!forecaster %in% unnecessary_stat) 
+  
+  return(final)
 }
+
+
+
+
