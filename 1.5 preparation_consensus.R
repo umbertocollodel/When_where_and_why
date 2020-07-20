@@ -19,7 +19,7 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
       map(~ .x %>% filter(Country != "Euro Area")) %>%
       map(~ .x %>% remove_empty("cols"))
   
-  ### Correct problematic features of dataframe (see initial note):
+  ### Correct problematic features of dataframe (see Note1):
   
   forecasts <- forecasts %>% 
       map(~ if(any(.x$`Survey Date` == "2008 Apr 14" | .x$`Survey Date` == "2010 Apr 12")){
