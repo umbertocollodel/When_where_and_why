@@ -1,14 +1,20 @@
-# Script to prepare consensus forecast data ----
-# Note1: for India, forecast are for the previous and current year
-# instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
-# Note2: for 2007 and 2008, we are missing some variables given that previous report are not
+##### Script to prepare consensus forecast data ----
+
+## Note1: many emerging markets available in Timmerman (2016) are not available in the first week of
+# Consensus. Likewise, advanced economies are not available in the second week. Some countries, mainly
+# emerging europe, are overlapping. We take the first week for advanced and the second for emerging.
+
+## Note2: for India, forecast are for the previous and current year instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
+# This is included in the correction parameter of the function.
+
+## Note3: for 2007 and 2008, we are missing some horizons given that previous report are not
 # available in this format.
-# Note3: downloaded every month second week of data because larger country availability. 
 
 
 # Wrangling consensus forecasts function: ----
   
-wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx"){
+wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_eme.xlsx",
+                                        correction = FALSE){
 
   path = path
   
@@ -23,7 +29,7 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
       map(~ .x %>% remove_empty("cols"))
   
   ### Correct problematic features of dataframe (see Note1):
-  
+  if(correction == TRUE){
   forecasts <- forecasts %>% 
       map(~ if(any(.x$`Survey Date` == "2008 Apr 14" | .x$`Survey Date` == "2010 Apr 12")){
         .x %>% filter(Country != "India")
@@ -38,12 +44,12 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
         .x
       })
   ###
-  
+  }
   
   forecasts <- forecasts %>% 
       map(~ .x %>% split(.$`Forecast Length`)) %>%
       modify_depth(2, ~ .x %>% remove_empty("cols")) %>% 
-      modify_depth(2, ~ .x %>% gather("year_forecasted","variable",12:ncol(.))) %>% 
+      modify_depth(2, ~ .x %>% gather("year_forecasted","variable",11:ncol(.))) %>% 
       map(~ .x %>% bind_rows())
   
   forecasts <-  forecasts %>% 
@@ -102,26 +108,33 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
   return(final)
 }
 
-# Create final dataframe: -----
+# Create and export final dataframe: -----
 
-wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019.xlsx") %>% 
-  rio::export(file = "../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
+
+advanced <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_firstweek.xlsx",T) 
+emerging <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_secondweek.xlsx",F)
+
+
+consensus_clean <- rbind(advanced, emerging) %>% 
+  arrange(country, year) %>% 
+  filter(year < 2019)
+
+
+# Problem of duplicates:
+
+consensus_clean <- consensus_clean %>% 
+  distinct(country, year, forecaster, .keep_all = T) 
+
+
+
+# Export:
+
+
+rio::export(consensus_clean, file = "../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
 
 
 
 
 cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory:"
                          ," ../IEO_forecasts_material/intermediate_data/consensus")))
-
-
-# Analyze consensus forecasts -----
-
-
-
-x %>% 
-  group_by(year) %>% 
-  summarise(count = length(unique(country)))
-
-
-
 
