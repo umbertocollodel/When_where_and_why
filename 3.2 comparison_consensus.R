@@ -142,6 +142,8 @@ comparison_consensus %>%
             )
   
 
+# Adjustment with consecutive years recession ----
+
 comparison_consensus %>% 
   filter(forecaster == "Consensus (Mean)") %>% 
   mutate(Recession = case_when(targety_first < 0 ~ 1,
@@ -150,3 +152,44 @@ comparison_consensus %>%
   select(country, year, variable1, consensus1, variable2, consensus2) %>% 
   print(n = Inf)
   
+
+recession <- comparison_consensus %>%
+  filter(forecaster == "Consensus (Mean)") %>% 
+  mutate(recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0)) %>% 
+  filter(recession == 1) %>% 
+  select(country, year, targety_first, variable1, consensus1) %>%
+  gather("var","value",targety_first:consensus1) %>% 
+  mutate(var = case_when(var == "targety_first" ~ "Actual",
+                         var == "variable1" ~ "WEO Forecast",
+                         T ~ "Consensus (Mean)")) %>% 
+  mutate(year = as.numeric(year)) %>% 
+  group_by(country, var, grp = cumsum(c(1, diff(year) != 1))) %>%  # have to understand this line!
+  filter(n() > 1) %>% 
+  ungroup() %>% 
+  mutate(year = as.character(year))
+
+
+
+
+recession %>% 
+  ggplot(aes(year, value, col = var, group = var)) +
+  geom_line(aes(group = paste(country,var)),size = 2) +
+  geom_point(size = 3) +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  labs(col = "") +
+  facet_wrap(~country, strip.position = "bottom", scales = "free_x", nrow = 1) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
+  theme(axis.text.y = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16),
+        strip.text.x = element_text(size = 18))+
+  ylim(-17,17) +
+  theme(legend.position = "bottom") +
+  theme(panel.spacing = unit(0, "lines"), 
+        strip.background = element_blank(),
+        strip.placement = "outside")
+
