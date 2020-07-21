@@ -91,7 +91,7 @@ rmse_comparison %>%
                              horizon == "ratio3"~ "H=1,F",
                              T ~ "H=1,S")) %>% 
   ggplot(aes(horizon, share)) +
-  geom_col(width = 0.3,col = "lightgrey") +
+  geom_col(width = 0.3,col = "lightgrey",alpha = 0.6) +
   facet_wrap(~ group) +
   theme_minimal() +
   ylab("Share of countries (%)") +
@@ -142,5 +142,11 @@ comparison_consensus %>%
             )
   
 
-
+comparison_consensus %>% 
+  filter(forecaster == "Consensus (Mean)") %>% 
+  mutate(Recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0)) %>% 
+  filter(Recession == 1 & year >= 2011) %>% 
+  select(country, year, variable1, consensus1, variable2, consensus2) %>% 
+  print(n = Inf)
   
