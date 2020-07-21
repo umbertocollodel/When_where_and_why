@@ -101,7 +101,7 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
   
   # Final step - remove unnecessary summary stats:
   
-  unnecessary_stat <- c("High","Low","Number of Forecasts","Standard Deviation",
+  unnecessary_stat <- c("High","Low","Number of Forecasts","No of Forecasts","Standard Deviation",
                         "Total","Ref.")
   
   final <- final_forecasts %>% 
