@@ -140,56 +140,28 @@ comparison_consensus %>%
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession.tex"
             )
-  
 
-# Adjustment with consecutive years recession ----
+# Recessions and best forecaster ----
 
-comparison_consensus %>% 
-  filter(forecaster == "Consensus (Mean)") %>% 
-  mutate(Recession = case_when(targety_first < 0 ~ 1,
-                               T ~ 0)) %>% 
-  filter(Recession == 1 & year >= 2011) %>% 
-  select(country, year, variable1, consensus1, variable2, consensus2) %>% 
+best_forecaster <- comparison_consensus %>%
+  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
+  select(country, year, forecaster, targety_first, variable1, consensus1) %>% 
+  filter(country == "Venezuela") %>% 
+  group_by(country,year) %>%
+  mutate(consensus1 = case_when(is.na(consensus1) ~ 10,
+                                T ~ consensus1)) %>%
+  mutate(consensus1 = abs(consensus1)) %>% 
+  filter(consensus1 == min(abs(consensus1))) %>% 
   print(n = Inf)
-  
 
-recession <- comparison_consensus %>%
-  filter(forecaster == "Consensus (Mean)") %>% 
+
+best_forecaster %>%
+  filter(country == "Ukraine")
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
   filter(recession == 1) %>% 
-  select(country, year, targety_first, variable1, consensus1) %>%
-  gather("var","value",targety_first:consensus1) %>% 
-  mutate(var = case_when(var == "targety_first" ~ "Actual",
-                         var == "variable1" ~ "WEO Forecast",
-                         T ~ "Consensus (Mean)")) %>% 
-  mutate(year = as.numeric(year)) %>% 
-  group_by(country, var, grp = cumsum(c(1, diff(year) != 1))) %>%  # have to understand this line!
-  filter(n() > 1) %>% 
-  ungroup() %>% 
-  mutate(year = as.character(year))
+  select(country, year, variable1, consensus1) %>% 
+  print(n = Inf)
 
 
-
-
-recession %>% 
-  ggplot(aes(year, value, col = var, group = var)) +
-  geom_line(aes(group = paste(country,var)),size = 2) +
-  geom_point(size = 3) +
-  theme_minimal() +
-  xlab("") +
-  ylab("") +
-  labs(col = "") +
-  facet_wrap(~country, strip.position = "bottom", scales = "free_x", nrow = 1) +
-  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
-  theme(axis.text.y = element_text(size = 18),
-        axis.title = element_text(size = 21),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16),
-        strip.text.x = element_text(size = 18))+
-  ylim(-17,17) +
-  theme(legend.position = "bottom") +
-  theme(panel.spacing = unit(0, "lines"), 
-        strip.background = element_blank(),
-        strip.placement = "outside")
 
