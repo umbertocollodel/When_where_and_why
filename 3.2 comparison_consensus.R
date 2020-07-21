@@ -142,65 +142,67 @@ comparison_consensus %>%
             )
 
 # Recessions and best forecaster ----
-# Bugs: still problem of absolute value
 
-best_forecaster <- comparison_consensus %>%
+
+best_forecaster1 <- comparison_consensus %>%
   filter(complete.cases(targety_first)) %>% 
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
   select(country, year, forecaster, targety_first, variable1, consensus1, adv) %>% 
   group_by(country,year) %>%
-  mutate(consensus1 = case_when(is.na(consensus1) ~ 10,
-                                T ~ consensus1)) %>%
   mutate(consensus1_abs = abs(consensus1)) %>% 
-  filter(consensus1_abs == min(consensus1_abs)) %>% 
+  filter(consensus1_abs == min(consensus1_abs, na.rm = T)) %>% 
   select(-consensus1_abs) %>% 
   ungroup()
 
 
-best_forecaster <- comparison_consensus %>%
+best_forecaster2 <- comparison_consensus %>%
   filter(complete.cases(targety_first)) %>% 
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
   select(country, year, forecaster, targety_first, variable2, consensus2, adv) %>% 
   group_by(country,year) %>%
-  mutate(consensus2 = case_when(is.na(consensus2) ~ 10,
-                                T ~ consensus2)) %>%
   mutate(consensus2_abs = abs(consensus2)) %>% 
-  filter(consensus2_abs == min(consensus2_abs)) %>% 
+  filter(consensus2_abs == min(consensus2_abs, na.rm = T)) %>% 
   select(-consensus2_abs) %>% 
   ungroup()
 
 
-best_forecaster <- comparison_consensus %>%
+best_forecaster3 <- comparison_consensus %>%
   filter(complete.cases(targety_first)) %>% 
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
   select(country, year, forecaster, targety_first, variable3, consensus3, adv) %>% 
   group_by(country,year) %>%
-  mutate(consensus3 = case_when(is.na(consensus3) ~ 10,
-                                T ~ consensus3)) %>%
   mutate(consensus3_abs = abs(consensus3)) %>% 
-  filter(consensus3_abs == min(consensus3_abs)) %>% 
+  filter(consensus3_abs == min(consensus3_abs, na.rm = T)) %>% 
   select(-consensus3_abs) %>% 
   ungroup()
 
 
-best_forecaster <- comparison_consensus %>%
+best_forecaster4 <- comparison_consensus %>%
   filter(complete.cases(targety_first)) %>% 
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
   select(country, year, forecaster, targety_first, variable4, consensus4, adv) %>% 
   group_by(country,year) %>%
-  mutate(consensus4 = case_when(is.na(consensus4) ~ 10,
-                                T ~ consensus4)) %>%
   mutate(consensus4_abs = abs(consensus4)) %>% 
-  filter(consensus4_abs == min(consensus4_abs)) %>% 
+  filter(consensus4_abs == min(consensus4_abs, na.rm = T)) %>% 
   select(-consensus4_abs) %>% 
   ungroup()
 
 
-best_forecaster %>%
-  mutate(recession = case_when(targety_first < 0 ~ 1,
-                               T ~ 0)) %>% 
-  group_by(recession,adv) %>% 
-  summarise_at(vars(matches("variable|consensus")), median, na.rm = T)
+list(best_forecaster1,best_forecaster2,best_forecaster3, best_forecaster4) %>% 
+  map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0))) %>% 
+  map(~ .x %>% group_by(recession,adv)) %>% 
+  map(~ .x %>% summarise_at(vars(matches("variable|consensus")), median, na.rm = T)) %>% 
+  bind_cols() %>% 
+  ungroup() %>% 
+  select(recession,adv, matches("variable|consensus")) %>%
+  filter(recession == 1) %>% 
+  mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               T ~ "Recession")) %>% 
+  mutate_at(vars(matches("variable|consensus")),round, 2) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best.tex")
   
 
 
