@@ -62,12 +62,13 @@ rmse_comparison <- comparison_consensus %>%
          ratio2 = variable2/consensus2 - 1,
          ratio3 = variable3/consensus3 - 1,
          ratio4 = variable4/consensus4 - 1) %>% 
-  select(country,contains("ratio"))
+  select(country_code,country,contains("ratio"))
 
 # Export
 
 
 rmse_comparison %>%
+  select(country, contains("ratio")) %>% 
   mutate_at(vars(ratio1:ratio4), funs(round(.,digits = 2))) %>% 
   setNames(c("Country","H=0,F","H=0,S","H=1,F","H=1,S")) %>% 
   stargazer(summary= F,
@@ -111,5 +112,35 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/consensus/comparison
 
 footnote=c("Share of countries with lower RMSE from WEO forecasts compared to Consensus Forecasts") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse_footnote.tex")
+
+# Uncertainty of consensus forecasts: ----
+
+
+comparison_consensus %>% 
+  ggplot(aes(x = year)) +
+  geom_boxplot(aes(y = consensus1), fill = "darkblue", outlier.size = 0) +
+  theme_minimal() +
+  xlab("")
+
+
+# Recessions ----
+
+
+
+comparison_consensus %>% 
+  filter(forecaster == "Consensus (Mean)") %>% 
+  mutate(Recession = case_when(targety_first < 0 ~ "Recession",
+                               T ~ "Non-Recession")) %>% 
+  group_by(Recession) %>%
+  select(country_code, year, country, targety_first, contains("variable"), contains("consensus")) %>% 
+  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>% 
+  summarise_at(vars(matches("variable|consensus")), median, na.rm = T) %>%
+  mutate_at(vars(matches("variable|consensus")), round, 2) %>%
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession.tex"
+            )
   
+
+
   
