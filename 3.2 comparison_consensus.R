@@ -144,15 +144,14 @@ comparison_consensus %>%
 # Recessions and best forecaster ----
 
 best_forecaster <- comparison_consensus %>%
+  filter(complete.cases(targety_first)) %>% 
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
   select(country, year, forecaster, targety_first, variable1, consensus1) %>% 
-  filter(country == "Venezuela") %>% 
   group_by(country,year) %>%
   mutate(consensus1 = case_when(is.na(consensus1) ~ 10,
                                 T ~ consensus1)) %>%
   mutate(consensus1 = abs(consensus1)) %>% 
-  filter(consensus1 == min(abs(consensus1))) %>% 
-  print(n = Inf)
+  filter(consensus1 == min(abs(consensus1))) 
 
 
 best_forecaster %>%
