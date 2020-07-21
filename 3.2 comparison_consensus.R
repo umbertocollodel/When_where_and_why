@@ -75,6 +75,7 @@ rmse_comparison %>%
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
   
 # Figure with different groups:
+# Enhancement: add the number of countries by plot
 
  group %>% 
   merge(rmse_comparison, by=c("country_code")) %>% 
