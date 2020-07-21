@@ -50,6 +50,8 @@ comparison_consensus %>%
 # Compare RMSE by country ----
 
 
+# Full table:
+
 rmse_comparison <- comparison_consensus %>% 
   filter(forecaster == "Consensus (Mean)") %>% 
   group_by(country_code) %>%
@@ -59,8 +61,21 @@ rmse_comparison <- comparison_consensus %>%
   mutate(ratio1 = variable1/consensus1 - 1,
          ratio2 = variable2/consensus2 - 1,
          ratio3 = variable3/consensus3 - 1,
-         ratio4 = variable4/consensus4 - 1) 
+         ratio4 = variable4/consensus4 - 1) %>% 
+  select(country,contains("ratio"))
+
+# Export
+
+
+rmse_comparison %>%
+  mutate_at(vars(ratio1:ratio4), funs(round(.,digits = 2))) %>% 
+  setNames(c("Country","H=0,F","H=0,S","H=1,F","H=1,S")) %>% 
+  stargazer(summary= F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
   
+# Figure with different groups:
+
  group %>% 
   merge(rmse_comparison, by=c("country_code")) %>% 
   mutate_at(vars(ratio1:ratio4), funs(case_when(. < 0 ~ 1,
