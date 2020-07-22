@@ -46,6 +46,7 @@ final_forecasts <-  forecasts %>%
     })  %>%  
   bind_rows() %>% 
   mutate(country_code = countrycode(country,"country.name","imf")) %>%
+  filter(complete.cases(country_code)) %>% 
   select(country_code, country, year, wb1, wb2, wb3, wb4) %>% 
   arrange(country,year)
 
