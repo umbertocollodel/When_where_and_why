@@ -191,12 +191,11 @@ best_forecaster4 <- comparison_consensus %>%
 list(best_forecaster1,best_forecaster2,best_forecaster3, best_forecaster4) %>% 
   map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0))) %>% 
-  map(~ .x %>% group_by(recession,adv)) %>% 
+  map(~ .x %>% group_by(recession)) %>% 
   map(~ .x %>% summarise_at(vars(matches("variable|consensus")), median, na.rm = T)) %>% 
   bind_cols() %>% 
   ungroup() %>% 
-  select(recession,adv, matches("variable|consensus")) %>%
-  filter(recession == 1) %>% 
+  select(recession, matches("variable|consensus")) %>%
   mutate(recession = case_when(recession == 0 ~ "Non-recession",
                                T ~ "Recession")) %>% 
   mutate_at(vars(matches("variable|consensus")),round, 2) %>% 
