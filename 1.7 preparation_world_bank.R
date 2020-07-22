@@ -55,3 +55,9 @@ final_forecasts <-  forecasts %>%
 # Export:
 
 saveRDS(final_forecasts, file ="../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds")
+
+cat(crayon::green("World Bank forecasts succesfully cleaned.\nExported intermediate data in directory:../IEO_forecasts_material/intermediate_data/world bank"))
+
+
+
+
