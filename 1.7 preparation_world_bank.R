@@ -1,4 +1,6 @@
 ##### Script to prepare World Bank forecast data ----
+# Note: sample goes from 110 to 130 form the first to last year. Should be cleaned
+# further to remove undesirable features.
 
 original_wb <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/GEP_forecast_vintages_06232020.xlsx",
           sheet = "Table_long") %>% 
@@ -37,15 +39,17 @@ for(i in 1:length(forecasts)){
 
 final_forecasts <-  forecasts %>% 
   map(~ if(length(names(.x)) == 6){
-    .x %>% setNames(c(rev(paste0("variable",seq(4:1))),"country","year"))
+    .x %>% setNames(c(rev(paste0("wb",seq(4:1))),"country","year"))
   } else if(length(names(.x)) == 4){
-    .x %>% setNames(c(rev(paste0("variable",seq(2:1))),"country","year"))
+    .x %>% setNames(c(rev(paste0("wb",seq(2:1))),"country","year"))
     })  %>%  
   bind_rows() %>% 
   mutate(country_code = countrycode(country,"country.name","imf")) %>%
-  select(country_code, country, year, variable1, variable2, variable3, variable4) %>% 
+  select(country_code, country, year, wb1, wb2, wb3, wb4) %>% 
   arrange(country,year)
 
 
 
-  
+# Export:
+
+rio::export(final_forecasts, file ="../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.RData")
