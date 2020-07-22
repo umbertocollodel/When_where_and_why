@@ -60,4 +60,20 @@ cat(crayon::green("World Bank forecasts succesfully cleaned.\nExported intermedi
 
 
 
+#   List of countries wih gaps or that start after 2010: ----
+
+country_to_exclude <- c("Afghanistan","Bahrain","Bhutan",
+"Bosnia and Herzegovina","Chad",
+"Chile","Congo, Rep.","Croatia",
+"Djibouti","Egypt","Equatorial Guinea",
+"Grenada","Hungary","Iraq","Kosovo",
+"Kuwait","Liberia","Maldives","Mongolia",
+"Montenegro","Myanmar","Oman","Poland",
+"Quatar","Saudi Arabia","Serbia","Seychelles",
+"Solomon Islands","Suriname","Timor-Leste",
+"Trinidad and Tobago","Turkmenistan",
+"United Arab Emirates","Uruguay","West Bank and Gaza",
+"Zimbabwe")
+
+
 
