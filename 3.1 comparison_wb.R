@@ -1,18 +1,15 @@
 ################ Script to compare IMF WEO forecasts with World Bank GEP:
 
-# Note: we are using the updated version of gep transcribed manually, needs
-# to be changed with the total dataset received from WB.
-
-# World Bank data:
+# Prepare comparison dataframe -----
 
 
-# Data scraped manually:
-gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/wb_gep_updated.xlsx") %>% 
-  rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) %>% 
-  select(country, year, wb2, wb4) %>% 
-  rename(wb1 = wb2, wb2 = wb4)
+# # World Bank data scraped manually:
+# gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/wb_gep_updated.xlsx") %>% 
+#   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) %>% 
+#   select(country, year, wb2, wb4) %>% 
+#   rename(wb1 = wb2, wb2 = wb4)
 
-# Data from Ayuhan:
+# World Bank data (complete) from Ayuhan:
 gep_data <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
   select(country, year, wb2, wb4) %>%
   rename(wb1 = wb2, wb2 = wb4) %>% 
@@ -31,14 +28,13 @@ target <- final_sr$gdp %>%
   select(country_code, year, group, targety_first)
 
 # Bind together:
-# Note: removed Latvia, Lithuania and Vanatu because have important gap years after entering the sample 
-# in 2010. In the future, check this automatically and remove countries.
 
 comparison_wb <- x %>%   
   merge(gep_data, by=c("country","year")) %>% 
   merge(target, by=c("country_code","year")) %>% 
   select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2)  
-# filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu")  
+
+# Dataframe with geographical group countries ----
 
 
 group <- comparison_wb %>%
@@ -236,7 +232,7 @@ raw <- comparison_wb %>%
                 rownames = F,
                 out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/rmse_comparison_full.tex")
     
-# Figure with different groups:
+# Same figure with different groups: ----
 # Enhancement: add the number of countries by plot
     
     group %>% 
