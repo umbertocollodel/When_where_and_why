@@ -41,6 +41,18 @@ comparison_wb <- x %>%
 # filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu")  
 
 
+group <- comparison_wb %>%
+  group_by(country_code) %>% 
+  slice(1) %>% 
+  select(country_code, group) %>% 
+  mutate(group = case_when(group == "europe" ~ "Advanced Economies",
+                           is.na(group) ~ "Advanced Economies",
+                           group == "emerging_asia" ~ "Emerging Asia",
+                           group == "latin_america" ~ "Latin America",
+                           group == "emerging_europe" ~ "Emerging Europe",
+                           group == "middle_east" ~ "Middle East",
+                           T ~ "Africa"))
+
 # Table with list countries comparison:----
 
 comparison_wb %>% 
@@ -204,8 +216,58 @@ raw <- comparison_wb %>%
     
     ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
     
-  
-
+    rmse_comparison <- comparison_wb %>% 
+      group_by(country_code) %>%
+      select(country_code, country, year, targety_first, variable1:variable2, wb1:wb2, group) %>% 
+      summarise_at(vars(variable1:wb2), funs(hydroGOF::rmse(.,targety_first))) %>% 
+      mutate(country = countrycode(country_code,"imf","country.name")) %>% 
+      mutate(ratio1 = variable1/wb1 - 1,
+             ratio2 = variable2/wb2 - 1) %>% 
+      select(country_code,country,contains("ratio"))
+    
+    # Export
+    
+    
+    rmse_comparison %>%
+      select(country, contains("ratio")) %>% 
+      mutate_at(vars(ratio1:ratio2), funs(round(.,digits = 2))) %>% 
+      setNames(c("Country","H=0,J","H=1,J")) %>% 
+      stargazer(summary= F,
+                rownames = F,
+                out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/rmse_comparison_full.tex")
+    
+# Figure with different groups:
+# Enhancement: add the number of countries by plot
+    
+    group %>% 
+      merge(rmse_comparison, by=c("country_code")) %>% 
+      mutate_at(vars(ratio1:ratio2), funs(case_when(. < 0 ~ 1,
+                                                    T ~ 0))) %>% 
+      ungroup() %>% 
+      group_by(group) %>% 
+      summarise_at(vars(ratio1:ratio2), mean, na.rm = T) %>% 
+      gather("horizon","share",ratio1:ratio2) %>% 
+      mutate(horizon = case_when(horizon == "ratio1"~ "H=0,J",
+                                 horizon == "ratio2"~ "H=1,J")) %>% 
+      ggplot(aes(horizon, share)) +
+      geom_col(width = 0.3,col = "lightgrey",alpha = 0.6) +
+      facet_wrap(~ group) +
+      theme_minimal() +
+      ylab("Share of countries (%)") +
+      xlab("Horizon") +
+      theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+            legend.position = "bottom") +
+      theme(axis.text = element_text(size = 18),
+            axis.title = element_text(size = 21),
+            legend.title = element_text(size = 18),
+            legend.text = element_text(size = 16)) +
+      theme(strip.text.x = element_text(size = 14, colour = "darkblue")) +
+      theme(panel.grid.major.x = element_blank(),
+            panel.grid.minor.y = element_blank())
+    
+    
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group.pdf")
+    
 
 # Forecast errors during recessions and expansions: (table) ----- 
 
