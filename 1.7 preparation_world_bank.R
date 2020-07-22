@@ -52,4 +52,4 @@ final_forecasts <-  forecasts %>%
 
 # Export:
 
-rio::export(final_forecasts, file ="../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.RData")
+saveRDS(final_forecasts, file ="../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds")
