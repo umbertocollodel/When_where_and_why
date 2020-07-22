@@ -15,7 +15,8 @@ gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/wb_gep_upda
 # Data from Ayuhan:
 gep_data <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
   select(country, year, wb2, wb4) %>%
-  rename(wb1 = wb2, wb2 = wb4)
+  rename(wb1 = wb2, wb2 = wb4) %>% 
+  filter(!country %in% country_to_exclude)
   
 
 # IMF WEO January update data:
@@ -36,10 +37,9 @@ target <- final_sr$gdp %>%
 comparison_wb <- x %>%   
   merge(gep_data, by=c("country","year")) %>% 
   merge(target, by=c("country_code","year")) %>% 
-  select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2) %>% 
-  filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu") %>% 
-  filter(country != "Japan" & country != "United States")
-  
+  select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2)  
+# filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu")  
+
 
 # Table with list countries comparison:----
 
@@ -53,7 +53,7 @@ comparison_wb %>%
                            group == "latin_america" ~ "Latin America",
                            group == "middle_east" ~ "Middle East",
                            group == "africa"~ "Africa")) %>%
-  rename(Country = country, `Geo. group` = group) %>%
+  rename(Country = country, `Geo. group` = group) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/country_sample.tex"
