@@ -5,15 +5,24 @@
 
 # World Bank data:
 
+
+# Data scraped manually:
 gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/wb_gep_updated.xlsx") %>% 
   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) %>% 
   select(country, year, wb2, wb4) %>% 
   rename(wb1 = wb2, wb2 = wb4)
 
+# Data from Ayuhan:
+gep_data <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
+  select(country, year, wb2, wb4) %>%
+  rename(wb1 = wb2, wb2 = wb4)
+  
+
 # IMF WEO January update data:
 
 
 load("../IEO_forecasts_material/intermediate_data/rgdp_jan_update.RData")
+
 
 # Actual values: (fall issue of next year WEO)
 
@@ -28,7 +37,8 @@ comparison_wb <- x %>%
   merge(gep_data, by=c("country","year")) %>% 
   merge(target, by=c("country_code","year")) %>% 
   select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2) %>% 
-  filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu")
+  filter(country != "Latvia" & country != "Lithuania" & country != "Vanuatu") %>% 
+  filter(country != "Japan" & country != "United States")
   
 
 # Table with list countries comparison:----
@@ -41,8 +51,9 @@ comparison_wb %>%
   mutate(group = case_when(group == "emerging_asia" ~ "Emerging Asia",
                            group == "emerging_europe" ~ "Emerging Europe",
                            group == "latin_america" ~ "Latin America",
-                           group == "middle_east" ~ "Middle East")) %>% 
-  rename(Country = country, `Geo. group` = group) %>% 
+                           group == "middle_east" ~ "Middle East",
+                           group == "africa"~ "Africa")) %>%
+  rename(Country = country, `Geo. group` = group) %>%
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/country_sample.tex"
