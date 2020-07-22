@@ -6,6 +6,7 @@ original_wb <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/GEP_fore
           sheet = "Table_long") %>% 
   select(1:4) %>% 
   setNames(c("date_publication","country","year_forecasted","wb")) %>%
+  filter(country != "Euro Area" & country != "United States" & country != "Japan") %>% 
   mutate(wb = as.numeric(wb)) %>% 
   mutate(year_publication = str_extract(date_publication,"\\d{4}")) %>% 
   group_by(country) %>% 
