@@ -51,5 +51,24 @@ list_df <- list.files("../IEO_forecasts_material/raw_data/european commision/") 
   map2_chr(names, ~ paste0("../IEO_forecasts_material/raw_data/european commision/",.y,"/",.x)) %>% 
   map(~ read.csv(.x, sep = ";"))
 
+# Assign names:
+
+for(i in 1:length(list_df)){
+  names(list_df)[i] <- names[i]
+}
+
+
+
+# Gross domestic product at 2005 market prices
+
+list_df %>% 
+  map(~ .x %>% as_tibble()) %>%
+  map(~ .x %>% select(-X)) %>% 
+  map(~ .x %>% rename_all(funs(str_remove(.,"^X")))) %>%
+  map(~ .x %>% mutate(TITLE = as.character(TITLE))) %>% 
+  map(~ .x %>% filter(str_detect(TITLE,"Gross domestic product at 2005 market prices")))
+
+
+
 
 
