@@ -59,7 +59,7 @@ for(i in 1:length(list_df)){
 
 
 
-# Gross domestic product at 2005 market prices
+# Wrangle: ----
 
 list_df_cleaned <- list_df %>% 
   map(~ .x %>% as_tibble()) %>%
@@ -71,9 +71,28 @@ list_df_cleaned <- list_df %>%
                       TITLE == "Gross domestic product at 2010 reference levels "|
                       TITLE == "Gross domestic product at 2010 market prices " |
                       TITLE == "Gross domestic product at 2015 reference levels "|
-                      TITLE == "Gross domestic product at 2000 market prices "))
+                      TITLE == "Gross domestic product at 2000 market prices ")) %>% 
+  map(~ .x %>% select(-COUNTRY,-SUB.CHAPTER, -UNIT)) %>% 
+  map(~ .x %>% mutate(CODE = str_extract(CODE,"^[A-Z]{3}"))) %>% 
+  map(~ .x %>% filter(complete.cases(CODE))) %>%
+  map(~ .x %>% mutate(country_code = countrycode(CODE,"iso3c","imf"))) %>% 
+  map(~ .x %>% rename(country = CODE)) %>% 
+  map(~ .x %>% select(country_code, country, TITLE, everything()))
+  
+
+
+list_df_gathered <- list_df_cleaned %>% 
+  map(~ .x %>% select(-TITLE)) %>% 
+  map(~ .x %>% gather("year_forecasted","ec", `1960`:ncol(.))) %>%
+  imap(~ .x %>% mutate(date_publication = .y)) %>% 
+  map(~ .x %>% mutate(year_publication = str_extract(date_publication, "\\d{4}"))) %>% 
+  map(~ .x %>% mutate(ec = as.numeric(ec))) %>% 
+  map(~ .x %>% group_by(country) %>% mutate(ec = ((ec - dplyr::lag(ec,1))/dplyr::lag(ec,1))*100)) %>% 
+  map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5)))
 
 
 
 
+
+list_df_gathered  
 
