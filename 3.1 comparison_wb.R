@@ -333,11 +333,68 @@ footnote = c("IEO calculations.") %>%
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB/comparison_recessions_footnote.tex")
 
   
+# Figures requested by Prakash (single countries) ----
+
+countries=c("Argentina","Bangladesh","China","Colombia","Nigeria","Ethiopia","Peru","Vietnam")
 
 
+# Current-year January:
+
+individual_current_jan <- countries %>% 
+  map(~ comparison_wb %>% filter(country == .x)) %>% 
+  map(~ .x %>% select(country, year, targety_first, variable1, wb1)) %>% 
+  map(~ .x %>% mutate_at(vars(variable1:wb1), funs(targety_first -.))) %>%
+  map(~ .x %>% rename(IMF = variable1, `World Bank`= wb1)) %>% 
+  map(~ .x %>% gather("var","value", IMF:`World Bank`)) %>% 
+  map(~ .x %>% 
+        ggplot(aes(year, value, group = var, col = var)) +
+        geom_line(size = 1.5) +
+        geom_hline(yintercept = 0, size = 1) +
+        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=5,angle = 270,alpha=0.9)+
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
+        theme(axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16)) +
+        theme(legend.position = "bottom") +
+        xlab("")  +
+        ylab("") +
+        labs(col = "") +
+        ylim(-10,10)
+        )
+
+individual_current_jan %>% 
+  walk2(countries, ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/current_jan_",.y,".pdf"),.x))
 
 
+# Year-ahead January:
 
+individual_year_jan <- countries %>% 
+  map(~ comparison_wb %>% filter(country == .x)) %>%
+  map(~ .x %>% filter(year >= 2011)) %>% 
+  map(~ .x %>% select(country, year, targety_first, variable2, wb2)) %>% 
+  map(~ .x %>% mutate_at(vars(variable2:wb2), funs(targety_first -.))) %>%
+  map(~ .x %>% rename(IMF = variable2, `World Bank`= wb2)) %>% 
+  map(~ .x %>% gather("var","value", IMF:`World Bank`)) %>% 
+  map(~ .x %>% 
+        ggplot(aes(year, value, group = var, col = var)) +
+        geom_line(size = 1.5) +
+        geom_hline(yintercept = 0, size = 1) +
+        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=5,angle = 270,alpha=0.9)+
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
+        theme(axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16)) +
+        theme(legend.position = "bottom") +
+        xlab("")  +
+        ylab("") +
+        labs(col = "") +
+        ylim(-10,10)
+  )
+
+individual_current_jan %>% 
+  walk2(countries, ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/year_ahead_jan_",.y,".pdf"),.x))
 
 
 
