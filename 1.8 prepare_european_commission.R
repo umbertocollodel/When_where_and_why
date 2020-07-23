@@ -30,7 +30,8 @@ urls %>%
 
 
 names <- names %>% 
-  str_remove("\\.zip")
+  str_remove("\\.zip") %>% 
+  sort()
 
 
 list.files("../IEO_forecasts_material/raw_data/european commision/") %>% 
@@ -38,7 +39,7 @@ list.files("../IEO_forecasts_material/raw_data/european commision/") %>%
   map2(names, ~ unzip(.x, exdir = paste0("../IEO_forecasts_material/raw_data/european commision/",.y)))
 
 
-
+cat(crayon::green("Unzipped downloaded files.\n"))
 
 
 # Load all text files with gdp data (6th sheet) ----
@@ -88,11 +89,54 @@ list_df_gathered <- list_df_cleaned %>%
   map(~ .x %>% mutate(year_publication = str_extract(date_publication, "\\d{4}"))) %>% 
   map(~ .x %>% mutate(ec = as.numeric(ec))) %>% 
   map(~ .x %>% group_by(country) %>% mutate(ec = ((ec - dplyr::lag(ec,1))/dplyr::lag(ec,1))*100)) %>% 
-  map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5)))
+  map(~ .x %>% filter(year_forecasted >= year_publication & year_forecasted <= as.character(as.numeric(year_publication) + 5))) %>% 
+  map(~ .x %>% ungroup())
+
+
+
+
+forecasts <- list_df_gathered %>% 
+  bind_rows() %>% 
+  split(.$year_forecasted) %>% 
+  map(~ .x %>% select(-year_publication)) %>% 
+  map(~ .x %>% spread(date_publication,ec)) %>% 
+  map(~ .x %>% rename_at(vars(starts_with("ameco_autumn")), ~ paste0(.,"oct"))) %>% 
+  map(~ .x %>% rename_at(vars(starts_with("ameco_autumn")), ~ str_remove(.,"^ameco_autumn"))) %>% 
+  map(~ .x %>% rename_at(vars(starts_with("ameco_spring")), ~ paste0(.,"apr"))) %>% 
+  map(~ .x %>% rename_at(vars(starts_with("ameco_spring")), funs(str_remove(.,"^ameco_spring"))))
+
+# Order names of the columns:
+
+for(i in 1:length(forecasts)){
+  forecasts[[i]] <- forecasts[[i]][,order(names(forecasts[[i]]))]
+}
+
+# Discard years for which no actual value:
+
+
+forecasts <- forecasts %>% 
+  discard(~ unique(.x$year_forecasted) > 2019)
+
+
+# Naming similar to Zidong and bind together:
+# Note: opposit order compared to other datasets (autumn-spring compared to apr-oct)
+
+
+final_forecasts <-  forecasts %>% 
+  map(~ if(length(names(.x)) == 5){
+    .x %>% setNames(c(rev(paste0("variable",seq(2:1))),"country","country_code","year"))
+  } else if(length(names(.x)) == 7){
+    .x %>% setNames(c(rev(paste0("variable",seq(4:1))),"country","country_code","year"))
+  } else if(length(names(.x)) == 8){
+    .x %>% setNames(c(rev(paste0("variable",seq(5:1))),"country","country_code","year"))
+  }) %>%  
+  bind_rows() %>% 
+  mutate(country = countrycode(country,"iso3c","country.name")) %>% 
+  select(country_code, country, year, everything()) %>% 
+  arrange(country)
 
 
 
 
 
-list_df_gathered  
 
