@@ -136,7 +136,9 @@ final_forecasts <-  forecasts %>%
   arrange(country)
 
 
+# Export: ----
 
 
+saveRDS(final_forecasts, file = "../IEO_forecasts_material/intermediate_data/european commission/ec_gdp_cleaned.rds")
 
 
