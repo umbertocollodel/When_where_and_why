@@ -133,12 +133,18 @@ final_forecasts <-  forecasts %>%
   bind_rows() %>% 
   mutate(country = countrycode(country,"iso3c","country.name")) %>% 
   select(country_code, country, year, everything()) %>% 
+  filter(complete.cases(country)) %>% 
   arrange(country)
 
 
 # Export: ----
 
+country_with_gaps=c("Albania","Serbia")
 
-saveRDS(final_forecasts, file = "../IEO_forecasts_material/intermediate_data/european commission/ec_gdp_cleaned.rds")
+
+  final_forecasts %>%
+  filter(!country %in% country_with_gaps) 
+  saveRDS(final_forecasts, file = "../IEO_forecasts_material/intermediate_data/european commission/ec_gdp_cleaned.rds")
+
 
 
