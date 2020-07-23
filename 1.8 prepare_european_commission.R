@@ -24,3 +24,23 @@ urls %>%
   ))
 
 
+# Could create a function to get all EC forecasts!
+
+# Unzip all files -----
+
+
+names <- names %>% 
+  str_remove("\\.zip")
+
+
+list.files("../IEO_forecasts_material/raw_data/european commision/") %>% 
+  map_chr(~ paste0("../IEO_forecasts_material/raw_data/european commision/",.x)) %>% 
+  map2(names, ~ unzip(.x, exdir = paste0("../IEO_forecasts_material/raw_data/european commision/",.y)))
+
+
+
+
+
+# Load all files ----
+
+
