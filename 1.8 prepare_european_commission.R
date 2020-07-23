@@ -41,6 +41,15 @@ list.files("../IEO_forecasts_material/raw_data/european commision/") %>%
 
 
 
-# Load all files ----
+# Load all text files with gdp data (6th sheet) ----
+
+list_df <- list.files("../IEO_forecasts_material/raw_data/european commision/") %>% 
+  map_chr(~ paste0("../IEO_forecasts_material/raw_data/european commision/",.x)) %>% 
+  str_subset("\\.zip",negate = T) %>% 
+  map(~ list.files(.x)) %>% 
+  map(~ .x %>% str_subset("AMECO6")) %>% 
+  map2_chr(names, ~ paste0("../IEO_forecasts_material/raw_data/european commision/",.y,"/",.x)) %>% 
+  map(~ read.csv(.x, sep = ";"))
+
 
 
