@@ -61,12 +61,17 @@ for(i in 1:length(list_df)){
 
 # Gross domestic product at 2005 market prices
 
-list_df %>% 
+list_df_cleaned <- list_df %>% 
   map(~ .x %>% as_tibble()) %>%
   map(~ .x %>% select(-X)) %>% 
   map(~ .x %>% rename_all(funs(str_remove(.,"^X")))) %>%
+  map(~ .x %>% filter(SUB.CHAPTER == "01 Gross domestic product")) %>% 
   map(~ .x %>% mutate(TITLE = as.character(TITLE))) %>% 
-  map(~ .x %>% filter(str_detect(TITLE,"Gross domestic product at 2005 market prices")))
+  map(~ .x %>% filter(TITLE == "Gross domestic product at 2005 market prices " |
+                      TITLE == "Gross domestic product at 2010 reference levels "|
+                      TITLE == "Gross domestic product at 2010 market prices " |
+                      TITLE == "Gross domestic product at 2015 reference levels "|
+                      TITLE == "Gross domestic product at 2000 market prices "))
 
 
 
