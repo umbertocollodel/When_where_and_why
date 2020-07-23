@@ -350,13 +350,13 @@ individual_current_jan <- countries %>%
         ggplot(aes(year, value, group = var, col = var)) +
         geom_line(size = 1.5) +
         geom_hline(yintercept = 0, size = 1) +
-        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=5,angle = 270,alpha=0.9)+
+        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=7,angle = 270,alpha=0.9)+
         theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
-        theme(axis.text.y = element_text(size = 18),
-              axis.title = element_text(size = 21),
-              legend.text = element_text(size = 16)) +
-        theme(legend.position = "bottom") +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 22)) +
+        theme(axis.text.y = element_text(size = 22),
+              axis.title = element_text(size = 22),
+              legend.text = element_text(size = 18)) +
+        theme(legend.position = "none") +
         xlab("")  +
         ylab("") +
         labs(col = "") +
@@ -365,6 +365,21 @@ individual_current_jan <- countries %>%
 
 individual_current_jan %>% 
   walk2(countries, ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/current_jan_",.y,".pdf"),.x))
+
+
+# Table with summary:
+
+
+comparison_wb %>% 
+  filter(country %in% countries) %>% 
+  group_by(country) %>% 
+  summarise_at(vars(variable1:wb1), funs(hydroGOF::rmse(.,targety_first))) %>%
+  mutate_at(vars(variable1:wb1), funs(round(.,2))) %>%
+  setNames(c("Country","Current-year (IMF)","Current-year (WB)")) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/summary_table.tex")
+
 
 
 # Year-ahead January:
@@ -380,21 +395,26 @@ individual_year_jan <- countries %>%
         ggplot(aes(year, value, group = var, col = var)) +
         geom_line(size = 1.5) +
         geom_hline(yintercept = 0, size = 1) +
-        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=5,angle = 270,alpha=0.9)+
+        geom_text(aes(y=9.5,x=year,label=round(targety_first,2)),color="black",size=7,angle = 270,alpha=0.9)+
         theme_minimal() +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 14)) +
-        theme(axis.text.y = element_text(size = 18),
-              axis.title = element_text(size = 21),
-              legend.text = element_text(size = 16)) +
-        theme(legend.position = "bottom") +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1, size = 22)) +
+        theme(axis.text.y = element_text(size = 22),
+              axis.title = element_text(size = 22),
+              legend.text = element_text(size = 18)) +
+        theme(legend.position = "none") +
         xlab("")  +
         ylab("") +
         labs(col = "") +
         ylim(-10,10)
   )
 
-individual_current_jan %>% 
+individual_year_jan %>% 
   walk2(countries, ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/year_ahead_jan_",.y,".pdf"),.x))
 
 
+# Footnote:
+
+footnote=c("IEO calculations. Orange and blue line indicate respectively the forecast error of the World
+Economic Outlook (IMF) and Global Economic Prospects (World Bank) January current-year forecasts. 
+At the top of each year, the actual GDP growth is reported in bold")
 
