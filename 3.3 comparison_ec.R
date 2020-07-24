@@ -163,3 +163,29 @@ comparison_ec %>%
 
 
 
+
+# Sovereign Debt crisis event study: ------
+
+countries=c("Spain","Italy","Greece","Portugal")
+
+
+comparison_ec %>% 
+  filter(country %in% countries & year > 2011 & year < 2016) %>% 
+  ggplot(aes(year, group = 1)) +
+  geom_line(aes(y=targety_first),col = "blue", size= 1.5) +
+  geom_line(aes(y=ec3)) +
+  geom_line(aes(y=variable3), linetype = "dashed") +
+  facet_wrap(~ country) +
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+        legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)) +
+  theme(strip.text = element_text(size = 16))
+
+ggsave("../IEO_forecasts_material/output/figures/comparison/EC/event_study_sdc.pdf")
+  
