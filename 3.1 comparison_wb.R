@@ -369,16 +369,29 @@ individual_current_jan %>%
 
 # Table with summary:
 
+comparison_wb %>% 
+  filter(country %in% countries) %>% 
+  group_by(country) %>% 
+  summarise_at(vars(variable1:wb2), funs(hydroGOF::rmse(.,targety_first))) %>%
+  mutate_at(vars(variable1:wb2), funs(round(.,2))) %>%
+  setNames(c("Country","Current-year (IMF)","Current-year (WB)", "Year-ahead (IMF)","Year-ahead (WB)")) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/summary_table_accuracy.tex")
+
+
 
 comparison_wb %>% 
   filter(country %in% countries) %>% 
   group_by(country) %>% 
-  summarise_at(vars(variable1:wb1), funs(hydroGOF::rmse(.,targety_first))) %>%
-  mutate_at(vars(variable1:wb1), funs(round(.,2))) %>%
-  setNames(c("Country","Current-year (IMF)","Current-year (WB)")) %>% 
+  summarise_at(vars(variable1:wb2), funs(median(targety_first - ., na.rm = T))) %>%
+  mutate_at(vars(variable1:wb2), funs(round(.,2))) %>%
+  setNames(c("Country","Current-year (IMF)","Current-year (WB)", "Year-ahead (IMF)","Year-ahead (WB)")) %>% 
   stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/summary_table.tex")
+            out = "../IEO_forecasts_material/output/figures/comparison/WB_updated/individual/summary_table_bias.tex")
+
+
 
 
 
