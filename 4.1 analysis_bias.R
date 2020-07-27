@@ -43,3 +43,80 @@ df_bias %>%
                           rownames = F,
                           out = paste0("../IEO_forecasts_material/output/tables/medium_term/bias/",.y,".tex")))
   
+
+# Share of countries with bias by horizon ----
+
+share_aggregate <- df_bias %>% 
+  split(.$horizon) %>% 
+  map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
+                                              T ~ 0))) %>% 
+  map(~ .x %>% mutate(positive_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-", negate = T) ~ 1,
+                                                       T ~ 0))) %>%
+  map(~ .x %>% split(.$issue)) %>% 
+  modify_depth(2, ~ .x %>% summarise_at(vars(contains("significant")), mean, na.rm = T)) %>% 
+  map(~ .x %>% bind_rows(.id = "issue")) %>%
+  bind_rows(.id = "horizon") %>% 
+  gather("sign","share",negative_significant:positive_significant) %>% 
+  mutate(sign = case_when(sign == "negative_significant" ~ "Optimistic",
+                          T ~ "Pessimistic")) %>%
+  split(.$issue) %>% 
+  map(~ .x %>% 
+        ggplot(aes(sign, share, fill = sign)) +
+        geom_col(width = 0.4) +
+        geom_text(aes(label = round(share,2)), size = 5, vjust = -0.5) +
+        facet_wrap(~ horizon) +
+        theme_minimal() +
+        ylim(0,1)  +
+        xlab("") +
+        ylab("Share of countries (%)") +
+        theme(legend.position = "bottom") +
+        theme(strip.text.x = element_text(size = 16),
+              axis.text.x = element_blank(),
+              axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16)) +
+        theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+        labs(fill = ""))
+
+# Export:
+
+share_aggregate %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/",.y,".pdf"),.x))
+
+# Footnote:
+
+footnote=c("The figure shows the share of countries for each forecast horizon and issue of the World Economic
+           Outlook (Fall or Spring) with a statistically signicant negative and positive bias. Test of statistical
+           significance is run individually with country-by-country regressions.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/aggregate_footnote.tex")
+  
+
+
+
+
+# Magnitude of bias ----
+
+table_magnitude <- df_bias %>% 
+  split(.$horizon) %>% 
+  map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>%
+  map(~ .x %>% mutate(negative = case_when(str_detect(Estimate,"-") ~ 1,
+                                           T ~ 0))) %>% 
+  map(~ .x %>% mutate(Estimate = as.numeric(str_remove(Estimate, "\\*+")))) %>% 
+  map(~ .x %>% group_by(negative) %>% summarise(mean_bias = round(mean(Estimate, na.rm = T),2),
+                                                median_bias = round(median(Estimate, na.rm = T),2),
+                                                max_bias = round(max(Estimate),2),
+                                                min_bias = round(min(Estimate),2))) %>% 
+  bind_rows(.id = "horizon") %>% 
+  mutate(negative = case_when(negative == 0 ~ "Optimistic",
+                              T ~ "Pessimistic")) %>% 
+  arrange(negative) %>% 
+  setNames(c("Horizon","Type of bias","Mean","Median", "Min.", "Max."))
+
+
+table_magnitude %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias.tex")
+  
+
