@@ -483,23 +483,23 @@ list_scatter <- aid_comparison %>%
 list_scatter %>% 
   map(~ .x %>% 
   ggplot(aes(value, wb1)) +
-  geom_point(size=2) +
+  geom_point(size=5) +
   geom_smooth(method='lm', formula= y~x, se = F) +
   theme_minimal() +
   ylab("Real Growth Forecast Error (%)") +
   xlab("Engagement") +
   xlim(0,1000) +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
-  theme(  axis.text.x = element_text(size = 18),
-          axis.text.y = element_text(size = 18),
-          axis.title = element_text(size = 21))
+  theme(  axis.text.x = element_text(size = 20),
+          axis.text.y = element_text(size = 20),
+          axis.title = element_text(size = 22))
   ) %>% 
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_current.pdf"),.x))
 
 list_scatter %>% 
   map(~ .x %>% 
         ggplot(aes(value, wb2)) +
-        geom_point(size=2) +
+        geom_point(size=5) +
         geom_smooth(method='lm', formula= y~x, se = F) +
         theme_minimal() +
         ylab("Real Growth Forecast Error (%)") +
@@ -507,15 +507,15 @@ list_scatter %>%
         xlim(0,1000) +
         scale_y_continuous(breaks = c(3,2,1,0,-1,-2,-3)) +
         theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
-        theme(  axis.text.x = element_text(size = 18),
-                axis.text.y = element_text(size = 18),
-                axis.title = element_text(size = 21))
+        theme(  axis.text.x = element_text(size = 20),
+                axis.text.y = element_text(size = 20),
+                axis.title = element_text(size = 22))
   ) %>% 
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_ahead.pdf"),.x))
 
 
 
-footnote=c("Forecast error is the median forecast error in the period 2010-2018. Engagement is total loans outstanding 
+footnote=c("Forecast error is the country-by-country median forecast error in the period 2010-2018. Engagement is total loans outstanding 
            in milions USD as of June 2014.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
 
