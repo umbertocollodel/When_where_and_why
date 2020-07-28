@@ -91,7 +91,7 @@ comparison_wb %>%
         legend.text = element_text(size = 16)) +
   theme(panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank()) +
-  ylim(-4,4)
+  ylim(-2,2)
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/current_year_comparison.pdf")
 
@@ -102,6 +102,7 @@ comparison_wb %>%
   group_by(year) %>% 
   mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T)) %>% 
   mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T)) %>% 
+  filter(year > 2010) %>% 
   ggplot(aes(year)) +
   geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
   geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
@@ -119,7 +120,7 @@ comparison_wb %>%
   ) +
   theme(panel.grid.minor.x = element_blank(),
         panel.grid.minor.y = element_blank()) +
-  ylim(-4,4)
+  ylim(-2,2)
 
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/year_ahead_comparison.pdf")
