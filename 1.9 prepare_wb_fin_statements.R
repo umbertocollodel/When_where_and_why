@@ -74,6 +74,24 @@ wb_aid %>%
 saveRDS(file = "../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
 
 
+# Analysis: ----
 
-
+wb_aid %>% 
+  gather("aid_instit","amount",aid_ibrd:total_aid) %>%
+  mutate(aid_instit = case_when(aid_instit == "aid_ibrd" ~ "IBRD",
+                                aid_instit == "aid_ida" ~ "IDA",
+                                T ~ "Total")) %>% 
+  split(.$aid_instit) %>% 
+  map(~ .x %>% arrange(-amount)) %>% 
+  map(~ .x %>% slice(1:10)) %>% 
+  bind_rows() %>% 
+  mutate(country = as.factor(country)) %>% 
+  mutate(country = reorder(factor(country),amount)) %>% 
+  ggplot(aes(country, amount)) +
+  geom_col() +
+  facet_wrap(~ aid_instit, nrow = 3, scales = "free_y") +
+  coord_flip() +
+  theme_minimal() +
+  xlab("") +
+  ylab("")
 
