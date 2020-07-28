@@ -451,23 +451,69 @@ aid_comparison %>%
   gather("type_aid","upper",aid_ibrd:total_aid) %>% 
   split(.$type_aid) %>% 
   map(~ .x %>% group_by(upper)) %>% 
-  map(~ .x %>% summarise(median1 = median(wb1, na.rm = T),
-                         median2 = median(wb2, na.rm = T))) %>% 
+  map(~ .x %>% summarise(median1 = round(median(wb1, na.rm = T),2),
+                         median2 = round(median(wb2, na.rm = T),2))) %>% 
   bind_rows(.id = "Source") %>% 
   mutate(upper = case_when(upper == 1 ~ "Extensive",
                            upper == 0 ~ "Normal")) %>% 
   mutate(Source = case_when(Source == "aid_ibrd" ~ "IBRD",
                             Source == "aid_ida" ~ "IDA",
                             T ~ "Total")) %>% 
-  setNames(c("Source","Type of Engament","H=0, J","H=1, J"))
+  setNames(c("Source","Type of Engament","H=0, J","H=1, J")) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors.tex")
+
+
+footnote=c("Extensive engament is defined as total loans outstanding above the median of the distribution
+           as of June 2014. H=0, J is the current-year January median forecast error for the group. H=1, J is the year-ahead January 
+           median forecast error.") %>% 
+  cat(file ="../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_footnote.tex")
 
 # Scatter plot:
 
-aid_comparison %>% 
+list_scatter <- aid_comparison %>% 
   group_by(country) %>% 
   mutate_at(vars(matches("variable|wb")), median, na.rm = T) %>% 
-  slice(1) %>% 
-  ggplot(aes(aid_ida, wb2)) +
-  geom_point() +
-  geom_smooth(method='lm', formula= y~x) +
-  theme_minimal()
+  slice(1) %>%
+  gather("type_aid","value",aid_ibrd:total_aid) %>% 
+  split(.$type_aid) 
+
+
+list_scatter %>% 
+  map(~ .x %>% 
+  ggplot(aes(value, wb1)) +
+  geom_point(size=2) +
+  geom_smooth(method='lm', formula= y~x, se = F) +
+  theme_minimal() +
+  ylab("Real Growth Forecast Error (%)") +
+  xlab("Engagement") +
+  xlim(0,1000) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+  theme(  axis.text.x = element_text(size = 18),
+          axis.text.y = element_text(size = 18),
+          axis.title = element_text(size = 21))
+  ) %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_current.pdf"),.x))
+
+list_scatter %>% 
+  map(~ .x %>% 
+        ggplot(aes(value, wb2)) +
+        geom_point(size=2) +
+        geom_smooth(method='lm', formula= y~x, se = F) +
+        theme_minimal() +
+        ylab("Real Growth Forecast Error (%)") +
+        xlab("Engagement") +
+        xlim(0,1000) +
+        scale_y_continuous(breaks = c(3,2,1,0,-1,-2,-3)) +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+        theme(  axis.text.x = element_text(size = 18),
+                axis.text.y = element_text(size = 18),
+                axis.title = element_text(size = 21))
+  ) %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_ahead.pdf"),.x))
+
+
+
+
+
