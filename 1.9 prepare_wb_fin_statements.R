@@ -88,7 +88,7 @@ wb_aid %>%
   mutate(country = as.factor(country)) %>% 
   mutate(country = reorder(factor(country),amount)) %>% 
   ggplot(aes(country, amount)) +
-  geom_col() +
+  geom_col(width = 0.6) +
   facet_wrap(~ aid_instit, nrow = 3, scales = "free_y") +
   coord_flip() +
   theme_minimal() +
