@@ -431,3 +431,43 @@ footnote=c("IEO calculations. Orange and blue line indicate respectively the for
 Economic Outlook (IMF) and Global Economic Prospects (World Bank) January current-year forecasts. 
 At the top of each year, the actual GDP growth is reported in bold")
 
+
+# Forecast errors and aid ----
+
+wb_aid <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
+
+aid_comparison <- merge(comparison_wb, wb_aid) %>% 
+  mutate_at(vars(contains("variable")), funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("wb")), funs(targety_first - .)) %>%
+  arrange(country, year) %>% 
+  as_tibble()
+
+
+# Table:
+
+aid_comparison %>% 
+  mutate_at(vars(contains("aid")), funs(case_when(. > median(.,na.rm = T) ~ 1,
+                                                  T ~ 0))) %>%
+  gather("type_aid","upper",aid_ibrd:total_aid) %>% 
+  split(.$type_aid) %>% 
+  map(~ .x %>% group_by(upper)) %>% 
+  map(~ .x %>% summarise(median1 = median(wb1, na.rm = T),
+                         median2 = median(wb2, na.rm = T))) %>% 
+  bind_rows(.id = "Source") %>% 
+  mutate(upper = case_when(upper == 1 ~ "Extensive",
+                           upper == 0 ~ "Normal")) %>% 
+  mutate(Source = case_when(Source == "aid_ibrd" ~ "IBRD",
+                            Source == "aid_ida" ~ "IDA",
+                            T ~ "Total")) %>% 
+  setNames(c("Source","Type of Engament","H=0, J","H=1, J"))
+
+# Scatter plot:
+
+aid_comparison %>% 
+  group_by(country) %>% 
+  mutate_at(vars(matches("variable|wb")), median, na.rm = T) %>% 
+  slice(1) %>% 
+  ggplot(aes(aid_ida, wb2)) +
+  geom_point() +
+  geom_smooth(method='lm', formula= y~x) +
+  theme_minimal()
