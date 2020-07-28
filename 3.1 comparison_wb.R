@@ -515,5 +515,7 @@ list_scatter %>%
 
 
 
-
+footnote=c("Forecast error is the median forecast error in the period 2010-2018. Engagement is total loans outstanding 
+           in milions USD as of June 2014.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
 
