@@ -63,7 +63,7 @@ wb_aid <- list(ibrd_stat, ida_stat) %>%
   map(~ .x %>% mutate_at(vars(contains("aid")), funs(as.numeric(.)))) %>% 
   map(~ .x %>% mutate(country_code = countrycode(country, "country.name","imf"))) %>% 
   map(~ .x %>% select(country_code, contains("aid"))) %>%
-  reduce(merge,by = c("country_code")) %>% 
+  reduce(merge,by = c("country_code"), all = T) %>% 
   mutate(country = countrycode(country_code,"imf","country.name")) %>% 
   select(country_code, country, contains("aid")) %>% 
   mutate(total_aid = aid_ibrd + aid_ida)
@@ -95,3 +95,13 @@ wb_aid %>%
   xlab("") +
   ylab("")
 
+# Maybe a table is better... ----
+
+wb_aid %>% 
+  gather("aid_instit","amount",aid_ibrd:total_aid) %>%
+  mutate(aid_instit = case_when(aid_instit == "aid_ibrd" ~ "IBRD",
+                                aid_instit == "aid_ida" ~ "IDA",
+                                T ~ "Total")) %>% 
+  split(.$aid_instit) %>% 
+  map(~ .x %>% arrange(-amount)) %>% 
+  map(~ .x %>% slice(1:10))
