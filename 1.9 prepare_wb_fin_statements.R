@@ -71,7 +71,8 @@ wb_aid <- list(ibrd_stat, ida_stat) %>%
 # Export:
 
 wb_aid %>% 
-saveRDS(file = "../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
+  as_tibble() %>% 
+  saveRDS(file = "../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
 
 
 # Analysis: ----
