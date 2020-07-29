@@ -266,6 +266,40 @@ raw <- comparison_wb %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group.pdf")
     
 
+# Magnitude of difference by geographical group: -----
+
+group %>% 
+  merge(rmse_comparison, by=c("country_code")) %>% 
+  group_by(group) %>% 
+  summarise_at(vars(contains("ratio")), median, na.rm = T) %>% 
+  gather("horizon","value",ratio1:ratio2) %>% 
+  mutate(value = value*100) %>%
+  mutate(horizon = case_when(horizon == "ratio1"~ "H=0,J",
+                             horizon == "ratio2"~ "H=1,J")) %>% 
+  ggplot(aes(horizon, value)) +
+  geom_col(width = 0.3, alpha = 0.6) +
+  facet_wrap(~ group) +
+  theme_minimal() +
+  ylab("% of GEP RMSE") +
+  xlab("Horizon") +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+        legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)) +
+  theme(strip.text.x = element_text(size = 14, colour = "darkblue")) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.y = element_blank())
+
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group_magnitude.pdf")
+
+
+footnote=c("IEO calculations. Median (country-by-country) difference between WEO root mean squared error and GEP root mean squared error as a percentage
+           of the latter.") %>% 
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group_magnitude_footnote.tex")
+
+
 # Forecast errors during recessions and expansions: (table) ----- 
 
 comparison_wb %>% 
