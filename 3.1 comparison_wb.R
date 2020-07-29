@@ -471,6 +471,31 @@ footnote=c("Extensive engament is defined as total loans outstanding above the m
            median forecast error.") %>% 
   cat(file ="../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_footnote.tex")
 
+
+# Robutstness with different cut-offs for extensive engagement:
+
+names=c("75th_percentile","90th_percentile")
+
+c(0.75,0.90) %>% 
+  map(~ aid_comparison %>% mutate_at(vars(contains("aid")), funs(case_when(. > quantile(.,.x,na.rm = T) ~ 1,
+                                                  T ~ 0)))) %>%
+  map(~ .x %>% gather("type_aid","upper",aid_ibrd:total_aid)) %>% 
+  map(~ .x %>% split(.$type_aid)) %>% 
+  modify_depth(2, ~ .x %>% group_by(upper)) %>% 
+  modify_depth(2, ~ .x %>% summarise(median1 = round(median(wb1, na.rm = T),2),
+                         median2 = round(median(wb2, na.rm = T),2))) %>% 
+  map(~ .x %>% bind_rows(.id = "Source")) %>% 
+  map(~ .x %>% mutate(upper = case_when(upper == 1 ~ "Extensive",
+                           upper == 0 ~ "Normal"))) %>% 
+  map(~ .x %>% mutate(Source = case_when(Source == "aid_ibrd" ~ "IBRD",
+                            Source == "aid_ida" ~ "IDA",
+                            T ~ "Total"))) %>% 
+  map(~ .x %>% setNames(c("Source","Type of Engament","H=0, J","H=1, J"))) %>% 
+  map2(names, ~ .x %>% stargazer(summary = F,
+                         rownames = F,
+                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_",.y,".tex")))
+
+
 # Scatter plot:
 
 list_scatter <- aid_comparison %>% 
