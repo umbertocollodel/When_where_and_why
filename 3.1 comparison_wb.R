@@ -285,7 +285,76 @@ comparison_wb %>%
 
 
 
+# Same table by group -----
 
+comparison_wb %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  as_tibble() %>% 
+  split(.$group) %>% 
+  map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0))) %>% 
+  map(~ .x %>% group_by(recession) %>% 
+  summarise(wb1 = round(median(wb1, na.rm = T),2), imf1 = round(median(variable1, na.rm = T),2),
+            wb2 = round(median(wb2, na.rm = T),2),imf2 = round(median(variable2, na.rm = T),2))) %>%
+  map(~ .x %>% setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)"))) %>%
+  map(~ .x %>% filter(Recession == 1)) %>% 
+  bind_rows(.id = "Geo. group") %>% 
+  select(-Recession) %>% 
+  mutate(`Geo. group` = case_when(`Geo. group` == "emerging_asia" ~ "Emerging Asia",
+                           `Geo. group` == "latin_america" ~ "Latin America",
+                           `Geo. group` == "emerging_europe" ~ "Emerging Europe",
+                           `Geo. group` == "middle_east" ~ "Middle East",
+                           T ~ "Africa")) %>% 
+  stargazer(rownames = F,
+            summary = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_group.tex")
+
+
+# Distribution forecast errors during recessions by group: ----
+
+distribution_group <- comparison_wb %>% 
+  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  as_tibble() %>% 
+  split(.$group) %>% 
+  map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
+                                            T ~ 0))) %>% 
+  map(~ .x %>% filter(recession == 1)) %>% 
+  map(~ .x %>% filter(country != "Papua New Guinea")) %>% 
+  bind_rows() %>% 
+  gather("institution","value",variable1:wb1) %>% 
+  mutate(institution = case_when(institution == "variable1" ~ "IMF",
+                                 T ~ "WB")) %>% 
+  mutate(group = case_when(group == "emerging_asia" ~ "Em. Asia",
+                                  group == "latin_america" ~ "Lat. America",
+                                  group == "emerging_europe" ~ "Em. Europe",
+                                  group == "middle_east" ~ "Middle East",
+                                  T ~ "Africa")) %>% 
+  ggplot(aes(group, value, col = group)) +
+  geom_boxplot(width = 0.4, outlier.size = 0) +
+  facet_wrap(~ institution) +
+  coord_flip() +
+  theme_minimal() +
+  ylab("") +
+  xlab("") +
+  ylim(-15,5) +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+  theme(strip.text = element_text(size = 16),
+        axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)) +
+  theme(legend.position = "none")
+
+distribution_group %>% 
+ggsave(filename = "../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession.pdf")
+
+
+footnote=c("IEO calculations. Emerging Asia is excluded from the graph because it reports only one recession in the period 2010-2018.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession_footnote.tex")
+  
+  
 # Evolution forecast errors during periods of consecutive recessions: -----
 # Note: evolution of current-year forecasts
 
@@ -474,9 +543,9 @@ footnote=c("Extensive engament is defined as total loans outstanding above the m
 
 # Robutstness with different cut-offs for extensive engagement:
 
-names=c("75th_percentile","90th_percentile")
+names=c("75th_percentile","95th_percentile")
 
-c(0.75,0.90) %>% 
+c(0.75,0.95) %>% 
   map(~ aid_comparison %>% mutate_at(vars(contains("aid")), funs(case_when(. > quantile(.,.x,na.rm = T) ~ 1,
                                                   T ~ 0)))) %>%
   map(~ .x %>% gather("type_aid","upper",aid_ibrd:total_aid)) %>% 
