@@ -75,7 +75,7 @@ comparison_wb %>%
             )
 
 
-# Comparison of median forecast error: ----
+# Figure 1: comparison of median forecast error: ----
 
 evolution_median_fe <- comparison_wb %>%  
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
@@ -127,74 +127,55 @@ plot_evolution(variable4, wb4) %>%
 
 # By country group: ----
 
-comparison_wb %>% 
-  mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
-  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
-  split(.$group) %>% 
-  map(~ .x %>% group_by(year)) %>% 
-  map(~ .x %>% mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T))) %>% 
-  map(~ .x %>% mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T))) %>% 
-  map(~ .x %>% ggplot(aes(year)) +
-        geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
-        geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
-        theme_minimal() +
-        xlab("") +
-        ylab("") +
-        labs(col = "Institution") +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-              legend.position = "bottom") +
-        theme(axis.text = element_text(size = 18),
-              axis.title = element_text(size = 21),
-              legend.title = element_text(size = 18),
-              legend.text = element_text(size = 16)
-        ) +
-        ylim(-4,4))
+# comparison_wb %>% 
+#   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
+#   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+#   split(.$group) %>% 
+#   map(~ .x %>% group_by(year)) %>% 
+#   map(~ .x %>% mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T))) %>% 
+#   map(~ .x %>% mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T))) %>% 
+#   map(~ .x %>% ggplot(aes(year)) +
+#         geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
+#         geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
+#         theme_minimal() +
+#         xlab("") +
+#         ylab("") +
+#         labs(col = "Institution") +
+#         theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+#               legend.position = "bottom") +
+#         theme(axis.text = element_text(size = 18),
+#               axis.title = element_text(size = 21),
+#               legend.title = element_text(size = 18),
+#               legend.text = element_text(size = 16)
+#         ) +
+#         ylim(-4,4))
 
 
-# Comparison of forecast accuracy: ----
-
-
-# Diebold-Mariano (version in Timmerman paper)
-# Note: very few observations, we ascribe the absence of significant differences to the low statistical 
-# power of the test
-
-comparison_wb %>% 
-    mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
-    mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-    mutate(diff = wb1^2 - variable1^2) %>% 
-    split(.$country) %>% 
-    map(~ lm(diff ~ 1, .x)) %>%
-    map(~ summary(.x)) %>% 
-    map(~ coef(.x))
-
-# Raw comparison (with no significance) of RMSE for countries and institution:
+# Figure 2: number of countries with lower RMSE for each institution ----
   
 raw <- comparison_wb %>% 
-  group_by(country) %>% 
-  summarise(rmse_imf1 = hydroGOF::rmse(variable1, targety_first),
-            rmse_wb1 = hydroGOF::rmse(wb1, targety_first),
-            rmse_imf2 = hydroGOF::rmse(variable2, targety_first),
-            rmse_wb2 = hydroGOF::rmse(wb2, targety_first)) %>% 
+  group_by(country) %>%
+  summarise_at(vars(matches("variable|wb")),funs(hydroGOF::rmse(.,targety_first))) %>% 
   ungroup() %>% 
-  mutate(ratio1 = (rmse_imf1/rmse_wb1)- 1,
-         ratio2 = (rmse_imf2/rmse_wb2) - 1) %>%
-  mutate(better_imf1 = case_when(ratio1 < 0 ~ 1,
-                                T ~ 0),
-         better_imf2 = case_when(ratio2 < 0 ~ 1,
-                                 T ~ 0)) %>% 
-  ungroup() 
+  mutate(ratio1 = (variable1/wb1)- 1,
+         ratio2 = (variable2/wb2) - 1,
+         ratio3 = (variable3/wb3) - 1,
+         ratio4 = (variable4/wb4) - 1) %>%
+  mutate_at(vars(contains("ratio")), funs(better_imf = case_when(. < 0 ~ 1,
+                                                    T ~ 0))) 
 
-# list(raw %>% group_by(better_imf) %>% count(), raw %>% filter(better_imf == 0) %>% .$country %>% unique())
-  
+
   raw %>% 
-    gather("better_imf","value",better_imf1:better_imf2) %>% 
+    gather("better_imf","value",ratio1_better_imf:ratio4_better_imf) %>% 
     group_by(better_imf, value) %>% 
     count() %>% 
     ungroup() %>% 
     mutate(value = case_when(value == 0 ~ "WB",
                                   T ~ "IMF")) %>%
-    mutate(better_imf = case_when(better_imf == "better_imf1" ~ "Current Year",
-                             T ~ "Year Ahead")) %>% 
+    mutate(better_imf = case_when(better_imf == "ratio1_better_imf" ~ "H=0, Jul.",
+                                  better_imf == "ratio2_better_imf" ~ "H=0, Jan.",
+                                  better_imf == "ratio3_better_imf" ~ "H=1, Jul.",
+                                  T ~ "H=1, Jan.")) %>% 
     ggplot(aes(better_imf, n)) +
     geom_col(aes(fill=value),position = "dodge", alpha = 0.8, width = 0.3, col = "white") +
     geom_text(aes(y = n,label=n, fill = value), position=position_dodge(width=0.3), size = 7, vjust = -0.25) +
@@ -212,39 +193,43 @@ raw <- comparison_wb %>%
     
     ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
     
+# Table appendix: comparison RMSE for all individual countries ----- 
+    
+    
     rmse_comparison <- comparison_wb %>% 
       group_by(country_code) %>%
-      select(country_code, country, year, targety_first, variable1:variable2, wb1:wb2, group) %>% 
-      summarise_at(vars(variable1:wb2), funs(hydroGOF::rmse(.,targety_first))) %>% 
+      summarise_at(vars(variable1:wb4), funs(hydroGOF::rmse(.,targety_first))) %>% 
       mutate(country = countrycode(country_code,"imf","country.name")) %>% 
-      mutate(ratio1 = variable1/wb1 - 1,
-             ratio2 = variable2/wb2 - 1) %>% 
+      mutate(ratio1 = (variable1/wb1)- 1,
+             ratio2 = (variable2/wb2) - 1,
+             ratio3 = (variable3/wb3) - 1,
+             ratio4 = (variable4/wb4) - 1) %>% 
       select(country_code,country,contains("ratio"))
     
-    # Export
-    
+    # Export:
     
     rmse_comparison %>%
       select(country, contains("ratio")) %>% 
-      mutate_at(vars(ratio1:ratio2), funs(round(.,digits = 2))) %>% 
-      setNames(c("Country","H=0,J","H=1,J")) %>% 
+      mutate_at(vars(ratio1:ratio4), funs(round(.,digits = 2))) %>% 
+      setNames(c("Country","H=0,Jul.", "H=0,Jan.","H=1,Jul.","H=1,Jan.")) %>% 
       stargazer(summary= F,
                 rownames = F,
                 out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/rmse_comparison_full.tex")
     
-# Same figure with different groups: ----
-# Enhancement: add the number of countries by plot
+# Figure 3: share of countries with lower RMSE for IMF by region ----
     
     group %>% 
       merge(rmse_comparison, by=c("country_code")) %>% 
-      mutate_at(vars(ratio1:ratio2), funs(case_when(. < 0 ~ 1,
+      mutate_at(vars(ratio1:ratio4), funs(case_when(. < 0 ~ 1,
                                                     T ~ 0))) %>% 
       ungroup() %>% 
       group_by(group) %>% 
-      summarise_at(vars(ratio1:ratio2), mean, na.rm = T) %>% 
-      gather("horizon","share",ratio1:ratio2) %>% 
-      mutate(horizon = case_when(horizon == "ratio1"~ "H=0,J",
-                                 horizon == "ratio2"~ "H=1,J")) %>% 
+      summarise_at(vars(ratio1:ratio4), mean, na.rm = T) %>% 
+      gather("horizon","share",ratio1:ratio4) %>% 
+      mutate(horizon = case_when(horizon == "ratio1"~ "H=0,Jul.",
+                                 horizon == "ratio2"~ "H=0,Jan.",
+                                 horizon == "ratio3"~ "H=1,Jul.",
+                                 T~ "H=1,Jan.")) %>% 
       ggplot(aes(horizon, share)) +
       geom_col(width = 0.3,col = "lightgrey",alpha = 0.6) +
       facet_wrap(~ group) +
@@ -265,16 +250,18 @@ raw <- comparison_wb %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group.pdf")
     
 
-# Magnitude of difference by geographical group: -----
+# Figure 4: magnitude of RMSE difference by geographical group: -----
 
 group %>% 
   merge(rmse_comparison, by=c("country_code")) %>% 
   group_by(group) %>% 
   summarise_at(vars(contains("ratio")), median, na.rm = T) %>% 
-  gather("horizon","value",ratio1:ratio2) %>% 
+  gather("horizon","value",ratio1:ratio4) %>% 
   mutate(value = value*100) %>%
-  mutate(horizon = case_when(horizon == "ratio1"~ "H=0,J",
-                             horizon == "ratio2"~ "H=1,J")) %>% 
+  mutate(horizon = case_when(horizon == "ratio1"~ "H=0,Jul.",
+                             horizon == "ratio2"~ "H=0,Jan.",
+                             horizon == "ratio3"~ "H=1,Jul.",
+                             T~ "H=1,Jan.")) %>% 
   ggplot(aes(horizon, value)) +
   geom_col(width = 0.3, alpha = 0.6) +
   facet_wrap(~ group) +
@@ -299,17 +286,21 @@ footnote=c("IEO calculations. Median (country-by-country) difference between WEO
   cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group_magnitude_footnote.tex")
 
 
-# Forecast errors during recessions and expansions: (table) ----- 
+# Table 1: forecast errors of both institutions during recessions and non-recessions ---- 
 
 comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0)) %>% 
-  group_by(recession) %>% 
-  summarise(wb1 = round(median(wb1, na.rm = T),2), imf1 = round(median(variable1, na.rm = T),2),
-            wb2 = round(median(wb2, na.rm = T),2),imf2 = round(median(variable2, na.rm = T),2)) %>%
-  setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)")) %>%
+  group_by(recession) %>%
+  summarise_at(vars(matches("variable|wb")),funs(round(median(.,na.rm = T),2))) %>% 
+  select(recession, wb1, variable1, wb2, variable2, wb3, variable3, wb4, variable4) %>% 
+  setNames(c("Recession",
+             "Current-year, Jul. (WB)","Current-year, Jul. (IMF)",
+             "Current-year, Jan. (WB)","Current-year, Jan. (IMF)",
+             "Year-ahead, Jul. (WB)","Year-ahead, Jul. (IMF)",
+             "Year-ahead, Jan. (WB)","Year-ahead, Jan. (IMF)")) %>%
   mutate(Recession = case_when(Recession == 1 ~ "Recession",
                                T ~ "Non-recession")) %>% 
   stargazer(rownames = F,
@@ -318,7 +309,7 @@ comparison_wb %>%
 
 
 
-# Same table by group -----
+# Table 2: forecast errors of both institutions during recessions and non-recessions (by geo. group) -----
 
 comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
@@ -327,10 +318,14 @@ comparison_wb %>%
   split(.$group) %>% 
   map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0))) %>% 
-  map(~ .x %>% group_by(recession) %>% 
-  summarise(wb1 = round(median(wb1, na.rm = T),2), imf1 = round(median(variable1, na.rm = T),2),
-            wb2 = round(median(wb2, na.rm = T),2),imf2 = round(median(variable2, na.rm = T),2))) %>%
-  map(~ .x %>% setNames(c("Recession","Current-year (WB)","Current-year (IMF)","Year-ahead (WB)","Year-ahead (IMF)"))) %>%
+  map(~ .x %>% group_by(recession)) %>% 
+  map(~ .x %>% summarise_at(vars(matches("variable|wb")),funs(round(median(.,na.rm = T),2)))) %>% 
+  map(~ .x %>% select(recession, wb1, variable1, wb2, variable2, wb3, variable3, wb4, variable4)) %>% 
+  map(~ .x %>% setNames(c("Recession",
+                            "Current-year, Jul. (WB)","Current-year, Jul. (IMF)",
+                            "Current-year, Jan. (WB)","Current-year, Jan. (IMF)",
+                            "Year-ahead, Jul. (WB)","Year-ahead, Jul. (IMF)",
+                            "Year-ahead, Jan. (WB)","Year-ahead, Jan. (IMF)"))) %>%
   map(~ .x %>% filter(Recession == 1)) %>% 
   bind_rows(.id = "Geo. group") %>% 
   select(-Recession) %>% 
@@ -344,7 +339,7 @@ comparison_wb %>%
             out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_group.tex")
 
 
-# Distribution forecast errors during recessions by group: ----
+# Figure 5: distribution forecast errors during recessions by group ----
 
 distribution_group <- comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
