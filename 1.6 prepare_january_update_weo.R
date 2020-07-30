@@ -1,7 +1,12 @@
-# Script to clean the January update of WEO, instrumental for comparison
-# with World Bank data:
+#### Script to clean the January and July updates of WEO, instrumental for comparison
+#### with World Bank data
 
-path ="../IEO_forecasts_material/raw_data/weo_january_update.xlsx"
+
+# Creation function: ----
+
+wrangle_weo_updates <- function(path){
+  
+path = path
 
 sheets_name <- getSheetNames(path)
 
@@ -11,7 +16,9 @@ sheets_year <- getSheetNames(path) %>%
 forecasts <- sheets_name %>% 
   map(~ read_xlsx(path,sheet = .x)) %>%
   map(~ .x %>% slice(1:which(Country == "Zimbabwe"))) %>% 
-  map(~ .x %>% gather("year_forecasted","variable",8:ncol(.)))
+  map(~ .x %>% select(-matches("Q\\d"))) %>% 
+  map(~ .x %>% gather("year_forecasted","variable",8:ncol(.))) 
+
 
 
 forecasts <- forecasts %>% 
@@ -39,10 +46,17 @@ for(i in 1:length(forecasts)){
 forecasts <- forecasts %>% 
   discard(~ unique(.x$year_forecasted) > 2019 | unique(.x$year_forecasted) < 2010)
 
-# Revert column order for first dataframe: (later on improve this part of the code, not elegant)
 
+
+# Revert column order for for some df depending on path: (later on improve this part of the code, not elegant)
+
+if(path == "../IEO_forecasts_material/raw_data/weo_january_update.xlsx"){
 forecasts[[1]] <- forecasts[[1]] %>% 
   select(Series_code, jan2009, everything())
+} else if(path == "../IEO_forecasts_material/raw_data/weo_july_update.xlsx"){
+  forecasts[[3]] <- forecasts[[3]] %>% 
+    select(Series_code,sep2011, everything())
+}
 
 
 # Naming similar to Zidong and bind together:
@@ -58,6 +72,40 @@ final_forecasts <-  forecasts %>%
   select(country_code, country, year, variable1, variable2) %>% 
   arrange(country)
 
+  return(final_forecasts)
+}
 
-rio::export(final_forecasts, file = "../IEO_forecasts_material/intermediate_data/rgdp_jan_update.RData")
+
+# Set parameters and run: ----
+
+paths = c("../IEO_forecasts_material/raw_data/weo_january_update.xlsx",
+          "../IEO_forecasts_material/raw_data/weo_july_update.xlsx")
+
+
+updates <- paths %>% 
+  map(~ wrangle_weo_updates(.x))  
+  
+# Change names columns:
+# Note: be careful about forecast horizon
+
+updates[[1]] <- updates[[1]] %>% 
+  rename(variable2 = variable1, variable4 = variable2)
+
+updates[[2]] <- updates[[2]] %>% 
+  rename(variable3 = variable2)
+
+# Combine:
+
+weo_updates <- updates %>% 
+  reduce(merge, by=c("country_code","country","year")) %>% 
+  select(country_code, country, year, variable1, variable2, variable3, variable4) %>% 
+  as_tibble()
+
+
+# Export:
+
+
+saveRDS(weo_updates, file = "../IEO_forecasts_material/intermediate_data/rgdp_update_cleaned.RDS")
+
+
 
