@@ -345,12 +345,10 @@ distribution_group <- comparison_wb %>%
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   as_tibble() %>% 
-  split(.$group) %>% 
-  map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
-                                            T ~ 0))) %>% 
-  map(~ .x %>% filter(recession == 1)) %>% 
-  map(~ .x %>% filter(country != "Papua New Guinea")) %>% 
-  bind_rows() %>% 
+  mutate(recession = case_when(targety_first < 0 ~ 1,
+                                            T ~ 0)) %>% 
+  filter(recession == 1) %>% 
+  filter(country != "Papua New Guinea") %>% 
   gather("institution","value",variable1:wb1) %>% 
   mutate(institution = case_when(institution == "variable1" ~ "IMF",
                                  T ~ "WB")) %>% 
