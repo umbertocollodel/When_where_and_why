@@ -1,6 +1,8 @@
 ################ Script to compare IMF WEO forecasts with World Bank GEP:
 
 # Prepare comparison dataframe -----
+# Note: improve this reading part, switch intermediate files
+# to RDS in order to avoid repetition
 
 
 # World Bank data (complete) from Ayuhan:
