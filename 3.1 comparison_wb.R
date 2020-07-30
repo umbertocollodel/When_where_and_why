@@ -3,36 +3,41 @@
 # Prepare comparison dataframe -----
 
 
-# # World Bank data scraped manually:
-# gep_data <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/wb_gep_updated.xlsx") %>% 
-#   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","wb"))) %>% 
-#   select(country, year, wb2, wb4) %>% 
-#   rename(wb1 = wb2, wb2 = wb4)
-
 # World Bank data (complete) from Ayuhan:
+
 gep_data <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
-  select(country, year, wb2, wb4) %>%
-  rename(wb1 = wb2, wb2 = wb4) %>% 
   filter(!country %in% country_to_exclude)
   
 
-# IMF WEO January update data:
+# IMF WEO updates data:
 
-
-load("../IEO_forecasts_material/intermediate_data/rgdp_jan_update.RData")
-
+weo_updates <- readRDS("../IEO_forecasts_material/intermediate_data/rgdp_update_cleaned.RDS")
 
 # Actual values: (fall issue of next year WEO)
 
-target <- final_sr$gdp %>% 
-  select(country_code, year, group, targety_first)
+load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
 
-# Bind together:
+target <- x %>% 
+  select(country_code, country, year, targety_first)
 
-comparison_wb <- x %>%   
-  merge(gep_data, by=c("country","year")) %>% 
-  merge(target, by=c("country_code","year")) %>% 
-  select(country_code, country, year, group, targety_first, variable1, wb1, variable2, wb2)  
+# Geographical group:
+
+load("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RData")
+
+geo_group <- x
+
+
+# Bind all together:
+
+comparison_wb <- list(weo_updates, gep_data, target) %>% 
+  reduce(merge, by=c("country_code","country","year")) %>% 
+  merge(geo_group, by="country_code") %>% 
+  select(country_code, country, year, group, targety_first, everything()) %>%
+  arrange(country, year) %>% 
+  as_tibble()
+
+comparison_wb %>% 
+  saveRDS("../IEO_forecasts_material/intermediate_data/world bank/comparison_wb.RDS")
 
 # Dataframe with geographical group countries ----
 
