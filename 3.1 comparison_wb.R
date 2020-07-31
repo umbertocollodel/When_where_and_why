@@ -112,16 +112,16 @@ plot_evolution <- function(variable1, variable2){
 }
 
 plot_evolution(variable1, wb1) %>% 
-save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/current_year_jan_comparison.pdf")
+save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/current_year_jul_comparison.pdf")
 
 plot_evolution(variable2, wb2) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/current_year_jul_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/current_year_jan_comparison.pdf")
 
 plot_evolution(variable3, wb3) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jan_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jul_comparison.pdf")
 
 plot_evolution(variable4, wb4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jul_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jan_comparison.pdf")
 
 
 
