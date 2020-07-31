@@ -121,11 +121,11 @@ plot_evolution(variable3, wb3) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jul_comparison.pdf")
 
 plot_evolution(variable4, wb4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jan_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_j_comparison.pdf")
 
 
 
-# By country group: ----
+# By country group (not in the paper): ----
 
 # comparison_wb %>% 
 #   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
@@ -191,7 +191,7 @@ raw <- comparison_wb %>%
           legend.title = element_text(size = 18),
           legend.text = element_text(size = 16)) 
     
-    ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
     
 # Table appendix: comparison RMSE for all individual countries ----- 
     
@@ -288,7 +288,7 @@ footnote=c("IEO calculations. Median (country-by-country) difference between WEO
 
 # Table 1: forecast errors of both institutions during recessions and non-recessions ---- 
 
-comparison_wb %>% 
+main_table <- comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   mutate(recession = case_when(targety_first < 0 ~ 1,
@@ -302,16 +302,22 @@ comparison_wb %>%
              "Year-ahead, Jul. (WB)","Year-ahead, Jul. (IMF)",
              "Year-ahead, Jan. (WB)","Year-ahead, Jan. (IMF)")) %>%
   mutate(Recession = case_when(Recession == 1 ~ "Recession",
-                               T ~ "Non-recession")) %>% 
-  stargazer(rownames = F,
-            summary = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error.tex")
+                               T ~ "Non-recession"))
+
+
+issues=c("Jul","Jan")
+
+issues %>% 
+  map(~ main_table %>% select(Recession, contains(.x))) %>% 
+  map2(issues, ~ .x %>% stargazer(rownames = F,
+                         summary = F,
+                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_",.y,".tex")))
 
 
 
 # Table 2: forecast errors of both institutions during recessions and non-recessions (by geo. group) -----
 
-comparison_wb %>% 
+main_table <- comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   as_tibble() %>% 
@@ -333,10 +339,13 @@ comparison_wb %>%
                            `Geo. group` == "latin_america" ~ "Latin America",
                            `Geo. group` == "emerging_europe" ~ "Emerging Europe",
                            `Geo. group` == "middle_east" ~ "Middle East",
-                           T ~ "Africa")) %>% 
-  stargazer(rownames = F,
-            summary = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_group.tex")
+                           T ~ "Africa")) 
+
+issues %>% 
+  map(~ main_table %>% select(`Geo. group`,contains(.x))) %>% 
+  map2(issues,~ .x %>% stargazer(rownames = F,
+                       summary = F,
+                       out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_group_",.y,".tex")))
 
 
 # Figure 5: distribution forecast errors during recessions by group ----
@@ -348,16 +357,20 @@ distribution_group <- comparison_wb %>%
   mutate(recession = case_when(targety_first < 0 ~ 1,
                                             T ~ 0)) %>% 
   filter(recession == 1) %>% 
-  filter(country != "Papua New Guinea") %>% 
-  gather("institution","value",variable1:wb1) %>% 
-  mutate(institution = case_when(institution == "variable1" ~ "IMF",
-                                 T ~ "WB")) %>% 
-  mutate(group = case_when(group == "emerging_asia" ~ "Em. Asia",
+  filter(country != "Papua New Guinea") 
+
+
+distribution_group_plot <- c(1,2,3,4) %>% 
+  map(~ distribution_group %>% select(country_code, country, year, group, contains(as.character(.x)))) %>% 
+  map(~ .x %>% gather("institution","value",5:6)) %>% 
+  map(~ .x %>% mutate(institution = case_when(str_detect(institution, "variable") ~ "IMF",
+                                 T ~ "WB"))) %>% 
+  map(~ .x %>% mutate(group = case_when(group == "emerging_asia" ~ "Em. Asia",
                                   group == "latin_america" ~ "Lat. America",
                                   group == "emerging_europe" ~ "Em. Europe",
                                   group == "middle_east" ~ "Middle East",
-                                  T ~ "Africa")) %>% 
-  ggplot(aes(group, value, col = group)) +
+                                  T ~ "Africa"))) %>% 
+  map(~ .x %>% ggplot(aes(group, value, col = group)) +
   geom_boxplot(width = 0.4, outlier.size = 0) +
   facet_wrap(~ institution) +
   coord_flip() +
@@ -371,10 +384,16 @@ distribution_group <- comparison_wb %>%
         axis.title = element_text(size = 21),
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16)) +
-  theme(legend.position = "none")
+  theme(legend.position = "none"))
 
-distribution_group %>% 
-ggsave(filename = "../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession.pdf")
+horizon=c("current","year_ahead") %>% 
+  map(~ rep(.x, 2)) %>% 
+  unlist()
+
+list(distribution_group_plot,horizon, rep(issues,2)) %>% 
+  pwalk(function(x,y,z){
+    ggsave(x,filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession_",y,"_",z,".pdf"))
+    })
 
 
 footnote=c("IEO calculations. Emerging Asia is excluded from the graph because it reports only one recession in the period 2010-2018.") %>% 
