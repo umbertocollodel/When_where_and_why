@@ -547,7 +547,7 @@ Economic Outlook (IMF) and Global Economic Prospects (World Bank) January curren
 At the top of each year, the actual GDP growth is reported in bold")
 
 
-# Forecast errors and aid ----
+# Forecast errors bias and aid ----
 
 wb_aid <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
 
@@ -614,7 +614,9 @@ c(0.75,0.95) %>%
                          out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_",.y,".tex")))
 
 
-# Scatter plot:
+# Figure 7 & 8 - scatterplot bias and WB aid: ----
+
+# Calculate median forecast error throughout period:
 
 list_scatter <- aid_comparison %>% 
   group_by(country) %>% 
@@ -626,7 +628,7 @@ list_scatter <- aid_comparison %>%
   map(~ .x %>% mutate(type_engagement = case_when(value > median(value, na.rm = T) ~ "Extensive",
                                                   T ~ "Normal"))) 
 
-
+# Custom function to plot different horizons:
 
 plot_rel_bias_aid <- function(variable){
   
@@ -649,6 +651,8 @@ list_scatter %>%
   )
 }
 
+# Run the function and export:
+
 plot_rel_bias_aid(wb1) %>%
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_currentJul.pdf"),.x))
 
@@ -665,11 +669,9 @@ plot_rel_bias_aid(wb4) %>%
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_aheadJan.pdf"),.x))
 
 
-
-
-
+# Footnote:
 
 footnote=c("Forecast error is the country-by-country median forecast error in the period 2010-2018. Engagement is total loans outstanding 
-           in milions USD as of June 2014.") %>% 
+           in milions USD as of June 2014. Extensive engament is defined as total loans outstanding above the median of the distribution as of June 2014.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
 
