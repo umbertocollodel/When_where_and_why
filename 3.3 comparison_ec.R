@@ -48,7 +48,7 @@ plot_evolution <- function(variable1, variable2){
   evolution_median_fe %>% 
     filter(complete.cases(variable2)) %>% 
     ggplot(aes(year)) +
-    geom_line(aes(y = !!variable1_quosure, group = 1, col = "WB"), size = 1) +
+    geom_line(aes(y = !!variable1_quosure, group = 1, col = "IMF"), size = 1) +
     geom_line(aes(y = !!variable2_quosure, group = 1, col = "EC" ), size = 1) +
     geom_hline(yintercept = 0) +
     theme_minimal() +
@@ -77,7 +77,7 @@ plot_evolution(variable3, ec3) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jul_comparison.pdf")
 
 plot_evolution(variable4, ec4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_j_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jan_comparison.pdf")
 
 
 # Comparison of forecast accuracy: ----
