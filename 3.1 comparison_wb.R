@@ -191,7 +191,7 @@ raw <- comparison_wb %>%
           legend.title = element_text(size = 18),
           legend.text = element_text(size = 16)) 
     
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_individual_countries.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_individual_countries.pdf")
     
 # Table appendix: comparison RMSE for all individual countries ----- 
     
@@ -247,7 +247,7 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/compariso
             panel.grid.minor.y = element_blank())
     
     
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group.pdf")
     
 
 # Figure 4: magnitude of RMSE difference by geographical group: -----
@@ -278,7 +278,7 @@ group %>%
   theme(panel.grid.major.x = element_blank(),
         panel.grid.minor.y = element_blank())
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group_magnitude.pdf")
+ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group_magnitude.pdf")
 
 
 footnote=c("IEO calculations. Median (country-by-country) difference between WEO root mean squared error and GEP root mean squared error as a percentage
@@ -392,7 +392,7 @@ horizon=c("current","year_ahead") %>%
 
 list(distribution_group_plot,horizon, rep(issues,2)) %>% 
   pwalk(function(x,y,z){
-    ggsave(x,filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession_",y,"_",z,".pdf"))
+    ggsave(x,filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/distribution_fe_recession/distribution_fe_recession_",y,"_",z,".pdf"))
     })
 
 
@@ -657,19 +657,19 @@ list_scatter %>%
 # Run the function and export:
 
 plot_rel_bias_aid(wb1) %>%
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_currentJul.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJul.pdf"),.x))
 
   
 plot_rel_bias_aid(wb2) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_currentJan.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJan.pdf"),.x))
 
 
 plot_rel_bias_aid(wb3) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_aheadJul.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJul.pdf"),.x))
 
 
 plot_rel_bias_aid(wb4) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_aheadJan.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJan.pdf"),.x))
 
 
 # Footnote:
