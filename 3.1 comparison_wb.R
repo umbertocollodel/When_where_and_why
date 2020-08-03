@@ -642,6 +642,7 @@ list_scatter %>%
   theme_minimal() +
   ylab("Real Growth Forecast Error (%)") +
   xlab("Engagement") +
+  ylim(-3,2) +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
   theme(  axis.text.x = element_text(size = 20),
           axis.text.y = element_text(size = 20),
