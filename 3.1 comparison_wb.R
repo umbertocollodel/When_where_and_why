@@ -214,7 +214,7 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/
       setNames(c("Country","H=0,Jul.", "H=0,Jan.","H=1,Jul.","H=1,Jan.")) %>% 
       stargazer(summary= F,
                 rownames = F,
-                out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/rmse_comparison_full.tex")
+                out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full.tex")
     
 # Figure 3: share of countries with lower RMSE for IMF by region ----
     
@@ -311,7 +311,7 @@ issues %>%
   map(~ main_table %>% select(Recession, contains(.x))) %>% 
   map2(issues, ~ .x %>% stargazer(rownames = F,
                          summary = F,
-                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_",.y,".tex")))
+                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession/recession_forecast_error_",.y,".tex")))
 
 
 
@@ -345,7 +345,7 @@ issues %>%
   map(~ main_table %>% select(`Geo. group`,contains(.x))) %>% 
   map2(issues,~ .x %>% stargazer(rownames = F,
                        summary = F,
-                       out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession_forecast_error_group_",.y,".tex")))
+                       out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/recession/recession_forecast_error_group_",.y,".tex")))
 
 
 # Figure 5: distribution forecast errors during recessions by group ----
@@ -579,7 +579,7 @@ aid_comparison %>%
   setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.", "H=1, Jul.","H=1, Jan.")) %>% 
   stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors.tex")
+            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_bias/aid_errors.tex")
 
 
 footnote=c("Extensive engament is defined as total loans outstanding above the median of the distribution
@@ -611,7 +611,7 @@ c(0.75,0.95) %>%
   map(~ .x %>% setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.","H=1, Jul.","H=1, Jan."))) %>% 
   map2(names, ~ .x %>% stargazer(summary = F,
                          rownames = F,
-                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_",.y,".tex")))
+                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_bias/aid_errors_",.y,".tex")))
 
 
 # Figure 7 & 8 - scatterplot bias and WB aid: ----
