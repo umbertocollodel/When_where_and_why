@@ -59,7 +59,7 @@ ida_stat <- rbind(first_part, second_part)
 # Finish cleaning: ----
 
 wb_aid <- list(ibrd_stat, ida_stat) %>%
-  map(~ .x %>% mutate_at(vars(contains("aid")),funs(str_replace(.,",","\\.")))) %>% 
+  map(~ .x %>% mutate_at(vars(contains("aid")),funs(str_remove(.,",")))) %>% 
   map(~ .x %>% mutate_at(vars(contains("aid")), funs(as.numeric(.)))) %>% 
   map(~ .x %>% mutate(country_code = countrycode(country, "country.name","imf"))) %>% 
   map(~ .x %>% select(country_code, contains("aid"))) %>%
