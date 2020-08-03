@@ -647,7 +647,9 @@ list_scatter %>%
   theme(  axis.text.x = element_text(size = 20),
           axis.text.y = element_text(size = 20),
           axis.title = element_text(size = 22)) +
-  theme(legend.position = "bottom") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 20),
+        legend.text = element_text(size = 18)) +
   labs(col = "Type: ")
   )
 }
