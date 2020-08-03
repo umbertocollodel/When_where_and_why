@@ -31,65 +31,53 @@ comparison_ec %>%
   )
 
 
-# Comparison of forecast errors:
+# Figure 1: comparison of median forecast error: ----
 
-comparison_ec %>%  
+evolution_median_fe <- comparison_ec %>%  
   mutate_at(vars(contains("ec")),funs(targety_first - .)) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   group_by(year) %>% 
-  mutate(median_1ec = median(ec1, na.rm = T), median_2ec = median(ec2, na.rm = T)) %>% 
-  mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T)) %>% 
-  ggplot(aes(year)) +
-  geom_line(aes(y = median_1ec, group = 1, col = "EC"), size = 1) +
-  geom_line(aes(y = median_1imf, group = 1, col = "IMF" ), size = 1) +
-  geom_line(aes(y = median_2ec, group = 1, col = "EC"), alpha = 0.2, size = 1) +
-  geom_line(aes(y = median_2imf, group = 1, col = "IMF"), alpha = 0.2, size = 1) +
-  geom_hline(yintercept = 0) +
-  theme_minimal() +
-  xlab("") +
-  ylab("") +
-  labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-        legend.position = "bottom") +
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16)) +
-  theme(panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_blank()) +
-  ylim(-4,4)
+  mutate_at(vars(matches("variable|ec")), median, na.rm = T)
 
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/EC/current_year_comparison.pdf")
+plot_evolution <- function(variable1, variable2){
+  
+  variable1_quosure <- enquo(variable1)
+  variable2_quosure <- enquo(variable2)
+  
+  evolution_median_fe %>% 
+    filter(complete.cases(variable2)) %>% 
+    ggplot(aes(year)) +
+    geom_line(aes(y = !!variable1_quosure, group = 1, col = "WB"), size = 1) +
+    geom_line(aes(y = !!variable2_quosure, group = 1, col = "EC" ), size = 1) +
+    geom_hline(yintercept = 0) +
+    theme_minimal() +
+    xlab("") +
+    ylab("") +
+    labs(col = "Institution") +
+    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
+          legend.position = "bottom") +
+    theme(axis.text = element_text(size = 18),
+          axis.title = element_text(size = 21),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16)) +
+    theme(panel.grid.minor.x = element_blank(),
+          panel.grid.minor.y = element_blank()) +
+    ylim(-2,2)
+  
+}
 
+plot_evolution(variable1, ec1) %>% 
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_jul_comparison.pdf")
 
-comparison_ec %>%  
-  mutate_at(vars(contains("ec")),funs(targety_first - .)) %>% 
-  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
-  group_by(year) %>% 
-  mutate(median_3ec = median(ec3, na.rm = T), median_4ec = median(ec4, na.rm = T)) %>% 
-  mutate(median_3imf = median(variable3, na.rm = T), median_4imf = median(variable4, na.rm = T)) %>% 
-  ggplot(aes(year)) +
-  geom_line(aes(y = median_3ec, group = 1, col = "EC"), size = 1) +
-  geom_line(aes(y = median_3imf, group = 1, col = "IMF" ), size = 1) +
-  geom_hline(yintercept = 0) +
-  theme_minimal() +
-  xlab("") +
-  ylab("") +
-  labs(col = "Institution") +
-  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-        legend.position = "bottom") +
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16)) +
-  theme(panel.grid.minor.x = element_blank(),
-        panel.grid.minor.y = element_blank()) +
-  ylim(-4,4)
+plot_evolution(variable2, ec2) %>% 
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_jan_comparison.pdf")
 
+plot_evolution(variable3, ec3) %>% 
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jul_comparison.pdf")
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/EC/year_ahead_comparison.pdf")
-
+plot_evolution(variable4, ec4) %>% 
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_j_comparison.pdf")
 
 
 # Comparison of forecast accuracy: ----
