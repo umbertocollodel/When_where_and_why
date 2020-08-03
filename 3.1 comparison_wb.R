@@ -121,7 +121,7 @@ plot_evolution(variable3, wb3) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jul_comparison.pdf")
 
 plot_evolution(variable4, wb4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_j_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/WB_updated/evolution_bias/year_ahead_jan_comparison.pdf")
 
 
 
