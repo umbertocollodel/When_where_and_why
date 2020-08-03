@@ -621,22 +621,26 @@ list_scatter <- aid_comparison %>%
   mutate_at(vars(matches("variable|wb")), median, na.rm = T) %>% 
   slice(1) %>%
   gather("type_aid","value",aid_ibrd:total_aid) %>% 
-  split(.$type_aid) 
+  split(.$type_aid) %>%
+  map(~ .x %>% ungroup()) %>% 
+  map(~ .x %>% mutate(type_engagement = case_when(value > median(value, na.rm = T) ~ "Extensive",
+                                                  T ~ "Normal"))) 
 
 
 list_scatter %>% 
   map(~ .x %>% 
-  ggplot(aes(value, wb1)) +
-  geom_point(size=5) +
-  geom_smooth(method='lm', formula= y~x, se = F) +
+  ggplot(aes(value, wb1, col = type_engagement)) +
+  geom_point(size=5, alpha = 0.6) +
+  geom_smooth(method='lm', formula= y~x, se = F, col = "red") +
   theme_minimal() +
   ylab("Real Growth Forecast Error (%)") +
   xlab("Engagement") +
-  xlim(0,1000) +
   theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
   theme(  axis.text.x = element_text(size = 20),
           axis.text.y = element_text(size = 20),
-          axis.title = element_text(size = 22))
+          axis.title = element_text(size = 22)) +
+  theme(legend.position = "bottom") +
+  labs(col = "Type: ")
   ) %>% 
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_current.pdf"),.x))
 
