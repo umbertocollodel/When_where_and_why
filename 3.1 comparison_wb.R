@@ -627,9 +627,14 @@ list_scatter <- aid_comparison %>%
                                                   T ~ "Normal"))) 
 
 
+
+plot_rel_bias_aid <- function(variable){
+  
+  variable_quosure <- enquo(variable)
+
 list_scatter %>% 
   map(~ .x %>% 
-  ggplot(aes(value, wb1, col = type_engagement)) +
+  ggplot(aes(value, !!variable_quosure, col = type_engagement)) +
   geom_point(size=5, alpha = 0.6) +
   geom_smooth(method='lm', formula= y~x, se = F, col = "red") +
   theme_minimal() +
@@ -641,25 +646,26 @@ list_scatter %>%
           axis.title = element_text(size = 22)) +
   theme(legend.position = "bottom") +
   labs(col = "Type: ")
-  ) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_current.pdf"),.x))
+  )
+}
 
-list_scatter %>% 
-  map(~ .x %>% 
-        ggplot(aes(value, wb2)) +
-        geom_point(size=5) +
-        geom_smooth(method='lm', formula= y~x, se = F) +
-        theme_minimal() +
-        ylab("Real Growth Forecast Error (%)") +
-        xlab("Engagement") +
-        xlim(0,1000) +
-        scale_y_continuous(breaks = c(3,2,1,0,-1,-2,-3)) +
-        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
-        theme(  axis.text.x = element_text(size = 20),
-                axis.text.y = element_text(size = 20),
-                axis.title = element_text(size = 22))
-  ) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_ahead.pdf"),.x))
+plot_rel_bias_aid(wb1) %>%
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_currentJul.pdf"),.x))
+
+  
+plot_rel_bias_aid(wb2) %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_currentJan.pdf"),.x))
+
+
+plot_rel_bias_aid(wb3) %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_aheadJul.pdf"),.x))
+
+
+plot_rel_bias_aid(wb4) %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/",.y,"_aheadJan.pdf"),.x))
+
+
+
 
 
 
