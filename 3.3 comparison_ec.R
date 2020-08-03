@@ -80,7 +80,7 @@ plot_evolution(variable4, ec4) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jan_comparison.pdf")
 
 
-# Comparison of forecast accuracy: ----
+# Figure 3: share of countries with lower RMSE for IMF by region (in this case only advanced economies) ----
 
 raw <- comparison_ec %>% 
   group_by(country) %>% 
@@ -104,7 +104,6 @@ raw <- comparison_ec %>%
 
 raw %>% 
   select(country, contains("better")) %>%
-  print(n = Inf)
   summarise_at(vars(matches("better")), mean) %>% 
   gather("horizon","share",better_imf1:better_imf4) %>% 
   mutate(horizon = case_when(horizon == "better_imf1" ~ "H=0,F",
