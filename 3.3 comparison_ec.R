@@ -129,24 +129,28 @@ raw %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/EC/comparison_rmse_group.pdf")
 
 
-# Full list of RMSE by country: ---- 
+# Table appendix: comparison RMSE for all individual countries ----- 
 
 
-comparison_ec %>% 
-  group_by(country) %>% 
-  summarise_at(vars(matches("variable|ec")), funs(hydroGOF::rmse(.,targety_first))) %>% 
-  ungroup() %>% 
+rmse_comparison <- comparison_ec %>% 
+  group_by(country_code) %>%
+  summarise_at(vars(variable1:ec4), funs(hydroGOF::rmse(.,targety_first))) %>% 
+  mutate(country = countrycode(country_code,"imf","country.name")) %>% 
   mutate(ratio1 = (variable1/ec1)- 1,
          ratio2 = (variable2/ec2) - 1,
-         ratio3 = (variable3/ec3) -1,
-         ratio4 = (variable4/ec4)-1) %>% 
-  mutate_at(vars(matches("ratio")), round, 2) %>% 
-  select(country, matches("ratio")) %>% 
-  setNames(c("Country","H=0,F","H=0,S","H=1,F","H=1,S")) %>% 
-  stargazer(summary = F,
+         ratio3 = (variable3/ec3) - 1,
+         ratio4 = (variable4/ec4) - 1) %>% 
+  select(country_code,country,contains("ratio"))
+
+# Export:
+
+rmse_comparison %>%
+  select(country, contains("ratio")) %>% 
+  mutate_at(vars(ratio1:ratio4), funs(round(.,digits = 2))) %>% 
+  setNames(c("Country","H=0,Jul.", "H=0,Jan.","H=1,Jul.","H=1,Jan.")) %>% 
+  stargazer(summary= F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/EC/full_rmse.tex")
-
 
 
 
