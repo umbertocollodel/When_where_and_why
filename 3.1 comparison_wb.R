@@ -558,7 +558,7 @@ aid_comparison <- merge(comparison_wb, wb_aid) %>%
   as_tibble()
 
 
-# Table:
+# Table 3: bias and WB engagement ----
 
 aid_comparison %>% 
   mutate_at(vars(contains("aid")), funs(case_when(. > median(.,na.rm = T) ~ 1,
@@ -567,14 +567,16 @@ aid_comparison %>%
   split(.$type_aid) %>% 
   map(~ .x %>% group_by(upper)) %>% 
   map(~ .x %>% summarise(median1 = round(median(wb1, na.rm = T),2),
-                         median2 = round(median(wb2, na.rm = T),2))) %>% 
+                         median2 = round(median(wb2, na.rm = T),2),
+                         median3 = round(median(wb3, na.rm = T),2),
+                         median4 = round(median(wb4, na.rm = T),2))) %>% 
   bind_rows(.id = "Source") %>% 
   mutate(upper = case_when(upper == 1 ~ "Extensive",
                            upper == 0 ~ "Normal")) %>% 
   mutate(Source = case_when(Source == "aid_ibrd" ~ "IBRD",
                             Source == "aid_ida" ~ "IDA",
                             T ~ "Total")) %>% 
-  setNames(c("Source","Type of Engament","H=0, J","H=1, J")) %>% 
+  setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.", "H=1, Jul.","H=1, Jan.")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors.tex")
@@ -586,7 +588,7 @@ footnote=c("Extensive engament is defined as total loans outstanding above the m
   cat(file ="../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_footnote.tex")
 
 
-# Robutstness with different cut-offs for extensive engagement:
+# Tables 8 & 9: bias and WB engagement - robutstness with different cut-offs for extensive engagement ----
 
 names=c("75th_percentile","95th_percentile")
 
@@ -597,14 +599,16 @@ c(0.75,0.95) %>%
   map(~ .x %>% split(.$type_aid)) %>% 
   modify_depth(2, ~ .x %>% group_by(upper)) %>% 
   modify_depth(2, ~ .x %>% summarise(median1 = round(median(wb1, na.rm = T),2),
-                         median2 = round(median(wb2, na.rm = T),2))) %>% 
+                                     median2 = round(median(wb2, na.rm = T),2),
+                                     median3 = round(median(wb3, na.rm = T),2),
+                                     median4 = round(median(wb4, na.rm = T),2))) %>% 
   map(~ .x %>% bind_rows(.id = "Source")) %>% 
   map(~ .x %>% mutate(upper = case_when(upper == 1 ~ "Extensive",
                            upper == 0 ~ "Normal"))) %>% 
   map(~ .x %>% mutate(Source = case_when(Source == "aid_ibrd" ~ "IBRD",
                             Source == "aid_ida" ~ "IDA",
                             T ~ "Total"))) %>% 
-  map(~ .x %>% setNames(c("Source","Type of Engament","H=0, J","H=1, J"))) %>% 
+  map(~ .x %>% setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.","H=1, Jul.","H=1, Jan."))) %>% 
   map2(names, ~ .x %>% stargazer(summary = F,
                          rownames = F,
                          out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_errors_",.y,".tex")))
