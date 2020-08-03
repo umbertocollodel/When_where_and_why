@@ -155,6 +155,36 @@ rmse_comparison %>%
 
 
 
+# Table 1: forecast errors of both institutions during recessions and non-recessions ---- 
+
+main_table <- comparison_ec %>% 
+  mutate_at(vars(contains("ec")),funs(targety_first - .)) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  mutate(recession = case_when(targety_first < 0 ~ 1,
+                               T ~ 0)) %>% 
+  group_by(recession) %>%
+  summarise_at(vars(matches("variable|ec")),funs(round(median(.,na.rm = T),2))) %>% 
+  select(recession, ec1, variable1, ec2, variable2, ec3, variable3, ec4, variable4) %>% 
+  setNames(c("Recession",
+             "Current-year, Fall (EC)","Current-year, Fall (IMF)",
+             "Current-year, Spring (EC)","Current-year, Spring (IMF)",
+             "Year-ahead, Fall (EC)","Year-ahead, Fall (IMF)",
+             "Year-ahead, Spring (EC)","Year-ahead, Spring (IMF)")) %>%
+  mutate(Recession = case_when(Recession == 1 ~ "Recession",
+                               T ~ "Non-recession"))
+
+
+issues=c("Fall","Spring")
+
+issues %>% 
+  map(~ main_table %>% select(Recession, contains(.x))) %>% 
+  map2(issues, ~ .x %>% stargazer(rownames = F,
+                                  summary = F,
+                                  out = paste0("../IEO_forecasts_material/output/tables/comparison/EC/recession_forecast_error_",.y,".tex")))
+
+
+
+
 # Sovereign Debt crisis event study: ------
 
 countries=c("Spain","Italy","Greece","Portugal")
