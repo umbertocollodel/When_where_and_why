@@ -163,3 +163,32 @@ share_aggregate_group %>%
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/",.y,"_group.pdf"),.x))
 
 
+# Where are advanced economies?
+
+# Magnitude by group: ----
+
+
+df_bias %>% 
+  merge(group) %>%
+  split(.$horizon) %>% 
+  map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>% 
+  map(~ .x %>% filter(str_detect(Estimate,"-"))) %>% 
+  map(~ .x %>% group_by(group)) %>% 
+  map(~ .x %>% mutate(Estimate = as.numeric(str_remove_all(Estimate,"\\*")))) %>% 
+  map(~ .x %>% summarise(mean = round(mean(Estimate, na.rm = T),2),
+                         median = round(median(Estimate, na.rm = T),2),
+                         max = round(min(Estimate, na.rm = T),2))) %>% 
+  bind_rows(.id = "horizon") %>%
+  setNames(c("Horizon","Geo. group","Mean","Median","Max.")) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = paste0("../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_group.tex"))
+  
+
+
+
+
+
+
+
+
