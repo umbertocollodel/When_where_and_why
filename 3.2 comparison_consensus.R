@@ -241,5 +241,9 @@ list(filter_best_forecaster(consensus1),filter_best_forecaster(consensus2),
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best.tex")
   
 
+# Footnote:
+
+# TO ADD!
+
 
 
