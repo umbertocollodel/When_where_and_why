@@ -68,16 +68,16 @@ plot_evolution <- function(variable1, variable2){
 }
 
 plot_evolution(variable1, ec1) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_jul_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_fall_comparison.pdf")
 
 plot_evolution(variable2, ec2) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_jan_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/current_year_spring_comparison.pdf")
 
 plot_evolution(variable3, ec3) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jul_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_fall_comparison.pdf")
 
 plot_evolution(variable4, ec4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_jan_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_spring_comparison.pdf")
 
 
 # Figure 3: share of countries with lower RMSE for IMF by region (in this case only advanced economies) ----
