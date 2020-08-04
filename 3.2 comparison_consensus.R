@@ -1,4 +1,4 @@
-# Comparison between WEO and Consensus foecasts 
+############ Comparison between WEO and Consensus foecasts 
 
 # Prepare the data ----
 
@@ -90,10 +90,10 @@ plot_evolution(variable2, consensus2) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/current_year_spring_comparison.pdf")
 
 plot_evolution(variable3, consensus3) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/evolution_bias/year_ahead_fall_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/year_ahead_fall_comparison.pdf")
 
 plot_evolution(variable4, consensus4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/evolution_bias/year_ahead_fall_comparison.pdf")
+  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/year_ahead_fall_comparison.pdf")
 
 
 
