@@ -4,7 +4,7 @@ list_regressions=c(variable7 ~ 1, variable8 ~ 1, variable9 ~ 1,
 
 regressions <- gdp_medium %>% 
   mutate_at(vars(matches("variable")), funs(targety_first - .)) %>% 
-  split(.$country) %>% 
+  split(.$country_code) %>% 
   map( ~ map(list_regressions, function(x){
     tryCatch(lm(x, .x), error = function(e){
       cat(crayon::red("Could not run the regression. Check data\n"))
@@ -23,22 +23,24 @@ modify_depth(2, ~ tryCatch(summary(.x), error = function(e){
   map(~ discard(.x, ~ length(.x) != 4)) %>% 
   modify_depth(2, ~ as.data.frame(.x)) %>% 
   map(~ bind_rows(.x, .id = "horizon")) %>% 
-  bind_rows(.id = "country") %>% 
+  bind_rows(.id = "country_code") %>% 
   mutate(issue = case_when(horizon == 1 | horizon == 3 | horizon == 5 ~ "Fall",
                            T ~ "Spring"),
          horizon = case_when(horizon == 1 | horizon == 2 ~ "H=3",
                              horizon == 3 | horizon == 4 ~ "H=4",
                              horizon == 5 | horizon == 6 ~ "H=5")) %>% 
+  mutate(Estimate = round(Estimate,2)) %>% 
   mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
                                            (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
-                                           TRUE ~ as.character(Estimate))) %>% 
-  select(country, horizon, issue, Estimate)
+                                           TRUE ~ as.character(Estimate))) %>%
+  mutate(country = countrycode(country_code,"imf","country.name")) %>% 
+  select(country_code, country, horizon, issue, Estimate)
 
 
 df_bias %>% 
   split(.$horizon) %>% 
   map(~ .x %>% spread(issue, Estimate)) %>%
-  map(~ .x %>% select(-horizon)) %>% 
+  map(~ .x %>% select(-country_code,-horizon)) %>% 
   imap(~ .x %>% stargazer(summary = F, 
                           rownames = F,
                           out = paste0("../IEO_forecasts_material/output/tables/medium_term/bias/",.y,".tex")))
@@ -95,7 +97,7 @@ footnote=c("The figure shows the share of countries for each forecast horizon an
 
 
 
-# Magnitude of bias ----
+# Magnitude of bias: ----
 
 table_magnitude <- df_bias %>% 
   split(.$horizon) %>% 
@@ -118,5 +120,46 @@ table_magnitude %>%
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias.tex")
+
+# Geographical subvidision biases: ----
+
+
+share_aggregate_group <- df_bias %>% 
+  merge(group) %>%
+  split(.$horizon) %>% 
+  map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
+                                                       T ~ 0))) %>% 
+  map(~ .x %>% mutate(positive_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-", negate = T) ~ 1,
+                                                       T ~ 0))) %>%
+  map(~ .x %>% split(.$issue)) %>% 
+  modify_depth(2, ~ .x %>% group_by(group)) %>% 
+  modify_depth(2, ~ .x %>% summarise_at(vars(contains("significant")), mean, na.rm = T)) %>%
+  map(~ .x %>% bind_rows(.id = "issue")) %>%
+  bind_rows(.id = "horizon") %>% 
+  gather("sign","share",negative_significant:positive_significant) %>% 
+  mutate(sign = case_when(sign == "negative_significant" ~ "Optimistic",
+                          T ~ "Pessimistic")) %>% 
+  split(.$issue) %>% 
+  map(~ .x %>% 
+        ggplot(aes(group,share, fill = sign)) +
+        geom_col(position = "dodge",width = 0.5) +
+        coord_flip() +
+        facet_wrap(~horizon) + 
+        theme_minimal() +
+        xlab("") +
+        ylab("Share of countries (%)") +
+        theme(legend.position = "bottom") +
+        labs(fill="") +
+        theme(strip.text.x = element_text(size = 16),
+              axis.text.x = element_text(size = 16),
+              axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16))
+  )
   
+
+
+share_aggregate_group %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/",.y,"_group.pdf"),.x))
+
 
