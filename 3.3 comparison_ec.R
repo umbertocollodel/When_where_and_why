@@ -63,7 +63,7 @@ plot_evolution <- function(variable1, variable2){
           legend.text = element_text(size = 16)) +
     theme(panel.grid.minor.x = element_blank(),
           panel.grid.minor.y = element_blank()) +
-    ylim(-2,2)
+    ylim(-3,2)
   
 }
 
