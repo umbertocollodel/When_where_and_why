@@ -125,7 +125,7 @@ table_magnitude %>%
 
 
 share_aggregate_group <- df_bias %>% 
-  merge(group) %>%
+  merge(geo_group,by=c("country_code")) %>%
   split(.$horizon) %>% 
   map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
                                                        T ~ 0))) %>% 
@@ -169,7 +169,7 @@ share_aggregate_group %>%
 
 
 df_bias %>% 
-  merge(group) %>%
+  merge(geo_group,by=c("country_code")) %>%
   split(.$horizon) %>% 
   map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>% 
   map(~ .x %>% filter(str_detect(Estimate,"-"))) %>% 
@@ -180,11 +180,17 @@ df_bias %>%
                          max = round(min(Estimate, na.rm = T),2))) %>% 
   bind_rows(.id = "horizon") %>%
   setNames(c("Horizon","Geo. group","Mean","Median","Max.")) %>% 
+  mutate(`Geo. group` = case_when(`Geo. group` == "africa" ~ "Africa",
+                                  `Geo. group` == "emerging_asia" ~ "Emerging Asia",
+                                  `Geo. group` == "europe" ~ "Europe",
+                                  `Geo. group` == "emerging_europe"~ "Emerging Europe",
+                                  `Geo. group` == "latin_america" ~ "Latin America",
+                                  T ~ "Middle East"
+                                  )) %>% 
   stargazer(summary = F,
             rownames = F,
             out = paste0("../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_group.tex"))
   
-
 
 
 

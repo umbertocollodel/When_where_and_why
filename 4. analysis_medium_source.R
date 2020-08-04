@@ -4,3 +4,9 @@ gdp_medium <- x %>%
   select(country_code, country, year, targety_first, 
          variable7, variable8, variable9,
          variable10, variable11, variable12) 
+
+# Geographical group: ----
+
+load("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RData")
+
+geo_group <- x
