@@ -47,10 +47,7 @@ comparison_consensus %>%
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/list_countries.tex")
 
 
-# Compare RMSE by country ----
-
-
-# Full table:
+# Table appendix: comparison RMSE for all individual countries ----- 
 
 rmse_comparison <- comparison_consensus %>% 
   filter(forecaster == "Consensus (Mean)") %>% 
@@ -75,7 +72,7 @@ rmse_comparison %>%
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
   
-# Figure with different groups:
+# Figure 3: share of countries with lower RMSE for IMF by region  ----
 # Enhancement: add the number of countries by plot
 
  group %>% 
@@ -109,6 +106,7 @@ rmse_comparison %>%
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse.pdf")
 
+# Footnote:
 
 footnote=c("Share of countries with lower RMSE from WEO forecasts compared to Consensus Forecasts") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse_footnote.tex")
@@ -123,11 +121,11 @@ comparison_consensus %>%
   xlab("")
 
 
-# Recessions ----
+# Table 1: forecast errors of both institutions during recessions and non-recessions ----
 
 
 
-comparison_consensus %>% 
+main_table <- comparison_consensus %>% 
   filter(forecaster == "Consensus (Mean)") %>% 
   mutate(Recession = case_when(targety_first < 0 ~ "Recession",
                                T ~ "Non-Recession")) %>% 
@@ -136,69 +134,57 @@ comparison_consensus %>%
   mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>% 
   summarise_at(vars(matches("variable|consensus")), median, na.rm = T) %>%
   mutate_at(vars(matches("variable|consensus")), round, 2) %>%
-  stargazer(summary = F,
-            rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession.tex"
-            )
-
-# Recessions and best forecaster ----
-
-
-best_forecaster1 <- comparison_consensus %>%
-  filter(complete.cases(targety_first)) %>% 
-  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
-  select(country, year, forecaster, targety_first, variable1, consensus1, adv) %>% 
-  group_by(country,year) %>%
-  mutate(consensus1_abs = abs(consensus1)) %>% 
-  filter(consensus1_abs == min(consensus1_abs, na.rm = T)) %>% 
-  select(-consensus1_abs) %>% 
-  ungroup()
+  select(Recession, consensus1, variable1, consensus2,variable2, consensus3, variable3, consensus4, variable4) %>%
+  setNames(c("Recession",
+             "Current-year, Fall (Consensus)","Current-year, Fall (IMF)",
+             "Current-year, Spring (Consensus)","Current-year, Spring (IMF)",
+             "Year-ahead, Fall (Consensus)","Year-ahead, Fall (IMF)",
+             "Year-ahead, Spring (Consensus)","Year-ahead, Spring (IMF)"))
 
 
-best_forecaster2 <- comparison_consensus %>%
-  filter(complete.cases(targety_first)) %>% 
-  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
-  select(country, year, forecaster, targety_first, variable2, consensus2, adv) %>% 
-  group_by(country,year) %>%
-  mutate(consensus2_abs = abs(consensus2)) %>% 
-  filter(consensus2_abs == min(consensus2_abs, na.rm = T)) %>% 
-  select(-consensus2_abs) %>% 
-  ungroup()
+issues=c("Fall","Spring")
+
+issues %>% 
+  map(~ main_table %>% select(Recession, contains(.x))) %>% 
+  map2(issues, ~ .x %>% stargazer(rownames = F,
+                                  summary = F,
+                                  out = paste0("../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_",.y,".tex")))
+
+# Table: recessions and best forecaster median forecast error ----
+# Note: we keep Consensus (mean) in the df
 
 
-best_forecaster3 <- comparison_consensus %>%
-  filter(complete.cases(targety_first)) %>% 
-  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
-  select(country, year, forecaster, targety_first, variable3, consensus3, adv) %>% 
-  group_by(country,year) %>%
-  mutate(consensus3_abs = abs(consensus3)) %>% 
-  filter(consensus3_abs == min(consensus3_abs, na.rm = T)) %>% 
-  select(-consensus3_abs) %>% 
-  ungroup()
+
+filter_best_forecaster <- function(variable){
+  
+  quosurize_variable <- enquo(variable)
+  
+  comparison_consensus %>%
+    filter(complete.cases(targety_first)) %>% 
+    mutate_at(vars(matches("consensus")), funs(targety_first - .)) %>%
+    select(country, year, forecaster, targety_first, !!quosurize_variable) %>% 
+    group_by(country,year) %>%
+    mutate_at(vars(contains("consensus")), funs(abs = abs(.))) %>% 
+    filter(abs == min(abs, na.rm = T)) %>% 
+    select(-abs) %>% 
+    ungroup()
+}
 
 
-best_forecaster4 <- comparison_consensus %>%
-  filter(complete.cases(targety_first)) %>% 
-  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>%
-  select(country, year, forecaster, targety_first, variable4, consensus4, adv) %>% 
-  group_by(country,year) %>%
-  mutate(consensus4_abs = abs(consensus4)) %>% 
-  filter(consensus4_abs == min(consensus4_abs, na.rm = T)) %>% 
-  select(-consensus4_abs) %>% 
-  ungroup()
 
-
-list(best_forecaster1,best_forecaster2,best_forecaster3, best_forecaster4) %>% 
+list(filter_best_forecaster(consensus1),filter_best_forecaster(consensus2),
+     filter_best_forecaster(consensus3),filter_best_forecaster(consensus4)) %>% 
   map(~ .x %>% mutate(recession = case_when(targety_first < 0 ~ 1,
                                T ~ 0))) %>% 
   map(~ .x %>% group_by(recession)) %>% 
-  map(~ .x %>% summarise_at(vars(matches("variable|consensus")), median, na.rm = T)) %>% 
+  map(~ .x %>% summarise_at(vars(matches("consensus")), median, na.rm = T)) %>% 
   bind_cols() %>% 
   ungroup() %>% 
-  select(recession, matches("variable|consensus")) %>%
-  mutate(recession = case_when(recession == 0 ~ "Non-recession",
-                               T ~ "Recession")) %>% 
-  mutate_at(vars(matches("variable|consensus")),round, 2) %>% 
+  select(recession, matches("consensus")) %>%
+  filter(recession ==1) %>% 
+  mutate(recession = "Recession") %>% 
+  mutate_at(vars(matches("consensus")),round, 2) %>%
+  setNames(c("Recession","Current-year, Fall","Current-year, Spring","Year-ahead, Fall","Year-ahead, Spring")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best.tex")
