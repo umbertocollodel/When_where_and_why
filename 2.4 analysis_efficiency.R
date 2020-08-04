@@ -20,41 +20,41 @@ centre_countries <- final_sr$growth %>%
 # Merge and regress by group:
 
 
-# After 2011:
+list_regressions=c(variable1 ~ centre1, variable2 ~ centre2,
+                   variable3 ~ centre3, variable4 ~ centre4)
 
-centre_countries %>% 
-  map(~ .x %>% filter(year > 2011)) %>%
+regressions <- centre_countries %>% 
   map(~ merge(fe,.x, by=c("year"))) %>%
   map(~ as.tibble(.x)) %>% 
   map(~ split(.x, .x$group)) %>% 
-  modify_depth(2, ~ tryCatch(lm(variable2 ~ centre2, .x), error = function(e){
-    cat(crayon::red("Could not run regression: check dataframe."))
-  })) %>% 
-  walk2(centre_countries_names, ~ stargazer(.x,
-                  omit.stat = c("rsq","adj.rsq","ser","f"),
-                  omit = c("Constant"),
-                  dep.var.labels = c("Forecast error"),
-                  covariate.labels = paste0(.y," growth forecast"),
-                  column.labels = c("Africa", "Emerging Asia","Emerging Europe", "Europe","Latam","Middle East"),
-                  out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/after2011_",.y,".tex"))) 
+  modify_depth(2, ~ map(list_regressions, function(x){
+    tryCatch(lm(x, .x), error = function(e){
+      cat(crayon::red("Could not run the regression. Check data\n"))
+    })})) 
 
-# Before 2011:
+# Create custom function for production table and export tables: ----
+# Note: only run for Fall issue at the three different horizons (1= current-year Fall, 3= year-ahead Fall and so on...)
 
-centre_countries %>% 
-  map(~ .x %>% filter(year <= 2011)) %>%
-  map(~ merge(fe,.x, by=c("year"))) %>%
-  map(~ as.tibble(.x)) %>% 
-  map(~ split(.x, .x$group)) %>% 
-  modify_depth(2, ~ tryCatch(lm(variable2 ~ centre2, .x), error = function(e){
-    cat(crayon::red("Could not run regression: check dataframe."))
-  })) %>% 
-  walk2(centre_countries_names, ~ stargazer(.x,
-                                            omit.stat = c("rsq","adj.rsq","ser","f"),
-                                            omit = c("Constant"),
-                                            dep.var.labels = c("Forecast error"),
-                                            covariate.labels = paste0(.y," growth forecast"),
-                                            column.labels = c("Africa", "Emerging Asia","Emerging Europe", "Europe","Latam","Middle East"),
-                                            out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/before2011_",.y,".tex"))) 
+
+produce_table_efficiency <- function(horizon=1){
+  
+  horizon=horizon  
+  
+  regressions %>% 
+    modify_depth(2, ~ .x[[horizon]]) %>% 
+    imap(~ stargazer(.x, 
+                     summary = F,
+                     rownames = F,
+                     omit.stat = c("rsq","adj.rsq","ser","f"),
+                     omit = c("Constant"),
+                     dep.var.labels = c("Forecast error"),
+                     covariate.labels = paste0(.y," growth forecast"),
+                     column.labels = c("Africa", "Emerging Asia","Emerging Europe", "Europe","Latam","Middle East"),
+                     out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/",.y,"_",horizon,".tex")))
+}
+
+c(1,3) %>% 
+  map(~ produce_table_efficiency(.x)) 
 
 
 

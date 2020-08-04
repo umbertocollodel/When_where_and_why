@@ -33,7 +33,7 @@ regressions <- centre_countries %>%
   })})) 
 
 # Create custom function for production table and export tables: ----
-# Note: only run for Fall issue at the three different horizons (1=3 years ahead, 2=4 years ahead and so on...)
+# Note: only run for Fall issue at the three different horizons (1=3 years ahead Fall, 3=4 years ahead Fall and so on...)
 
 
 produce_table_efficiency <- function(horizon=1){
