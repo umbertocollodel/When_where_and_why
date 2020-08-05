@@ -75,7 +75,31 @@ footnote=c("The table shows results from regressions of year(t + h) errors in th
 
 
 
+# Merge and regress by country: ----
+
+# Merge and regress by group:
+
+
+list_regressions=c(variable7 ~ centre7, variable8 ~ centre8, variable9 ~ centre9,
+                   variable10 ~ centre10, variable11 ~ centre11, variable12 ~ centre12)
+
+regressions <- centre_countries %>% 
+  map(~ merge(fe,.x, by=c("year"))) %>%
+  map(~ as.tibble(.x)) %>% 
+  map(~ split(.x, .x$country)) %>% 
+  modify_depth(2, ~ map(list_regressions, function(x){
+    tryCatch(lm(x, .x), error = function(e){
+      cat(crayon::red("Could not run the regression. Check data\n"))
+    })})) %>% 
+  modify_depth(2,~ discard(.x,~ class(.x) != "lm"))
 
 
 
+table_medium_efficiency <- regressions %>% 
+  modify_depth(3, ~ summary(.x)) %>% 
+  modify_depth(3, ~ .x[["coefficients"]]) %>% 
+  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
+  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
+  map(~ .x %>% bind_rows(.id = "country"))
+  
 
