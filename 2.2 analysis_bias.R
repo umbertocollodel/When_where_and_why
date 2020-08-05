@@ -233,7 +233,7 @@ list_regressions=c(variable1 ~ 1, variable2 ~ 1,
 
 regressions <- final_sr$growth %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  split(.$country) %>%
+  split(.$country_code) %>%
   map( ~ map(list_regressions, function(x){
       tryCatch(lm(x, .x), error = function(e){
         cat(crayon::red("Could not run the regression. Check data\n"))
@@ -251,7 +251,7 @@ df_bias <- regressions %>%
   map(~ discard(.x, ~ length(.x) != 4)) %>% 
   modify_depth(2, ~ as.data.frame(.x)) %>% 
   map(~ bind_rows(.x, .id = "horizon")) %>% 
-  bind_rows(.id = "country") %>% 
+  bind_rows(.id = "country_code") %>% 
   mutate(issue = case_when(horizon == 1 | horizon == 3  ~ "Fall",
                            T ~ "Spring"),
          horizon = case_when(horizon == 1 | horizon == 2 ~ "H=0",
@@ -260,7 +260,9 @@ df_bias <- regressions %>%
   mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
                               (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
                               TRUE ~ as.character(Estimate))) %>% 
-  select(country, horizon, issue, Estimate)
+  mutate(country = countrycode(country_code,"imf","country.name")) %>% 
+  select(country_code, country, horizon, issue, Estimate)
+
 
 
 # Table appendix: individual countries biases for each forecast horizon ----
@@ -268,6 +270,7 @@ df_bias <- regressions %>%
 
 df_bias %>%
   unite("horizon",horizon, issue, sep = ",") %>%
+  select(-country_code) %>% 
   spread(horizon, Estimate) %>%
   rename(Country = country) %>% 
   stargazer(summary = F, 
@@ -350,6 +353,44 @@ table_magnitude %>%
 
 
 
+# Geographical subvidision biases: ----
+
+share_aggregate_group <- df_bias %>% 
+  merge(geo_group,by=c("country_code")) %>%
+  split(.$horizon) %>% 
+  map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
+                                                       T ~ 0))) %>% 
+  map(~ .x %>% mutate(positive_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-", negate = T) ~ 1,
+                                                       T ~ 0))) %>%
+  map(~ .x %>% split(.$issue)) %>% 
+  modify_depth(2, ~ .x %>% group_by(group)) %>% 
+  modify_depth(2, ~ .x %>% summarise_at(vars(contains("significant")), mean, na.rm = T)) %>%
+  map(~ .x %>% bind_rows(.id = "issue")) %>%
+  bind_rows(.id = "horizon") %>% 
+  gather("sign","share",negative_significant:positive_significant) %>% 
+  mutate(sign = case_when(sign == "negative_significant" ~ "Optimistic",
+                          T ~ "Pessimistic")) %>% 
+  split(.$issue) %>% 
+  map(~ .x %>% 
+        ggplot(aes(group,share, fill = sign)) +
+        geom_col(position = "dodge",width = 0.5) +
+        coord_flip() +
+        facet_wrap(~horizon) + 
+        theme_minimal() +
+        xlab("") +
+        ylab("Share of countries (%)") +
+        theme(legend.position = "bottom") +
+        labs(fill="") +
+        theme(strip.text.x = element_text(size = 16),
+              axis.text.x = element_text(size = 16),
+              axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16))
+  )
+
+
+share_aggregate_group %>% 
+  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.y,"_group.pdf"),.x))
 
 # Table 2: Median forecast errors by income group and horizon (focusing on growth) ----
 
