@@ -7,3 +7,18 @@ list_df <- series %>%
 
 
 names(list_df) <- series
+
+
+# Keep only the approval:
+
+
+list_df$RGDPC %>% 
+  filter(`Review.Type` == "OldBoardApproval") %>% 
+  select(`Country.Code`,`Country.Name`, `Arrangement.Type`,`Approval.Date`,`T`,`T.1.1`) %>%
+  mutate_at(vars(matches("\\.")),funs(str_remove_all(.,"\\s")))
+
+# Need to convert the factors without messing up!
+
+
+
+# Need to merge with the target year!
