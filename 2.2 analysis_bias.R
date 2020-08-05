@@ -256,6 +256,7 @@ df_bias <- regressions %>%
                            T ~ "Spring"),
          horizon = case_when(horizon == 1 | horizon == 2 ~ "H=0",
                              horizon == 3 | horizon == 4 ~ "H=1")) %>% 
+  mutate(Estimate = round(Estimate,2)) %>% 
   mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
                               (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
                               TRUE ~ as.character(Estimate))) %>% 
@@ -266,11 +267,12 @@ df_bias <- regressions %>%
 
 
 df_bias %>%
-  unite("horizon",horizon, issue, sep = ",") %>% 
+  unite("horizon",horizon, issue, sep = ",") %>%
   spread(horizon, Estimate) %>%
+  rename(Country = country) %>% 
   stargazer(summary = F, 
             rownames = F,
-            out = paste0("../IEO_forecasts_material/output/tables/medium_term/bias/",.y,".tex"))
+            out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/by_country/growth.tex"))
 
 # Share of countries with bias by horizon ----
 
@@ -343,6 +345,7 @@ table_magnitude %>%
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias.tex")
+
 
 
 
