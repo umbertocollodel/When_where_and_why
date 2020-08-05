@@ -392,6 +392,32 @@ share_aggregate_group <- df_bias %>%
 share_aggregate_group %>% 
   iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.y,"_group.pdf"),.x))
 
+# Magnitude by group: ----
+
+
+df_bias %>% 
+  merge(geo_group,by=c("country_code")) %>%
+  split(.$horizon) %>% 
+  map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>% 
+  map(~ .x %>% filter(str_detect(Estimate,"-"))) %>% 
+  map(~ .x %>% group_by(group)) %>% 
+  map(~ .x %>% mutate(Estimate = as.numeric(str_remove_all(Estimate,"\\*")))) %>% 
+  map(~ .x %>% summarise(mean = round(mean(Estimate, na.rm = T),2),
+                         median = round(median(Estimate, na.rm = T),2),
+                         max = round(min(Estimate, na.rm = T),2))) %>% 
+  bind_rows(.id = "horizon") %>%
+  setNames(c("Horizon","Geo. group","Mean","Median","Max.")) %>% 
+  mutate(`Geo. group` = case_when(`Geo. group` == "africa" ~ "Africa",
+                                  `Geo. group` == "emerging_asia" ~ "Emerging Asia",
+                                  `Geo. group` == "europe" ~ "Europe",
+                                  `Geo. group` == "emerging_europe"~ "Emerging Europe",
+                                  `Geo. group` == "latin_america" ~ "Latin America",
+                                  T ~ "Middle East"
+  )) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_group.tex"))
+
 # Table 2: Median forecast errors by income group and horizon (focusing on growth) ----
 
 median_ws <- final_sr[["growth"]] %>%
