@@ -32,33 +32,46 @@ regressions <- centre_countries %>%
       cat(crayon::red("Could not run the regression. Check data\n"))
   })})) 
 
-# Create custom function for production table and export tables: ----
-# Note: only run for Fall issue at the three different horizons (1=3 years ahead Fall, 3=4 years ahead Fall and so on...)
+# Wrangle in table format: ----
 
 
-produce_table_efficiency <- function(horizon=1){
+table_medium_efficiency <- regressions %>% 
+  modify_depth(3, ~ summary(.x)) %>% 
+  modify_depth(3, ~ .x[["coefficients"]]) %>% 
+  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
+  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
+  map(~ .x %>% bind_rows(.id = "group")) %>% 
+  map(~ .x %>% mutate(Estimate = round(Estimate, 2))) %>% 
+  map(~ .x %>% mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
+                                           (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
+                                           TRUE ~ as.character(Estimate)))) %>% 
+  map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=3,F",
+                                          horizon == 2 ~ "H=3,S",
+                                          horizon == 3 ~ "H=4,F",
+                                          horizon == 4 ~ "H=4,S",
+                                          horizon == 5 ~ "H=5,F",
+                                          T ~ "H=5,S"))) %>% 
+  map(~ .x %>% mutate(group = case_when(group == "africa" ~ "Africa",
+                                        group == "emerging_asia" ~ "Emerging Asia",
+                                        group == "europe" ~ "Europe",
+                                        group == "emerging_europe"~ "Emerging Europe",
+                                        group == "latin_america" ~ "Latin America",
+                                        T ~ "Middle East"))) %>% 
+  map(~ .x %>% select(group, horizon, Estimate)) %>% 
+  map(~ .x %>% spread(horizon, Estimate)) %>% 
+  map(~ .x %>% rename(Group = group))
 
-horizon=horizon  
-  
-regressions %>% 
-  modify_depth(2, ~ .x[[horizon]]) %>% 
-  imap(~ stargazer(.x, 
-                  summary = F,
-                  rownames = F,
-                  omit.stat = c("rsq","adj.rsq","ser","f"),
-                  omit = c("Constant"),
-                  dep.var.labels = c("Forecast error"),
-                  covariate.labels = paste0(.y," growth forecast"),
-                  column.labels = c("Africa", "Emerging Asia","Emerging Europe", "Europe","Latam","Middle East"),
-                  out = paste0("../IEO_forecasts_material/output/tables/medium_term/efficiency/",.y,"_",horizon,".tex")))
-}
 
-# Run:
+table_medium_efficiency %>% 
+  iwalk(~ .x %>% stargazer(summary = F,
+                           rownames = F,
+                           out = paste0("../IEO_forecasts_material/output/tables/medium_term/efficiency/",.y,".tex")))
 
-c(1,3,5) %>% 
-  map(~ produce_table_efficiency(.x)) 
+# Footnote:
 
-
+footnote=c("The table shows results from regressions of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) US GDP growth (Panel I) , China GDP growth (Panel II) or Euro area GDP growth (Panel III). 
+           The four columns to the left report the estimated beta coefficient from these regressions.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/medium_term/efficiency/efficiency_footnote.tex")
 
 
 
