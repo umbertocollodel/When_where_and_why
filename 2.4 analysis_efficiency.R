@@ -32,29 +32,40 @@ regressions <- centre_countries %>%
       cat(crayon::red("Could not run the regression. Check data\n"))
     })})) 
 
-# Create custom function for production table and export tables: ----
-# Note: only run for Fall issue at the three different horizons (1= current-year Fall, 3= year-ahead Fall and so on...)
+# Wrangle in table format: ----
 
 
-produce_table_efficiency <- function(horizon=1){
-  
-  horizon=horizon  
-  
-  regressions %>% 
-    modify_depth(2, ~ .x[[horizon]]) %>% 
-    imap(~ stargazer(.x, 
-                     summary = F,
-                     rownames = F,
-                     omit.stat = c("rsq","adj.rsq","ser","f"),
-                     omit = c("Constant"),
-                     dep.var.labels = c("Forecast error"),
-                     covariate.labels = paste0(.y," growth forecast"),
-                     column.labels = c("Africa", "Emerging Asia","Emerging Europe", "Europe","Latam","Middle East"),
-                     out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/",.y,"_",horizon,".tex")))
-}
+table_sr_efficiency <- regressions %>% 
+  modify_depth(3, ~ summary(.x)) %>% 
+  modify_depth(3, ~ .x[["coefficients"]]) %>% 
+  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
+  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
+  map(~ .x %>% bind_rows(.id = "group")) %>% 
+  map(~ .x %>% mutate(Estimate = round(Estimate, 2))) %>% 
+  map(~ .x %>% mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
+                              (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
+                              TRUE ~ as.character(Estimate)))) %>% 
+  map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
+                                          horizon == 2 ~ "H=0,S",
+                                          horizon == 3 ~ "H=1,F",
+                                          T ~ "H=1,S"))) %>% 
+  map(~ .x %>% mutate(group = case_when(group == "africa" ~ "Africa",
+                                  group == "emerging_asia" ~ "Emerging Asia",
+                                  group == "europe" ~ "Europe",
+                                  group == "emerging_europe"~ "Emerging Europe",
+                                  group == "latin_america" ~ "Latin America",
+                                  T ~ "Middle East"))) %>% 
+  map(~ .x %>% select(group, horizon, Estimate)) %>% 
+  map(~ .x %>% spread(horizon, Estimate)) %>% 
+  map(~ .x %>% rename(Group = group))
 
-c(1,3) %>% 
-  map(~ produce_table_efficiency(.x)) 
+
+table_sr_efficiency %>% 
+  iwalk(~ .x %>% stargazer(summary = F,
+                           rownames = F,
+                           out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/",.y,".tex")))
+
+
 
 
 
