@@ -320,7 +320,7 @@ share_aggregate %>%
 # Footnote:
 
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the World Economic
-           Outlook (Fall or Spring) with a statistically signicant negative and positive bias. Test of statistical
+           Outlook (Fall or Spring) with a 5% statistically signicant negative or positive bias. Test of statistical
            significance is run individually with country-by-country regressions.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/aggregate_footnote.tex")
 
@@ -343,13 +343,18 @@ table_magnitude <- df_bias %>%
   arrange(negative) %>% 
   setNames(c("Horizon","Type of bias","Mean","Median", "Min.", "Max."))
 
+# Export:
 
 table_magnitude %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias.tex")
 
+# Footnote:
 
+footnote=c("Summary statistics of country-by-country intercepts significant at 5% level.
+           Fall and Spring issues of WEO pooled together by horizon.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_footnote.tex")
 
 
 
@@ -459,7 +464,12 @@ rbind(full_sample_recession, by_group_recession) %>%
             out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession.tex")
   
   
-  
+
+# Footnote:
+
+footnote=c("Median forecast error by horizon, issue and geographical group. Recessions are
+           defined as periods of negative growth.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession_footnote.tex")
 
 
 

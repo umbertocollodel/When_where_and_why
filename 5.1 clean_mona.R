@@ -22,3 +22,6 @@ list_df$RGDPC %>%
 
 
 # Need to merge with the target year!
+
+
+# Need to understand how to define (in the data) - find a variable - for big programs!
