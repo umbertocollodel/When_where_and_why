@@ -67,8 +67,8 @@ table_sr_efficiency %>%
 
 # Footnote:
 
-footnote=c("The table shows results from regressions of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) US GDP growth (Panel I) , China GDP growth (Panel II) or Euro area GDP growth (Panel III). 
-           The four columns to the left report the estimated beta coefficient from these regressions.") %>% 
+footnote=c("The table shows results from regressions of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) China GDP growth (Table 4) , Germany GDP growth (Table 5) or US GDP growth (Table 6). 
+           The four columns report the estimated beta coefficient from these regressions.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/efficiency_footnote.tex")
 
 
