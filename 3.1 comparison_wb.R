@@ -248,6 +248,12 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/
     
     
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group.pdf")
+
+# Footnote:
+
+footnote=c("The figure shows the share of countries for which WEO forecasts produce a lower RMSE
+           compared to GEP forecasts.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group_footnote.tex")
     
 
 # Figure 4: magnitude of RMSE difference by geographical group: -----
@@ -280,10 +286,11 @@ group %>%
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group_magnitude.pdf")
 
+# Footnote:
 
-footnote=c("IEO calculations. Median (country-by-country) difference between WEO root mean squared error and GEP root mean squared error as a percentage
+footnote=c("The figure shows the median (country-by-country) difference between WEO root mean squared error and GEP root mean squared error as a percentage
            of the latter.") %>% 
-  cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/comparison_rmse_group_magnitude_footnote.tex")
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/comparison_rmse_group_magnitude_footnote.tex")
 
 
 # Table 1: forecast errors of both institutions during recessions and non-recessions ---- 

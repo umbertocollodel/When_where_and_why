@@ -159,7 +159,7 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/consensus/comparison
 
 # Footnote:
 
-footnote=c("Share of countries with lower RMSE from WEO forecasts compared to Consensus Forecasts") %>% 
+footnote=c("The figure shows the share of countries for which WEO forecasts produce a lower RMSE compared to the mean of individual Consensus forecasts RMSE.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse_footnote.tex")
 
 # Uncertainty of consensus forecasts: ----
@@ -243,7 +243,9 @@ list(filter_best_forecaster(consensus1),filter_best_forecaster(consensus2),
 
 # Footnote:
 
-# TO ADD!
+footnote=c("The table shows the median forecast error for the 'best' Consensus forecasters i.e. the one that produce forecasts
+           closest to the actual value for recession periods.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best_footnote.tex")
 
 
 
