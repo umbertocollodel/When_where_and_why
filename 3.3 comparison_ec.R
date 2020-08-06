@@ -80,6 +80,12 @@ plot_evolution(variable4, ec4) %>%
   save.plot("../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/year_ahead_spring_comparison.pdf")
 
 
+# Footnote:
+
+footnote=c("The figure shows the median forecast error by institution and year.") %>% 
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/EC/evolution_bias/evolution_bias_footnote.tex")
+
+
 # Figure 3: share of countries with lower RMSE for IMF by region (in this case only advanced economies) ----
 
 raw <- comparison_ec %>% 
@@ -129,6 +135,12 @@ raw %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/EC/comparison_rmse_group.pdf")
 
 
+# Footnote:
+
+footnote=c("The figure shows the share of countries for which WEO forecasts produce a lower RMSE
+           compared to AMECO forecasts.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/comparison/EC/comparison_rmse_group_footnote.tex")
+
 # Figure 4: magnitude of RMSE difference by geographical group (in this case only advanced economies): -----
 
 rmse_comparison %>% 
@@ -157,7 +169,9 @@ rmse_comparison %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/EC/comparison_rmse_group_magnitude.pdf")
 
 
-footnote=c("IEO calculations. Median (country-by-country) difference between WEO root mean squared error and AMECO root mean squared error as a percentage
+# Footnote:
+
+footnote=c("The figure shows the median (country-by-country) difference between WEO root mean squared error and AMECO root mean squared error as a percentage
            of the latter.") %>% 
   cat(file ="../IEO_forecasts_material/output/figures/comparison/EC/comparison_rmse_group_magnitude_footnote.tex")
 
@@ -215,6 +229,7 @@ issues %>%
   map2(issues, ~ .x %>% stargazer(rownames = F,
                                   summary = F,
                                   out = paste0("../IEO_forecasts_material/output/tables/comparison/EC/recession_forecast_error_",.y,".tex")))
+
 
 
 
