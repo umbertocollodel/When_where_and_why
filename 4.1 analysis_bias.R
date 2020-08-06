@@ -89,7 +89,7 @@ share_aggregate %>%
 # Footnote:
 
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the World Economic
-           Outlook (Fall or Spring) with a statistically signicant negative and positive bias. Test of statistical
+           Outlook (Fall or Spring) with a 5% statistically signicant negative or positive bias. Test of statistical
            significance is run individually with country-by-country regressions.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/aggregate_footnote.tex")
   
@@ -120,6 +120,14 @@ table_magnitude %>%
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias.tex")
+
+
+# Footnote:
+
+footnote=c("Summary statistics of country-by-country intercepts significant at 5% level.
+           Fall and Spring issues of WEO pooled together by horizon.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_footnote.tex")
+
 
 # Geographical subvidision biases: ----
 
