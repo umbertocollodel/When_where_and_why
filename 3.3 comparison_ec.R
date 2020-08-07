@@ -199,6 +199,11 @@ rmse_comparison %>%
   stargazer(summary= F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/EC/full_rmse.tex")
+# Footnote:
+
+footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the AMECO forecasts. 
+           We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the AMECO forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
+  cat(file ="../IEO_forecasts_material/output/tables/comparison/EC/full_rmse_footnote.tex")
 
 
 

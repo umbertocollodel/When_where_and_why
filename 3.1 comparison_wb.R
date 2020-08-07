@@ -216,6 +216,12 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/
                 rownames = F,
                 out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full.tex")
     
+    # Footnote:
+    
+    footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the Global Economic Prospect (GEP) forecasts. 
+               We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the GEP forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
+      cat(file ="../IEO_forecasts_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full_footnote.tex")
+    
 # Figure 3: share of countries with lower RMSE for IMF by region ----
     
     group %>% 
