@@ -52,10 +52,10 @@ plot_rel_bias_big(variable2) %>%
 
 # Footnote: ----
 
-footnote=c("All programs in the period 2002-2018 with the exception of precautionary ones. Exceptional
+footnote=c("Includes all programs in the period 2002-2018 with the exception of precautionary ones. Exceptional
            access lending from SPR programs sheet. When no information on whether or not exceptional
            access, program excluded.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.pdf")
+  cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.tex")
 
 
 
