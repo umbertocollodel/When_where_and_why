@@ -16,6 +16,7 @@ mona_macro <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020
   setNames(c("program_id","country","program_type","date","year","variable1","variable2")) %>%
   mutate(country = str_to_sentence(tolower(country))) %>% 
   mutate(country_code = countrycode(country,"country.name","imf")) %>% 
+  mutate(date = as.Date(date)) %>% 
   select(country_code, country, program_id,date, year, program_type, variable1, variable2)
 
 
@@ -85,6 +86,7 @@ The blue line denotes the 3 years moving average and the red dot the highest val
 
 
 # Clean sheet with dummy for exceptional access: ----
+# Note: origin for date format changes according to machine used.
 
 mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.xlsx") %>% 
   select(-c(1, 7, 18, 20, 22, 24, 26, 28, 30, 35, 37, 40)) %>% 
@@ -93,9 +95,21 @@ mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.
   select(`IFS Code`,Year,`Date of Arrangement`,`Precautionary at program approval`,`Exceptional Access`,`Total Approved Amount (percent of current quota)`) %>%
   setNames(c("country_code","year","date","precautionary","exceptional_access","amount_percent_quota")) %>% 
   mutate(country = countrycode(country_code,"imf","country.name")) %>%
-  mutate(amount_percent_quota = as.numeric(amount_percent_quota)) %>% 
+  mutate(amount_percent_quota = as.numeric(amount_percent_quota)) %>%
+  mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>% 
   filter(year >= 2002) %>% 
   select(country_code, country, everything()) 
+
+# Combine the two:
+# why the number of programs decreases?
+
+
+final_mona <- merge(mona_macro, mona_amount) %>% 
+  as_tibble() %>% 
+  
+  
+
+
 
 
 
