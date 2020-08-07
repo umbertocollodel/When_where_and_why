@@ -34,7 +34,7 @@ evolution <- mona_macro %>%
   ggplot(aes(year)) +
   geom_line(aes(y=var_ma),size = 1, col = "darkblue") +
   geom_col(aes(y=n), width = 0.3,fill="darkgrey",alpha = 0.4) +
-  geom_point(aes(y=max_var),col="red",size=2)+
+  geom_point(aes(y=max_var),col="red",size=4)+
   theme_minimal() +
   xlab("") +
   ylab("") +
@@ -105,8 +105,24 @@ mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.
 
 
 final_mona <- merge(mona_macro, mona_amount) %>% 
-  as_tibble() %>% 
-  
+  as_tibble()
+
+
+# Table appendix: list of programs
+
+
+final_mona %>% 
+  select(-country_code, -contains("variable")) %>% 
+  select(program_id, everything()) %>%
+  filter(year < 2019) %>% 
+  arrange(country) %>% 
+  mutate(exceptional_access = str_replace(exceptional_access, "n.a.","/")) %>%
+  mutate(amount_percent_quota = round(amount_percent_quota,2)) %>% 
+  mutate(date = as.character(date)) %>% 
+  setNames(c("Program ID","Country","Date","Year","Type of program","Precautionary at approval","Exceptional access","Total amount (% quota)")) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/programs/list_programs.tex")
   
 
 
