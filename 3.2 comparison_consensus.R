@@ -125,6 +125,12 @@ rmse_comparison %>%
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
   
+# Footnote:
+
+footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the Consensus Economics (CE) forecasts. 
+We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the CE forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
+cat(file ="../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full_footnote.tex")
+
 # Figure 3: share of countries with lower RMSE for IMF by region  ----
 # Enhancement: add the number of countries by plot
 
