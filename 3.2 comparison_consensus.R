@@ -8,7 +8,7 @@ consensus <- x %>%
   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","consensus"))) %>% 
   select(-country)
 
-comparison_consensus <- final_sr$gdp %>%
+comparison_consensus <- final_sr$growth %>%
   merge(consensus, by = c("country_code","year")) %>% 
   as_tibble()
 
@@ -34,14 +34,16 @@ comparison_consensus %>%
   group_by(country_code) %>% 
   slice(1) %>% 
   mutate(country_name = countrycode(country_code, "imf","country.name")) %>% 
-  arrange(country_name) %>% 
-  mutate(group = case_when(group == "emerging_asia" ~ "Emerging Asia",
+  mutate(group = case_when(group == "africa" ~ "Africa",
+                           group == "emerging_asia" ~ "Emerging Asia",
                            group == "emerging_europe" ~ "Emerging Europe",
                            group == "latin_america" ~ "Latin America",
                            group == "middle_east" ~ "Middle East",
                            T ~ "Advanced Economies")) %>% 
   ungroup() %>% 
   select(country_name, group) %>%
+  arrange(group,country_name) %>%
+  setNames(c("Country","Geo. group")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/consensus/list_countries.tex")
