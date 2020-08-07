@@ -1,27 +1,82 @@
+# New database ----
 
-series=c("RGDPC","PCPIC","BCAX","GPB_Y")
-
-list_df <- series %>% 
-  map(~ read.csv("../IEO_forecasts_material/raw_data/mona/ArchMecon.csv") %>% filter(str_detect(Mneumonic,.x))) %>%
-  map(~ .x %>% as_tibble())
-
-
-names(list_df) <- series
-
-
-# Keep only the approval:
-
-
-list_df$RGDPC %>% 
-  filter(`Review.Type` == "OldBoardApproval") %>% 
-  select(`Country.Code`,`Country.Name`, `Arrangement.Type`,`Approval.Date`,`T`,`T.1.1`) %>%
-  mutate_at(vars(matches("\\.")),funs(str_remove_all(.,"\\s")))
-
-# Need to convert the factors without messing up!
+mona_macro <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020_macro.xlsx") %>%
+  filter(`Review Type` == "R0") %>% 
+  filter(Description == "Gross domestic product, constant prices") %>% 
+  select(`Arrangement Number`,`Country Name`,`Arrangement Type`,`Approval Date`,
+         `Approval Year`,`T-1`,`T`,`T+1`) %>% 
+  mutate(`T+1` = ((`T+1` - `T`)/`T`)*100,
+         `T` = ((`T` - `T-1`)/`T-1`)*100) %>% 
+  select(-`T-1`) %>% 
+  setNames(c("program_id","country","program_type","date","year","variable1","variable2")) %>%
+  mutate(country = str_to_sentence(tolower(country))) %>% 
+  mutate(country_code = countrycode(country,"country.name","imf")) %>% 
+  select(country_code, country, program_id,date, year, program_type, variable1, variable2)
 
 
 
-# Need to merge with the target year!
+# Simple analysis: evolution of programs over time and top rankers ----
+
+names=c("evolution","top_rankers")
+
+evolution <- mona_macro %>% 
+  group_by(year) %>%
+  count() %>%
+  ungroup() %>% 
+  mutate(var_ma = zoo::rollmean(n, 3, align = "center", fill = NA))  %>%
+  mutate(max_var=ifelse(var_ma>=quantile(var_ma,na.rm=T,p=0.99),var_ma,NA)) %>%
+  filter(year <= 2018) %>% 
+  ggplot(aes(year)) +
+  geom_line(aes(y=var_ma),size = 1, col = "darkblue") +
+  geom_col(aes(y=n), width = 0.3,fill="darkgrey",alpha = 0.4) +
+  geom_point(aes(y=max_var),col="red",size=2)+
+  theme_minimal() +
+  xlab("") +
+  ylab("") +
+  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+  theme(axis.text.x = element_text(size = 18),
+        axis.text.y = element_text(size = 18))
+
+top_rankers <- mona_macro %>% 
+  group_by(country_code) %>%
+  count() %>% 
+  merge(geo_group) %>%
+  as_tibble() %>% 
+  mutate(country = countrycode(country_code,"imf","country.name")) %>%
+  mutate(group = case_when(group == "africa" ~ "Africa",
+                           group == "emerging_europe" ~ "Emerging Europe",
+                           group == "latin_america" ~ "Latin America",
+                           group == "middle_east" ~ "Middle East")) %>% 
+  ungroup() %>%
+  arrange(-n) %>%
+  slice(1:20) %>% 
+  mutate(country = reorder(as.factor(country),n)) %>% 
+  ggplot(aes(country, n, fill = group)) +
+  geom_col(width = 0.3) +
+  coord_flip() +
+  theme_minimal() +
+  ylab("") +
+  xlab("") +
+  labs(fill = "") +
+  theme(legend.position = "bottom") +
+  theme(panel.grid.major.y = element_blank(),
+            panel.grid.minor.y = element_blank()) +
+  theme(axis.text.x = element_text(size=18),
+        axis.text.y = element_text(size = 18),
+        legend.text = element_text(size = 16)) 
+  
 
 
-# Need to understand how to define (in the data) - find a variable - for big programs!
+list(evolution,top_rankers) %>% 
+  walk2(names,~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/programs/summary/",.y,".pdf"),.x))
+
+
+
+
+  
+mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.xlsx") %>% 
+  as_tibble() %>% 
+  slice(-1) %>% 
+  row_to_names(1) %>%
+  select(Country) %>% 
+  setNames(c("country"))
