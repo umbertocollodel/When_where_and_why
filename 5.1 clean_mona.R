@@ -1,4 +1,9 @@
-# New database ----
+####### Script to clean the MONA database
+
+
+# Clean MONA with macro-variables 2002-2020 ----
+# Note: for the moment we focus only on board approval forecasts
+# in the future work also on correction of forecasts with reviews.
 
 mona_macro <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020_macro.xlsx") %>%
   filter(`Review Type` == "R0") %>% 
@@ -12,7 +17,6 @@ mona_macro <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020
   mutate(country = str_to_sentence(tolower(country))) %>% 
   mutate(country_code = countrycode(country,"country.name","imf")) %>% 
   select(country_code, country, program_id,date, year, program_type, variable1, variable2)
-
 
 
 # Simple analysis: evolution of programs over time and top rankers ----
@@ -66,6 +70,7 @@ top_rankers <- mona_macro %>%
         legend.text = element_text(size = 16)) 
   
 
+# Export:
 
 list(evolution,top_rankers) %>% 
   walk2(names,~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/programs/summary/",.y,".pdf"),.x))
@@ -78,10 +83,20 @@ The blue line denotes the 3 years moving average and the red dot the highest val
   cat(file="../IEO_forecasts_material/output/figures/programs/summary/evolution_footnote.tex")
 
 
-  
+
+# Clean sheet with dummy for exceptional access: ----
+
 mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.xlsx") %>% 
-  as_tibble() %>% 
+  select(-c(1, 7, 18, 20, 22, 24, 26, 28, 30, 35, 37, 40)) %>% 
   slice(-1) %>% 
   row_to_names(1) %>%
-  select(Country) %>% 
-  setNames(c("country"))
+  select(`IFS Code`,Year,`Date of Arrangement`,`Precautionary at program approval`,`Exceptional Access`,`Total Approved Amount (percent of current quota)`) %>%
+  setNames(c("country_code","year","date","precautionary","exceptional_access","amount_percent_quota")) %>% 
+  mutate(country = countrycode(country_code,"imf","country.name")) %>%
+  mutate(amount_percent_quota = as.numeric(amount_percent_quota)) %>% 
+  filter(year >= 2002) %>% 
+  select(country_code, country, everything()) 
+
+
+
+
