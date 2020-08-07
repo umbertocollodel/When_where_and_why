@@ -71,6 +71,11 @@ list(evolution,top_rankers) %>%
   walk2(names,~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/programs/summary/",.y,".pdf"),.x))
 
 
+# Footnote:
+
+footnote=c("Grey bars denote the number of countries entering an IMF program. 
+The blue line denotes the 3 years moving average and the red dot the highest value of the moving average over the period.") %>% 
+  cat(file="../IEO_forecasts_material/output/figures/programs/summary/evolution_footnote.tex")
 
 
   
