@@ -2,7 +2,7 @@
 
 
 
-# First regressions: ----
+# Scatterplots relationship amount approved (% of quota) and forecast error: ----
 
 
 first_reg <- final$growth %>%
@@ -50,7 +50,23 @@ plot_rel_bias_big(variable1) %>%
 plot_rel_bias_big(variable2) %>% 
   ggsave(filename = "../IEO_forecasts_material/output/figures/programs/bias_big/year_ahead.pdf")
 
+# Footnote: ----
 
+footnote=c("All programs in the period 2002-2018 with the exception of precautionary ones. Exceptional
+           access lending from SPR programs sheet. When no information on whether or not exceptional
+           access, program excluded.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.pdf")
+
+
+
+# Regressions amount approved (% of quota) and forecast error: -----
+
+a <- first_reg %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  filter(exceptional_access != "n.a.")
+
+lm(variable1 ~ amount_percent_quota, a) %>% 
+  summary()
 
 
 
