@@ -123,6 +123,11 @@ return(final_forecasts)
 #' 
 #' @return tibble with two identifiers (imf code and year) and actual value of variable
 #' 
+#' @details Format sheets: every sheet must have observations starting from 7th column, otherwise problems
+#' with gather. 
+#' @details Aggregate areas forecasts excluded.
+#' 
+
 
 
 get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
@@ -162,7 +167,11 @@ get_first_settled_weo <- function(path){
 #' 
 #' @param path path to the xlsx workbook in the locale.
 #' 
-#' @return tibble with two identifiers (imf code and year) and actual value of variable
+#' @return tibble with two identifiers (imf code and year) and actual value of variable.
+#' 
+#' @details Format sheets: every sheet must have observations starting from 7th column, otherwise problems
+#' with gather. 
+#' @details Aggregate areas forecasts excluded.
 #' 
 
 
