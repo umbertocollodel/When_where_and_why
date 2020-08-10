@@ -6,6 +6,26 @@
 
 wrangle_weo_updates <- function(path){
   
+#' Wrangling weo January and July updates.
+#' 
+#' Wrangling weo forecasts from excel sheet format for every issue (single variable) to a 
+#' more user-friendly database.
+#' 
+#' @param path path to the xlsx workbook in the locale.
+#' @param year_exclude character string. Not considering forecasts above this year.
+#' 
+#' @return tibble with three identifiers (imf code, country name and year forecasted) and
+#' variable1 to variable2, indicating respectively current-year and year-ahead forecast.
+#' 
+#' @details Format sheets: every sheet must have observations starting from 7th column, otherwise problems
+#' with gather. 
+#' @details Aggregate areas forecasts excluded.
+#' @details Missing obs for first year forecasted because for first year no forecasts other than same year issues
+#' and so on...
+#' 
+  
+  
+  
 path = path
 
 sheets_name <- getSheetNames(path)
