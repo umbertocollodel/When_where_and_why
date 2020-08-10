@@ -1,4 +1,4 @@
-# Script to prepare European Commission data 
+############### Script to prepare European Commission data 
 
 # Scraping EC website and download the files: -----
 
@@ -24,7 +24,6 @@ urls %>%
   ))
 
 
-# Could create a function to get all EC forecasts!
 
 # Unzip all files -----
 
