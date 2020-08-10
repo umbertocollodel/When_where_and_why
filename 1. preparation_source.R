@@ -1,7 +1,9 @@
-# Main script for the cleaning of raw data:
+############# Main script for the cleaning of raw data:
+# Cleans global environment, loads required packages for the section and runs
+# individual scripts of section.
 
 
-##############Prepare the environment
+# Prepare the environment: -----
 
 remove(list = ls())
 
@@ -15,9 +17,13 @@ lapply(packages, function(x){
 }
   )
 
-###############Source the files:
+# Source the files of first section: ------
 
-source("1.1 prepare_weo.R")
+
+list.files() %>% 
+  str_subset("^1.\\d") %>%
+  walk(~ source(.x))
+  
 
 
 
