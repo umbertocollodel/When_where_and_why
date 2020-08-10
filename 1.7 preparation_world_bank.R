@@ -1,6 +1,7 @@
-##### Script to prepare World Bank forecast data ----
-# Note: sample goes from 110 to 130 form the first to last year. Should be cleaned
+########## Script to prepare World Bank forecast data ----
+# Note 1: sample goes from 110 to 130 form the first to last year. Should be cleaned
 # further to remove undesirable features.
+# Note 2: only current-year and year-ahead forecasts in dataframe furnished.
 
 original_wb <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/GEP_forecast_vintages_06232020.xlsx",
           sheet = "Table_long") %>% 
