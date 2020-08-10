@@ -1,5 +1,5 @@
 # DESCRIPTION: the script produces the final dataframe for the comparison between forecasted values in WEO
-# and actual values and saves it in the intermediate_data directory of the project.
+# and actual values and saves it in the intermediate data directory of the project.
 
 
 # Wrangling weo forecasts function ----
@@ -10,17 +10,23 @@
 #' more user-friendly database.
 #' 
 #' @param path path to the xlsx workbook in the locale.
+#' @param year_exclude character string. Not considering forecasts above this year.
 #' 
 #' @return tibble with three identifiers (imf code, country name and year forecasted) and
 #' variable1 to 12 that correspond to the five years horizon forecast i.e. from Oct at t
 #' to Apr at t-5
 #' 
+#' @details Format sheets: every sheet must have observations starting from 7th column, otherwise problems
+#' with gather. 
+#' @details Aggregate areas forecasts excluded.
 #' @details Missing obs for first year forecasted because for first year no forecasts other than same year issues
 #' and so on...
+#' 
 
 
 
-wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx") {
+
+wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", year_exclude = "2019") {
 
 path = path
 
@@ -72,7 +78,7 @@ for(i in 1:length(forecasts)){
 
 
 forecasts <- forecasts %>% 
-  discard(~ unique(.x$year_forecasted) > 2019)
+  discard(~ unique(.x$year_forecasted) > year_exclude)
 
 
 # Naming similar to Zidong and bind together:
@@ -107,9 +113,9 @@ return(final_forecasts)
 
 # Getting weo actual value (last edition) function -----
 
-#' Getting weo actual values
+#' Getting weo actual values (from last edition)
 #' 
-#' From excel sheets with all issues of weo publication, gets a specied sheet and manipulates it
+#' From excel sheets with all issues of weo publication, gets a specific sheet and manipulates it
 #' in user-friendly format.
 #' 
 #' @param path path to the xlsx workbook in the locale.
@@ -146,9 +152,19 @@ get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xls
 
 
 
-# Getting weo actual value (first settled actual) function ----
+# Getting weo actual value (first settled) function ----
 
 get_first_settled_weo <- function(path){
+  
+#' Getting weo actual values (October WEO issue of the following year)
+#' 
+#' From excel sheets with all issues of weo publication, gets all the first settled actual values.
+#' 
+#' @param path path to the xlsx workbook in the locale.
+#' 
+#' @return tibble with two identifiers (imf code and year) and actual value of variable
+#' 
+
 
 path = path
 
