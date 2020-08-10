@@ -1,3 +1,7 @@
+######## Script to prepare a dataframe with imf country code and geographic group
+# Note: advanced economies apart from Euro area not included.
+
+
 # Prepare country group:
 
 groups <- list.files("../IEO_forecasts_material/raw_data/country_group_geography/") %>% 
