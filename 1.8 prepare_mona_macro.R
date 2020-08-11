@@ -44,3 +44,6 @@ final_mona <- merge(mona_macro, mona_amount) %>%
   arrange(country) %>% 
   select(country_code, country, everything())
 
+
+final_mona %>% 
+saveRDS("../IEO_forecasts_material/intermediate_data/mona/mona_macro_clean.RDS")
