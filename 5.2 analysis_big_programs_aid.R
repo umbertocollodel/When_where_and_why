@@ -1,16 +1,45 @@
-##### Script to analyse relationship between bias and "big" programs: -----
+########### Script to analyse relationship between bias and "big" programs: -----
 
 
+# Need actual value of real GDP
+
+load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+rgdp_weo <- x
+
+final_mona <- rgdp_weo %>%
+  select(country_code, country, year, targety_first) %>% 
+  merge(mona_rgdp, by = c("country_code","country","year")) %>% 
+  as_tibble() 
+
+
+
+# Simple graph of median forecast error: ----
+
+final_mona %>% 
+  filter(exceptional_access != "n.a." & exceptional_access != "..") %>% 
+  group_by(program_type) %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
+  summarise_at(vars(contains("variable")),median,na.rm = T) %>% 
+  mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
+                                  program_type == "PCL"| program_type == "PLL" ~ "Concessional",
+                                  T ~ "Non-concessional")) %>%
+  gather("horizon","value",variable1:variable2) %>% 
+  split(.$horizon) %>% 
+  map(~ .x %>% arrange(value)) %>% 
+  map(~ .x %>% mutate(program_type = reorder(as.factor(program_type), value))) %>% 
+  map(~ .x %>% 
+        ggplot(aes(program_type, value, fill = concessional)) +
+        geom_col(width = 0.2) +
+        labs(fill = "") +
+        xlab("") +
+        ylab("Forecast error (%)") +
+        theme_minimal() +
+        theme(legend.position = "bottom") +
+        theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) + 
+        theme(panel.grid.major.x = element_blank()))
+  
 
 # Scatterplots relationship amount approved (% of quota) and forecast error: ----
-
-
-first_reg <- final$growth %>%
-  select(country_code, country, year, targety_first) %>% 
-  merge(final_mona, by = c("country_code","country","year")) %>% 
-  as_tibble() %>% 
-  filter(precautionary == "N")
-
 
 
 plot_rel_bias_big <- function(variable){
@@ -18,7 +47,7 @@ plot_rel_bias_big <- function(variable){
 
 variable_quosure <- enquo(variable)  
   
-first_reg %>% 
+final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   filter(exceptional_access != "n.a.") %>% 
   mutate(exceptional_access = case_when(exceptional_access == "Y" ~ "Exceptional",
@@ -61,13 +90,17 @@ footnote=c("Includes all programs in the period 2002-2018 with the exception of 
 
 # Regressions amount approved (% of quota) and forecast error: -----
 
-a <- first_reg %>% 
+
+regression_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(exceptional_access != "n.a.")
+  filter(exceptional_access != "n.a." & exceptional_access != "..") 
 
-lm(variable1 ~ amount_percent_quota, a) %>% 
-  summary()
+formulas=c("variable1 ~ amount_percent_quota",
+           "variable2 ~ amount_percent_quota")
 
+formulas %>% 
+  map(~ lm(.x,regression_data)) %>% 
+  map(~ summary(.x))
 
 
 
