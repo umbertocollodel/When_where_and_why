@@ -7,7 +7,7 @@
 
 names=c("evolution","top_rankers")
 
-evolution <- mona_rgdp %>% 
+evolution <- mona_summary %>% 
   group_by(year) %>%
   count() %>%
   ungroup() %>% 
@@ -25,7 +25,7 @@ evolution <- mona_rgdp %>%
   theme(axis.text.x = element_text(size = 18),
         axis.text.y = element_text(size = 18))
 
-top_rankers <- mona_rgdp %>% 
+top_rankers <- mona_summary %>% 
   group_by(country_code) %>%
   count() %>% 
   merge(geo_group) %>%
@@ -71,7 +71,7 @@ footnote=c("Grey bars denote the number of countries entering an IMF program.
 # Table appendix: list of programs -----
 
 
-mona_rgdp %>% 
+mona_summary %>% 
   select(-country_code, -contains("variable"),-original_duration) %>% 
   select(program_id, everything()) %>%
   filter(year < 2019) %>% 

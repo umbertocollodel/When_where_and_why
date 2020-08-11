@@ -18,6 +18,7 @@ lapply(packages, function(x){
 )
 
 
+mona_summary <- readRDS("../IEO_forecasts_material/intermediate_data/mona/mona_summary_stat.RDS")
 mona_rgdp <- readRDS("../IEO_forecasts_material/intermediate_data/mona/mona_macro_clean.RDS")
 
 
