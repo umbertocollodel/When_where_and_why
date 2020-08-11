@@ -57,6 +57,7 @@ final_mona <- merge(mona_macro, mona_amount, all.x = T) %>%
                  T ~ .))) %>% 
   distinct(country,year,program_id, .keep_all = T) %>% 
   mutate_at(vars(precautionary:exceptional_access),funs(case_when(. == "n.a." ~ NA_character_,
+                                                                  . == ".." ~ NA_character_,
                                                                   T ~ .))) %>% 
   select(country_code, country, everything())
 
