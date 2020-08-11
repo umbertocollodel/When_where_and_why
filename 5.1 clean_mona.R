@@ -1,4 +1,4 @@
-####### Script to clean the MONA database
+####### Script to prepare the MONA database
 
 
 # Clean MONA with macro-variables 2002-2020 ----
