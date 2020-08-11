@@ -16,7 +16,7 @@ final_mona <- rgdp_weo %>%
 # Simple graph of median forecast error: ----
 
 final_mona %>% 
-  filter(exceptional_access != "n.a." & exceptional_access != "..") %>% 
+  filter(!is.na(exceptional_access)) %>% 
   group_by(program_type) %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
   summarise_at(vars(contains("variable")),median,na.rm = T) %>% 
@@ -49,7 +49,7 @@ variable_quosure <- enquo(variable)
   
 final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(exceptional_access != "n.a.") %>% 
+  filter(!is.na(exceptional_access)) %>% 
   mutate(exceptional_access = case_when(exceptional_access == "Y" ~ "Exceptional",
                                         T ~ "Normal")) %>% 
   ggplot(aes(amount_percent_quota, !!variable_quosure,col = exceptional_access)) +
@@ -93,10 +93,12 @@ footnote=c("Includes all programs in the period 2002-2018 with the exception of 
 
 regression_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(exceptional_access != "n.a." & exceptional_access != "..") %>% 
+  filter(!is.na(exceptional_access)) %>% 
   mutate(months_remaining = 12 - lubridate::month(date))
 
-formulas=c("variable1 ~ amount_percent_quota + months_remaining",
+formulas=c("variable1 ~ amount_percent_quota",
+           "variable2 ~ amount_percent_quota",
+           "variable1 ~ amount_percent_quota + months_remaining",
            "variable2 ~ amount_percent_quota + months_remaining")
 
 formulas %>% 
