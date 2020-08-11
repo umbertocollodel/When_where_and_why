@@ -49,6 +49,9 @@ variable_quosure <- enquo(variable)
   
 final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  filter(!is.na(exceptional_access)) %>% 
+  mutate(exceptional_access = case_when(exceptional_access == "Y" ~ "Exceptional",
+                                        T ~ "Normal")) %>% 
   ggplot(aes(amount_percent_quota, !!variable_quosure,col = exceptional_access)) +
   geom_point(size = 5,alpha = 0.6) +
   xlab("") +
