@@ -93,10 +93,11 @@ footnote=c("Includes all programs in the period 2002-2018 with the exception of 
 
 regression_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(exceptional_access != "n.a." & exceptional_access != "..") 
+  filter(exceptional_access != "n.a." & exceptional_access != "..") %>% 
+  mutate(months_remaining = 12 - lubridate::month(date))
 
-formulas=c("variable1 ~ amount_percent_quota",
-           "variable2 ~ amount_percent_quota")
+formulas=c("variable1 ~ amount_percent_quota + months_remaining",
+           "variable2 ~ amount_percent_quota + months_remaining")
 
 formulas %>% 
   map(~ lm(.x,regression_data)) %>% 
