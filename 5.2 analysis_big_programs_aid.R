@@ -7,8 +7,8 @@ load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
 rgdp_weo <- x
 
 final_mona <- rgdp_weo %>%
-  select(country_code, country, year, targety_first) %>% 
-  merge(mona_rgdp, by = c("country_code","country","year")) %>% 
+  select(country_code,year, targety_first) %>% 
+  merge(mona_rgdp, by = c("country_code","year")) %>% 
   as_tibble() 
 
 
@@ -49,9 +49,6 @@ variable_quosure <- enquo(variable)
   
 final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(!is.na(exceptional_access)) %>% 
-  mutate(exceptional_access = case_when(exceptional_access == "Y" ~ "Exceptional",
-                                        T ~ "Normal")) %>% 
   ggplot(aes(amount_percent_quota, !!variable_quosure,col = exceptional_access)) +
   geom_point(size = 5,alpha = 0.6) +
   xlab("") +
