@@ -1,8 +1,13 @@
-# Simple analysis: evolution of programs over time and top rankers ----
+################ Script to produce summary stat MONA database: evolution
+################ programs over time and top rankers
+
+
+
+# Summary stat ----
 
 names=c("evolution","top_rankers")
 
-evolution <- mona_macro %>% 
+evolution <- mona_rgdp %>% 
   group_by(year) %>%
   count() %>%
   ungroup() %>% 
@@ -20,7 +25,7 @@ evolution <- mona_macro %>%
   theme(axis.text.x = element_text(size = 18),
         axis.text.y = element_text(size = 18))
 
-top_rankers <- mona_macro %>% 
+top_rankers <- mona_rgdp %>% 
   group_by(country_code) %>%
   count() %>% 
   merge(geo_group) %>%
