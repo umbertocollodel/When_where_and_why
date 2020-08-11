@@ -1,5 +1,5 @@
 ################ Script to produce summary stat MONA database: evolution
-################ programs over time and top rankers
+################ programs over time, top rankers and list of programs
 
 
 
@@ -66,41 +66,20 @@ footnote=c("Grey bars denote the number of countries entering an IMF program.
            The blue line denotes the 3 years moving average and the red dot the highest value of the moving average over the period.") %>% 
   cat(file="../IEO_forecasts_material/output/figures/programs/summary/evolution_footnote.tex")
 
-# Clean sheet with dummy for exceptional access: ----
-# Note: origin for date format changes according to machine used.
-
-mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.xlsx") %>% 
-  select(-c(1, 7, 18, 20, 22, 24, 26, 28, 30, 35, 37, 40)) %>% 
-  slice(-1) %>% 
-  row_to_names(1) %>%
-  select(`IFS Code`,Year,`Date of Arrangement`,`Precautionary at program approval`,`Exceptional Access`,`Total Approved Amount (percent of current quota)`) %>%
-  setNames(c("country_code","year","date","precautionary","exceptional_access","amount_percent_quota")) %>% 
-  mutate(country = countrycode(country_code,"imf","country.name")) %>%
-  mutate(amount_percent_quota = as.numeric(amount_percent_quota)) %>%
-  mutate(date = as.Date(as.numeric(date), origin = "1899-12-30")) %>% 
-  filter(year >= 2002) %>% 
-  select(country_code, country, everything()) 
-
-# Combine the two:
-# why the number of programs decreases?
 
 
-final_mona <- merge(mona_macro, mona_amount) %>% 
-  as_tibble()
+# Table appendix: list of programs -----
 
 
-# Table appendix: list of programs
-
-
-final_mona %>% 
-  select(-country_code, -contains("variable")) %>% 
+mona_rgdp %>% 
+  select(-country_code, -contains("variable"),-original_duration) %>% 
   select(program_id, everything()) %>%
   filter(year < 2019) %>% 
   arrange(country) %>% 
   mutate(exceptional_access = str_replace(exceptional_access, "n.a.","/")) %>%
-  mutate(amount_percent_quota = round(amount_percent_quota,2)) %>% 
+  mutate_at(vars(contains("amount")),round,2) %>% 
   mutate(date = as.character(date)) %>% 
-  setNames(c("Program ID","Country","Date","Year","Type of program","Precautionary at approval","Exceptional access","Total amount (% quota)")) %>% 
+  setNames(c("Program ID","Country","Date","Year","Type of program","Precautionary at approval","Exceptional access","Total amount drawn (mln SDR)","Total amount (% quota)")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/programs/list_programs.tex")
