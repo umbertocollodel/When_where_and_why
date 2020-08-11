@@ -93,6 +93,7 @@ footnote=c("Includes all programs in the period 2002-2018 with the exception of 
 
 regression_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
   filter(!is.na(exceptional_access)) %>% 
   mutate(months_remaining = 12 - lubridate::month(date))
 
