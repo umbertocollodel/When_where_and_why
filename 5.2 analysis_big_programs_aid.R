@@ -95,30 +95,37 @@ regression_data <- final_mona %>%
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
   filter(!is.na(exceptional_access)) %>% 
-  mutate(months_remaining = 12 - lubridate::month(date))
+  mutate(months_remaining = 12 - lubridate::month(date)) %>% 
+  mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
+                                    program_type == "PCL"| program_type == "PLL" ~ "Concessional",
+                                  T ~ "Non-concessional"))
 
 formulas=c("variable1 ~ amount_percent_quota",
            "variable2 ~ amount_percent_quota",
            "variable1 ~ amount_percent_quota + months_remaining",
-           "variable2 ~ amount_percent_quota + months_remaining")
+           "variable2 ~ amount_percent_quota + months_remaining",
+           "variable1 ~ amount_percent_quota + concessional",
+           "variable2 ~ amount_percent_quota + concessional")
 
 regressions <- formulas %>% 
   map(~ lm(.x,regression_data))
 
 # Export:
 
-list(regressions[[1]],regressions[[3]]) %>%
+list(regressions[[1]],regressions[[3]], regressions[[5]]) %>%
   stargazer(covariate.labels = c("Total amount (% quota)",
-                                 "Remaining months"),
+                                 "Remaining months",
+                                 "Concessional"),
             dep.var.labels = "GDP forecast error",
-            omit.stat = c("rsq","adj.rsq","res.dev"),
+            omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_current_year.tex")
 
-list(regressions[[2]],regressions[[4]]) %>%
+list(regressions[[2]],regressions[[4]], regressions[[6]]) %>%
   stargazer(covariate.labels = c("Total amount (% quota)",
-                                 "Remaining months"),
+                                 "Remaining months",
+                                 "Concessional"),
             dep.var.labels = "GDP forecast error",
-            omit.stat = c("rsq","adj.rsq","res.dev"),
+            omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_year_ahead.tex")
   
   
