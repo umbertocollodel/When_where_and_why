@@ -49,8 +49,8 @@ variable_quosure <- enquo(variable)
   
 final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  filter(!is.na(exceptional_access)) %>% 
   mutate(exceptional_access = case_when(exceptional_access == "Y" ~ "Exceptional",
+                                        is.na(exceptional_access) ~ "No info",
                                         T ~ "Normal")) %>% 
   ggplot(aes(amount_percent_quota, !!variable_quosure,col = exceptional_access)) +
   geom_point(size = 5,alpha = 0.6) +
@@ -81,8 +81,7 @@ plot_rel_bias_big(variable2) %>%
 
 # Footnote: ----
 
-footnote=c("Includes all programs in the period 2002-2018. When no information on whether or not exceptional
-           access, program excluded.") %>% 
+footnote=c("Includes all programs in the period 2002-2018.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.tex")
 
 
