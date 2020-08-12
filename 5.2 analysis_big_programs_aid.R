@@ -81,8 +81,7 @@ plot_rel_bias_big(variable2) %>%
 
 # Footnote: ----
 
-footnote=c("Includes all programs in the period 2002-2018 with the exception of precautionary ones. Exceptional
-           access lending from SPR programs sheet. When no information on whether or not exceptional
+footnote=c("Includes all programs in the period 2002-2018. When no information on whether or not exceptional
            access, program excluded.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.tex")
 
@@ -101,10 +100,10 @@ regression_data <- final_mona %>%
                                   T ~ "Non-concessional"))
 
 formulas=c("variable1 ~ amount_percent_quota",
-           "variable2 ~ amount_percent_quota",
            "variable1 ~ amount_percent_quota + months_remaining",
-           "variable2 ~ amount_percent_quota + months_remaining",
            "variable1 ~ amount_percent_quota + concessional",
+           "variable2 ~ amount_percent_quota",
+           "variable2 ~ amount_percent_quota + months_remaining",
            "variable2 ~ amount_percent_quota + concessional")
 
 regressions <- formulas %>% 
@@ -112,21 +111,19 @@ regressions <- formulas %>%
 
 # Export:
 
-list(regressions[[1]],regressions[[3]], regressions[[5]]) %>%
+regressions %>%
   stargazer(covariate.labels = c("Total amount (% quota)",
                                  "Remaining months",
                                  "Concessional"),
-            dep.var.labels = "GDP forecast error",
+            dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahaead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
-            out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_current_year.tex")
+            out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp.tex")
 
-list(regressions[[2]],regressions[[4]], regressions[[6]]) %>%
-  stargazer(covariate.labels = c("Total amount (% quota)",
-                                 "Remaining months",
-                                 "Concessional"),
-            dep.var.labels = "GDP forecast error",
-            omit.stat = c("rsq","adj.rsq","res.dev","ser"),
-            out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_year_ahead.tex")
+# Footnote: ----
+
+footnote=c("Dependent variable winsorized at the 5% level.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_footnote.tex")
+
   
   
 
