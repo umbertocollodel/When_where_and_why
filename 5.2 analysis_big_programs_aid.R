@@ -12,8 +12,6 @@ final_mona <- rgdp_weo %>%
   as_tibble() 
 
 
-  
-
 # Scatterplots relationship amount approved (% of quota) and forecast error: ----
 
 
@@ -55,7 +53,7 @@ plot_rel_bias_big(variable1) %>%
 plot_rel_bias_big(variable2) %>% 
   ggsave(filename = "../IEO_forecasts_material/output/figures/programs/bias_big/year_ahead.pdf")
 
-# Footnote: ----
+# Footnote:
 
 footnote=c("Includes all programs in the period 2002-2018.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.tex")
@@ -69,7 +67,7 @@ regression_data <- final_mona %>%
   filter(review == "R0") %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
-  mutate(months_remaining = 12 - lubridate::month(date)) %>% 
+  mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional"))
@@ -94,13 +92,38 @@ regressions %>%
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp.tex")
 
-# Footnote: ----
+# Footnote: 
 
 footnote=c("Dependent variable winsorized at the 5% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_footnote.tex")
 
   
   
+
+
+
+
+
+# Role of reviews: ----
+
+reviews_data <- final_mona %>% 
+  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
+  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
+  mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
+  mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
+                                    program_type == "PCL"| program_type == "PLL" ~ "Concessional",
+                                  T ~ "Non-concessional")) %>% 
+  arrange(country, date_approval,review, year) %>% 
+  mutate(same_year = case_when(year == lubridate::year(date_approval) ~ 1,
+                               T ~ 0)) %>% 
+  filter(same_year == 1) 
+
+
+review_effect <- reviews_data %>%
+  split(.$review) %>% 
+  map(~ lm(variable1 ~ amount_percent_quota,.x)) %>% 
+  stargazer(covariate.labels = c("Total amount (% quota)"),
+            omit.stat = c("rsq","adj.rsq","res.dev","ser"))
 
 
 
