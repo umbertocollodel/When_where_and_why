@@ -142,5 +142,11 @@ reviews_data_regression %>%
             out= "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews.tex")
 
 
-  
+# Footnote:
+
+footnote=c("Dependent variable winsorized at the 5% level. The samples R1 and R2 include respectively
+           all first and second reviews made in the same year of program approval by the Board.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
+
+
 
