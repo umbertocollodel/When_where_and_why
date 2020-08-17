@@ -90,6 +90,7 @@ regressions %>%
                                  "Concessional"),
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahaead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
+            df=F,
             out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp.tex")
 
 # Footnote: 
@@ -118,12 +119,18 @@ reviews_data <- final_mona %>%
                                T ~ 0)) %>% 
   filter(same_year == 1) 
 
+# Export:
 
-review_effect <- reviews_data %>%
+reviews_data %>%
   split(.$review) %>% 
   map(~ lm(variable1 ~ amount_percent_quota,.x)) %>% 
   stargazer(covariate.labels = c("Total amount (% quota)"),
-            omit.stat = c("rsq","adj.rsq","res.dev","ser"))
+            column.labels = c("R0", "R1","R2"),
+            model.numbers = F,
+            dep.var.labels = rep(c("GDP forecast error (current year)",3)),
+            omit.stat = c("rsq","adj.rsq","res.dev","ser"),
+            df=F,
+            out= "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews.tex")
 
 
 
