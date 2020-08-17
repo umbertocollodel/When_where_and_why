@@ -1,8 +1,9 @@
 ##### Script to prepare consensus forecast data ----
 
-## Note1: Latin American countries available in Timmerman (2016) are not available in the first week of
-# Consensus. Likewise, advanced and Asian economies are not available in the second week. Overlapping in 2007/2008
-# for some countries with forecasts released both first and second week. Kept first week.
+## Note1: Latin American countries are not available in the first week of Consensus. 
+# Likewise, advanced and Asian economies are not available in the second week. 
+# Overlapping in 2007/2008 for some countries (Switzerland, Taiwan, Thailand, US and Vietnam) with forecasts released both first and second week.
+# Kept first week.
 
 ## Note2: for India, forecast are for the previous and current year instead of current and year-ahead in April 2008 and April 2010. We filter those occurences.
 # This is included in the correction parameter of the function.
@@ -10,13 +11,27 @@
 ## Note3: for 2007 and 2008, we are missing some horizons given that previous report are not
 # available in this format.
 
-# TO SOLVE: ncol problem in the function (12 first week, 11 second) and then vectorize the call and export.
-
 
 # Wrangling consensus forecasts function: ----
+
+#' Wrangling consensus forecasts from excel sheet format for every issue (single variable) to a 
+#' more user-friendly database.
+#' 
+#' @param path path to the xlsx workbook in the locale.
+#' @param correction see Note2.
+#' @param n_col numeric, number of columns before forecasts value.
+#' 
+#' @return tibble with four identifiers (imf code, country name, year forecasted and name of forecaster) and
+#' variable1 to 4 that correspond from current-year sept. to year-ahead apr. forecasts.
+#' 
+#' @details Aggregate 'Euro Area' excluded.
+#' @details Missing obs for first year forecasted because for first year no forecasts other than same year issues
+#' and so on...
+#' 
   
 wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_eme.xlsx",
-                                        correction = FALSE){
+                                        correction = FALSE,
+                                        n_col = 12){
 
   path = path
   
@@ -51,7 +66,7 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
   forecasts <- forecasts %>% 
       map(~ .x %>% split(.$`Forecast Length`)) %>%
       modify_depth(2, ~ .x %>% remove_empty("cols")) %>% 
-      modify_depth(2, ~ .x %>% gather("year_forecasted","variable",11:ncol(.))) %>% 
+      modify_depth(2, ~ .x %>% gather("year_forecasted","variable",n_col:ncol(.))) %>% 
       map(~ .x %>% bind_rows())
   
   forecasts <-  forecasts %>% 
@@ -113,8 +128,8 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
 # Create and export final dataframe: -----
 
 
-advanced <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_firstweek.xlsx",T) 
-emerging <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_secondweek.xlsx",F)
+advanced <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_firstweek.xlsx",T,12) 
+emerging <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_secondweek.xlsx",F,11)
 
 
 consensus_clean <- rbind(advanced, emerging) %>% 
