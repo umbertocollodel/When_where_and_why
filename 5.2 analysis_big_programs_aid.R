@@ -114,24 +114,33 @@ reviews_data <- final_mona %>%
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional")) %>% 
-  arrange(country, date_approval,review, year) %>% 
-  mutate(same_year = case_when(year == lubridate::year(date_approval) ~ 1,
-                               T ~ 0)) %>% 
-  filter(same_year == 1) 
+  arrange(country, date_approval,review, year)
 
-# Export:
+# Keep only reviews in the same year as approval(current-year forecasts) or 
+# year after approval(year-ahead forecasts)
 
-reviews_data %>%
-  split(.$review) %>% 
-  map(~ lm(variable1 ~ amount_percent_quota,.x)) %>% 
+reviews_data_regression <- c(0,1) %>% 
+  map(~ reviews_data %>% mutate(same_year = case_when(year == lubridate::year(date_approval) + .x ~ 1,
+                               T ~ 0))) %>% 
+  map(~ .x %>% filter(same_year == 1)) %>% 
+  map(~ .x %>% split(.$review)) %>% 
+  flatten()
+
+formulas=c(rep("variable1 ~ amount_percent_quota",3),
+           rep("variable2 ~ amount_percent_quota",3))
+           
+# Regress and export:
+
+reviews_data_regression %>% 
+  map2(formulas, ~ lm(.y,.x)) %>% 
   stargazer(covariate.labels = c("Total amount (% quota)"),
-            column.labels = c("R0", "R1","R2"),
+            column.labels = rep(c("R0", "R1","R2"),2),
             model.numbers = F,
-            dep.var.labels = rep(c("GDP forecast error (current year)",3)),
+            dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year-ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             df=F,
             out= "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews.tex")
 
 
-
+  
 
