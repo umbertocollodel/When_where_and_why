@@ -83,8 +83,7 @@ formulas=c("variable1 ~ amount_percent_quota",
            "variable2 ~ amount_percent_quota + concessional")
 
 regressions <- formulas %>% 
-  map(~ lm(.x,regression_data)) %>% 
-  map(~ summary(.x))
+  map(~ lm(.x,regression_data)) 
 
 # Export:
 
