@@ -63,12 +63,13 @@ footnote=c("Includes all programs in the period 2002-2018.") %>%
 
 
 # Regressions amount approved (% of quota) and forecast error: -----
+# Note: winsorized at 10% level.
 
 
 regression_data <- final_mona %>% 
   filter(review == "R0") %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
+  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.10,0.90)))) %>% 
   mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
@@ -82,7 +83,8 @@ formulas=c("variable1 ~ amount_percent_quota",
            "variable2 ~ amount_percent_quota + concessional")
 
 regressions <- formulas %>% 
-  map(~ lm(.x,regression_data))
+  map(~ lm(.x,regression_data)) %>% 
+  map(~ summary(.x))
 
 # Export:
 
