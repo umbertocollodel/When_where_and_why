@@ -21,6 +21,7 @@ final_sr <- final %>%
 
 # Source and produce output: ----
 
-source("2.1 analysis_accuracy.R")
 
-source("2.2 analysis_bias.R")
+list.files() %>% 
+  str_subset("^2.\\d") %>%
+  walk(~ source(.x))
