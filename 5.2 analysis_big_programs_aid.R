@@ -136,7 +136,6 @@ formulas=c(rep("variable1 ~ amount_percent_quota",3),
 
 reviews_data_regression %>% 
   map2(formulas, ~ lm(.y,.x)) %>%
-  map(~ summary(.x))
   stargazer(covariate.labels = c("Total amount (% quota)"),
             column.labels = rep(c("R0", "R1","R2"),2),
             model.numbers = F,
