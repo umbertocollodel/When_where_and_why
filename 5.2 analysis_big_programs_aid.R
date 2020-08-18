@@ -112,7 +112,7 @@ footnote=c("Dependent variable winsorized at the 10% level.") %>%
 
 reviews_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T))) %>% 
+  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.10,0.90)))) %>% 
   mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
@@ -135,7 +135,8 @@ formulas=c(rep("variable1 ~ amount_percent_quota",3),
 # Regress and export:
 
 reviews_data_regression %>% 
-  map2(formulas, ~ lm(.y,.x)) %>% 
+  map2(formulas, ~ lm(.y,.x)) %>%
+  map(~ summary(.x))
   stargazer(covariate.labels = c("Total amount (% quota)"),
             column.labels = rep(c("R0", "R1","R2"),2),
             model.numbers = F,
@@ -147,7 +148,7 @@ reviews_data_regression %>%
 
 # Footnote:
 
-footnote=c("Dependent variable winsorized at the 5% level. The samples R1 and R2 include respectively
+footnote=c("Dependent variable winsorized at the 10% level. The samples R1 and R2 include respectively
            all first and second reviews made in the same year of program approval by the Board.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
 
