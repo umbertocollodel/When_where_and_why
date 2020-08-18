@@ -1,4 +1,6 @@
 ####### Script to prepare the MONA database
+# Note: for few programs there is a discrepancy between the date of approval
+# in MONA data and the SPR sheet, that is why when merging the number of obs decreases.
 
 
 # Clean MONA with macro-variables 2002-2020 ----
