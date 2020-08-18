@@ -99,7 +99,7 @@ regressions %>%
 
 # Footnote: 
 
-footnote=c("Dependent variable winsorized at the 5% level.") %>% 
+footnote=c("Dependent variable winsorized at the 10% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_footnote.tex")
 
   
