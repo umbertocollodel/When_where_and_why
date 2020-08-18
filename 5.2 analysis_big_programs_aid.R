@@ -1,4 +1,6 @@
 ########### Script to analyse relationship between bias and "big" programs: -----
+# Note: number of observations decreases when merging MONA with actual values
+# because we exclude programs from 2019 onwards.
 
 
 # Need actual value of real GDP
