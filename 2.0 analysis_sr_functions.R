@@ -3,10 +3,12 @@
 #' @param data df with forecasts at different horizons and actual values (named respectively variable1/2/3/4 
 #' and targety_first)
 #' @param regressions character vector. Different regressions to perform.
-#' @param output_type character string. Either "appendix_table" or "share_plot". The first
-#' produces a tex table with value of the intercept for each country and forecast horizon.
+#' @param output_type character string. Can be "appendix_table", "share_plot" or "magnitude_table". 
+#' The first produces a tex table with value of the intercept for each country and forecast horizon.
 #' The second produces two plots with the share of countries with significant intercept
 #' at each horizon (dividing between Spring and Fall.)
+#' The third produces a table with the summary statistics of biases for each horizon and type
+#' of bias i.e optimistic or pessimistic. For each horizon, Spring and Fall issues are pooled together.
 #' @param output_path character string. Path to export table or graph.
 #' 
 
@@ -129,6 +131,21 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
     
   }
 }
+
+
+#' Analyse short-run forecasts bias
+#' 
+#' @param data df with forecasts at different horizons and actual values (named respectively variable1/2/3/4 
+#' and targety_first)
+#' @param regressions character vector. Different regressions to perform.
+#' @param output_type character string. Either "appendix_table" or "share_plot". The first
+#' produces a tex table with value of the intercept for each country and forecast horizon.
+#' The second produces two plots with the share of countries with significant intercept
+#' at each horizon (dividing between Spring and Fall.)
+#' @param output_path character string. Path to export table or graph.
+#' 
+
+
 
 
   
