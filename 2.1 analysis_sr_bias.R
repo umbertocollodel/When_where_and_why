@@ -1,5 +1,6 @@
-####### Script to analyze bias in short-term WEO forecasts
-
+################### Script to analyze bias in short-term WEO forecasts
+# Note: every figure and table vectorized through the function
+# analyse_sr_bias with the exception of table 3.
 
 # Set parameters: ----
 
@@ -70,45 +71,45 @@ final_sr %>%
 
 
 
-# Table 2: Median forecast errors by income group and horizon (focusing on growth) ----
+# Table 3: forecast errors during recessions and non-recessions ----
 
-full_sample_recession <- final_sr[["growth"]] %>%
-  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
-  mutate(recession = case_when(targety_first <= 0 ~ 1,
-                               TRUE ~ 0)) %>% 
-  group_by(recession) %>% 
-  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
-  mutate_at(vars(starts_with("variable")),round, 2) %>% 
-  mutate(group = "Full sample") %>% 
-  mutate(recession = case_when(recession == 0 ~ "Non-recession",
-                               recession == 1 ~ "Recession")) %>% 
-  select(group, everything())
+full_sample_recession <- final_sr %>%
+  map(~ .x %>% mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .))) %>%
+  map(~ .x %>% merge(years_recession)) %>% 
+  map(~ .x %>% group_by(recession)) %>% 
+  map(~ .x %>% summarise_at(vars(starts_with("variable")),median, na.rm =T)) %>% 
+  map(~ .x %>% mutate_at(vars(starts_with("variable")),round, 2)) %>% 
+  map(~ .x %>% mutate(group = "Full sample")) %>% 
+  map(~ .x %>% mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession"))) %>% 
+  map(~ .x %>% select(group, everything()))
 
 
-by_group_recession <- final_sr[["growth"]] %>%
-  merge(geo_group) %>% 
-  mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .)) %>%
-  mutate(recession = case_when(targety_first <= 0 ~ 1,
-                               TRUE ~ 0)) %>% 
-  group_by(group, recession) %>% 
-  summarise_at(vars(starts_with("variable")),median, na.rm =T) %>% 
-  mutate_at(vars(starts_with("variable")),round, 2) %>% 
-  ungroup() %>% 
-  mutate(group = case_when(group == "africa" ~ "Africa",
+by_group_recession <- final_sr %>%
+  map(~ .x %>% merge(geo_group)) %>%
+  map(~ .x %>% merge(years_recession)) %>% 
+  map(~ .x %>% mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .))) %>%
+  map(~ .x %>% mutate(recession = case_when(targety_first <= 0 ~ 1,
+                               TRUE ~ 0))) %>% 
+  map(~ .x %>% group_by(group, recession)) %>% 
+  map(~ .x %>% summarise_at(vars(starts_with("variable")),median, na.rm =T)) %>% 
+  map(~ .x %>% mutate_at(vars(starts_with("variable")),round, 2)) %>% 
+  map(~ .x %>% ungroup()) %>% 
+  map(~ .x %>% mutate(group = case_when(group == "africa" ~ "Africa",
                            group == "emerging_asia" ~ "Emerging Asia",
                            group == "europe" ~ "Europe",
                            group == "emerging_europe"~ "Emerging Europe",
                            group == "latin_america" ~ "Latin America",
-                           T ~ "Middle East")) %>% 
-  mutate(recession = case_when(recession == 0 ~ "Non-recession",
-                               recession == 1 ~ "Recession"))
+                           T ~ "Middle East"))) %>% 
+  map(~ .x %>% mutate(recession = case_when(recession == 0 ~ "Non-recession",
+                               recession == 1 ~ "Recession")))
 
-
-rbind(full_sample_recession, by_group_recession) %>%
-  setNames(c("Geo. group","Recession","H=0,F","H=0,S","H=1,F","H=1,S")) %>% 
-  stargazer(summary = F,
+full_sample_recession %>% 
+  map2(by_group_recession, ~ rbind(.x,.y)) %>% 
+  map(~ .x %>% setNames(c("Geo. group","Recession","H=0,F","H=0,S","H=1,F","H=1,S"))) %>% 
+  imap(~ .x %>% stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession.tex")
+            out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession_",.y,".tex")))
   
   
 
@@ -122,8 +123,8 @@ footnote=c("Median forecast error by horizon, issue and geographical group. Rece
 
 
 
-# EXTRA!!!:
-# Figure 2 - Evolution of forecast errors: (replication of Figure 7 of the previous report) -----
+# EXTRA!!!: -----
+# Figure 2 - Evolution of forecast errors: (replication of Figure 7 of the previous report)
 
 
 figures_fe <- final_sr %>% 

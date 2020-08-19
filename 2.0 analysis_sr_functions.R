@@ -174,7 +174,7 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
       iwalk(~ ggsave(filename = paste0(export_path,.y,"_group.pdf"),.x))
   }
     
-    else if(output_type == "magnitude_table_geo"){
+  else if(output_type == "magnitude_table_geo"){
       
     df_bias %>% 
       merge(geo_group,by=c("country_code")) %>%
