@@ -21,7 +21,7 @@ country_group_geography <- country_group_geography %>%
   select(country_code, group) 
 
 
-rio::export(country_group_geography, "..//IEO_forecasts_material/intermediate_data/country_group_geography_clean.RData")
+saveRDS(country_group_geography, file = "..//IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
   
   
   
