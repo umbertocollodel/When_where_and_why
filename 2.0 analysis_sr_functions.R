@@ -171,7 +171,7 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
       )
     
     share_aggregate_group %>% 
-      iwalk(~ ggsave(filename = paste0(export_path,.y,".pdf"),.x))
+      iwalk(~ ggsave(filename = paste0(export_path,.y,"_group.pdf"),.x))
   }
     
     else if(output_type == "magnitude_table_geo"){
