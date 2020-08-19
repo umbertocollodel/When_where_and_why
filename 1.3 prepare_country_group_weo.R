@@ -18,7 +18,14 @@ names(country_group_geography) <- groups
 
 country_group_geography <- country_group_geography %>% 
   bind_rows(.id = "group") %>% 
-  select(country_code, group) 
+  select(country_code, group) %>% 
+  mutate(group = case_when(group == "africa" ~ "Africa",
+                           group == "emerging_asia" ~ "Emerging Asia",
+                           group == "europe" ~ "Europe",
+                           group == "emerging_europe"~ "Emerging Europe",
+                           group == "latin_america" ~ "Latin America",
+                           T ~ "Middle East"))
+
 
 
 saveRDS(country_group_geography, file = "..//IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
