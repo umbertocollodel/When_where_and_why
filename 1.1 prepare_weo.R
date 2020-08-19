@@ -236,9 +236,9 @@ last_edition = c(rep("apr2020",3))
 
 name_variables = c("growth","inflation","cagdp")
 
-export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData",
-                 "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RData",
-               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RData")
+export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RDS",
+                 "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RDS",
+               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RDS")
 
                
 
@@ -273,7 +273,7 @@ names(final) <- name_variables
 # Export:
 
 final %>% 
-  walk2(export_names, ~ rio::export(.x, file = .y))
+  walk2(export_names, ~ saveRDS(.x, file = .y))
 
 # If I want a thruthful comparison between forecast errors using different target, should add complete.cases(targety_last).
 # sometimes revised series start much later (data quality before not considered good enough).
