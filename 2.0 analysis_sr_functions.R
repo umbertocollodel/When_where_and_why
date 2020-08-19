@@ -3,16 +3,20 @@
 #' @param data df with forecasts at different horizons and actual values (named respectively variable1/2/3/4 
 #' and targety_first)
 #' @param regressions character vector. Different regressions to perform.
-#' @param output_type character string. Can be "appendix_table", "share_plot" or "magnitude_table". 
-#' The first produces a tex table with value of the intercept for each country and forecast horizon.
+#' @param output_type character string. Can be "appendix_table", "share_plot","magnitude_table",
+#' "share_plot_geo" or "magnitude_table_geo". 
+#' @param export_path character string. Path to export table or graph.
+#' @return Output depends on parameter output type.
+#' #' The first produces a tex table with value of the intercept for each country and forecast horizon.
 #' The second produces two plots with the share of countries with significant intercept
 #' at each horizon (dividing between Spring and Fall.)
 #' The third produces a table with the summary statistics of biases for each horizon and type
 #' of bias i.e optimistic or pessimistic. For each horizon, Spring and Fall issues are pooled together.
-#' @param output_path character string. Path to export table or graph.
+#' The fourth produces the same plots as the second, but dividing by WEO geographical group.
+#' The fifth produces the same table as the third, but dividing by WEO geographical group.
 #' 
 
-analyse_sr_bias <- function(data, regressions, output_type, output_path){
+analyse_sr_bias <- function(data, regressions, output_type, export_path){
 
   # Run regressions for each country and formula, produces nested list:
 
@@ -60,7 +64,7 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
       rename(Country = country) %>% 
       stargazer(summary = F, 
                 rownames = F,
-                out = output_path)
+                out = export_path)
     
   }
   
@@ -102,7 +106,7 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
     # Export:
     
     share_aggregate %>% 
-      iwalk(~ ggsave(filename = paste0(output_path,.y,".pdf"),.x))
+      iwalk(~ ggsave(filename = paste0(export_path,.y,".pdf"),.x))
   }
   
   else if(output_type == "magnitude_table"){
@@ -127,13 +131,13 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
     table_magnitude %>% 
       stargazer(summary = F,
                 rownames = F,
-                out = output_path)
+                out = export_path)
     
   }
   
   else if(output_type == "share_plot_geo"){
      
-    df_bias %>% 
+    share_aggregate_group <- df_bias %>% 
       merge(geo_group,by=c("country_code")) %>%
       split(.$horizon) %>% 
       map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
@@ -167,7 +171,7 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
       )
     
     share_aggregate_group %>% 
-      iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.y,"_group.pdf"),.x))
+      iwalk(~ ggsave(filename = paste0(export_path,.y,".pdf"),.x))
   }
     
     else if(output_type == "magnitude_table_geo"){
@@ -193,7 +197,7 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
       )) %>% 
       stargazer(summary = F,
                 rownames = F,
-                out = output_path)
+                out = export_path)
     
     }
   }
