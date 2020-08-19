@@ -102,6 +102,32 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
     share_aggregate %>% 
       iwalk(~ ggsave(filename = paste0(output_path,.y,".pdf"),.x))
   }
+  
+  else if(output_type == "magnitude_table"){
+    
+    table_magnitude <- df_bias %>% 
+      split(.$horizon) %>% 
+      map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>%
+      map(~ .x %>% mutate(negative = case_when(str_detect(Estimate,"-") ~ 1,
+                                               T ~ 0))) %>% 
+      map(~ .x %>% mutate(Estimate = as.numeric(str_remove(Estimate, "\\*+")))) %>% 
+      map(~ .x %>% group_by(negative) %>% summarise(mean_bias = round(mean(Estimate, na.rm = T),2),
+                                                    median_bias = round(median(Estimate, na.rm = T),2),
+                                                    max_bias = round(max(Estimate),2),
+                                                    min_bias = round(min(Estimate),2))) %>% 
+      bind_rows(.id = "horizon") %>% 
+      mutate(negative = case_when(negative == 1 ~ "Optimistic",
+                                  T ~ "Pessimistic")) %>% 
+      arrange(negative) %>% 
+      setNames(c("Horizon","Type of bias","Mean","Median", "Min.", "Max."))
+    
+    
+    table_magnitude %>% 
+      stargazer(summary = F,
+                rownames = F,
+                out = output_path)
+    
+  }
 }
 
 
