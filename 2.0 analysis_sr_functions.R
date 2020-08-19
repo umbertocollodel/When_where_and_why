@@ -130,20 +130,73 @@ analyse_sr_bias <- function(data, regressions, output_type, output_path){
                 out = output_path)
     
   }
-}
-
-
-#' Analyse short-run forecasts bias
-#' 
-#' @param data df with forecasts at different horizons and actual values (named respectively variable1/2/3/4 
-#' and targety_first)
-#' @param regressions character vector. Different regressions to perform.
-#' @param output_type character string. Either "appendix_table" or "share_plot". The first
-#' produces a tex table with value of the intercept for each country and forecast horizon.
-#' The second produces two plots with the share of countries with significant intercept
-#' at each horizon (dividing between Spring and Fall.)
-#' @param output_path character string. Path to export table or graph.
-#' 
+  
+  else if(output_type == "share_plot_geo"){
+     
+    df_bias %>% 
+      merge(geo_group,by=c("country_code")) %>%
+      split(.$horizon) %>% 
+      map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
+                                                           T ~ 0))) %>% 
+      map(~ .x %>% mutate(positive_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-", negate = T) ~ 1,
+                                                           T ~ 0))) %>%
+      map(~ .x %>% split(.$issue)) %>% 
+      modify_depth(2, ~ .x %>% group_by(group)) %>% 
+      modify_depth(2, ~ .x %>% summarise_at(vars(contains("significant")), mean, na.rm = T)) %>%
+      map(~ .x %>% bind_rows(.id = "issue")) %>%
+      bind_rows(.id = "horizon") %>% 
+      gather("sign","share",negative_significant:positive_significant) %>% 
+      mutate(sign = case_when(sign == "negative_significant" ~ "Optimistic",
+                              T ~ "Pessimistic")) %>% 
+      split(.$issue) %>% 
+      map(~ .x %>% 
+            ggplot(aes(group,share, fill = sign)) +
+            geom_col(position = "dodge",width = 0.5) +
+            coord_flip() +
+            facet_wrap(~horizon) + 
+            theme_minimal() +
+            xlab("") +
+            ylab("Share of countries (%)") +
+            theme(legend.position = "bottom") +
+            labs(fill="") +
+            theme(strip.text.x = element_text(size = 16),
+                  axis.text.x = element_text(size = 16),
+                  axis.text.y = element_text(size = 18),
+                  axis.title = element_text(size = 21),
+                  legend.text = element_text(size = 16))
+      )
+    
+    share_aggregate_group %>% 
+      iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.y,"_group.pdf"),.x))
+  }
+    
+    else if(output_type == "magnitude_table_geo"){
+      
+    df_bias %>% 
+      merge(geo_group,by=c("country_code")) %>%
+      split(.$horizon) %>% 
+      map(~ .x %>% filter(str_detect(Estimate,"\\*"))) %>% 
+      map(~ .x %>% filter(str_detect(Estimate,"-"))) %>% 
+      map(~ .x %>% group_by(group)) %>% 
+      map(~ .x %>% mutate(Estimate = as.numeric(str_remove_all(Estimate,"\\*")))) %>% 
+      map(~ .x %>% summarise(mean = round(mean(Estimate, na.rm = T),2),
+                             median = round(median(Estimate, na.rm = T),2),
+                             max = round(min(Estimate, na.rm = T),2))) %>% 
+      bind_rows(.id = "horizon") %>%
+      setNames(c("Horizon","Geo. group","Mean","Median","Max.")) %>% 
+      mutate(`Geo. group` = case_when(`Geo. group` == "africa" ~ "Africa",
+                                      `Geo. group` == "emerging_asia" ~ "Emerging Asia",
+                                      `Geo. group` == "europe" ~ "Europe",
+                                      `Geo. group` == "emerging_europe"~ "Emerging Europe",
+                                      `Geo. group` == "latin_america" ~ "Latin America",
+                                      T ~ "Middle East"
+      )) %>% 
+      stargazer(summary = F,
+                rownames = F,
+                out = output_path)
+    
+    }
+  }
 
 
 
