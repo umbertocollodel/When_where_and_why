@@ -70,7 +70,7 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
   
   else if(output_type == "share_plot"){
     
-    df_bias %>% 
+    share_aggregate <- df_bias %>% 
     split(.$horizon) %>% 
     map(~ .x %>% mutate(negative_significant = case_when(str_detect(Estimate, "\\*") & str_detect(Estimate, "-") ~ 1,
                                                          T ~ 0))) %>% 
