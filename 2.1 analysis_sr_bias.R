@@ -338,7 +338,7 @@ table_magnitude <- df_bias %>%
                                                 max_bias = round(max(Estimate),2),
                                                 min_bias = round(min(Estimate),2))) %>% 
   bind_rows(.id = "horizon") %>% 
-  mutate(negative = case_when(negative == 0 ~ "Optimistic",
+  mutate(negative = case_when(negative == 1 ~ "Optimistic",
                               T ~ "Pessimistic")) %>% 
   arrange(negative) %>% 
   setNames(c("Horizon","Type of bias","Mean","Median", "Min.", "Max."))
