@@ -95,12 +95,6 @@ by_group_recession <- final_sr %>%
   map(~ .x %>% summarise_at(vars(starts_with("variable")),median, na.rm =T)) %>% 
   map(~ .x %>% mutate_at(vars(starts_with("variable")),round, 2)) %>% 
   map(~ .x %>% ungroup()) %>% 
-  map(~ .x %>% mutate(group = case_when(group == "africa" ~ "Africa",
-                           group == "emerging_asia" ~ "Emerging Asia",
-                           group == "europe" ~ "Europe",
-                           group == "emerging_europe"~ "Emerging Europe",
-                           group == "latin_america" ~ "Latin America",
-                           T ~ "Middle East"))) %>% 
   map(~ .x %>% mutate(recession = case_when(recession == 0 ~ "Non-recession",
                                recession == 1 ~ "Recession")))
 
