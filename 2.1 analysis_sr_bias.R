@@ -31,7 +31,7 @@ final_sr %>%
 
 
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the World Economic
-           Outlook (Fall or Spring) with a 5% statistically signicant negative or positive bias. Test of statistical
+           Outlook (Fall or Spring) with a 5% statistically significant negative or positive bias. Test of statistical
            significance is run individually with country-by-country regressions.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/aggregate_footnote.tex")
 

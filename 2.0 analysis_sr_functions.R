@@ -162,6 +162,7 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
             theme_minimal() +
             xlab("") +
             ylab("Share of countries (%)") +
+            scale_fill_grey() +
             theme(legend.position = "bottom") +
             labs(fill="") +
             theme(strip.text.x = element_text(size = 16),
