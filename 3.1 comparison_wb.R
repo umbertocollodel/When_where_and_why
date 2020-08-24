@@ -24,9 +24,7 @@ target <- x %>%
 
 # Geographical group:
 
-load("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RData")
-
-geo_group <- x
+geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
 
 
 # Bind all together:
