@@ -1,3 +1,10 @@
+# Prepare the datasets: ----
+
+rm(list = ls())
+
+# Load data:
+
+
 paths=c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RDS",
         "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RDS")
 
@@ -13,6 +20,14 @@ final_medium <- paths %>%
 
 names(final_medium) <- name_vars
 
-# Geographical group: ----
+# Load geo. group:
 
 geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
+
+
+# Source and produce output: ----
+
+
+list.files() %>% 
+  str_subset("^4.\\d") %>%
+  walk(~ source(.x))
