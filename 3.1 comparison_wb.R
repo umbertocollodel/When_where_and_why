@@ -45,14 +45,7 @@ comparison_wb %>%
 group <- comparison_wb %>%
   group_by(country_code) %>% 
   slice(1) %>% 
-  select(country_code, group) %>% 
-  mutate(group = case_when(group == "europe" ~ "Advanced Economies",
-                           is.na(group) ~ "Advanced Economies",
-                           group == "emerging_asia" ~ "Emerging Asia",
-                           group == "latin_america" ~ "Latin America",
-                           group == "emerging_europe" ~ "Emerging Europe",
-                           group == "middle_east" ~ "Middle East",
-                           T ~ "Africa"))
+  select(country_code, group) 
 
 # Table with list countries comparison:----
 
