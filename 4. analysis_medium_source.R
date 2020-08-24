@@ -1,12 +1,18 @@
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+paths=c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RDS",
+        "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RDS")
 
-gdp_medium <- x %>% 
-  select(country_code, country, year, targety_first, 
-         variable7, variable8, variable9,
-         variable10, variable11, variable12) 
+name_vars <- c("growth",
+               "inflation")
+
+
+final_medium <- paths %>% 
+  map(~ readRDS(.x)) %>% 
+  map(~ .x %>% select(country_code, country, year, targety_first, 
+                               variable7, variable8, variable9,
+                               variable10, variable11, variable12))
+
+names(final_medium) <- name_vars
 
 # Geographical group: ----
 
-load("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RData")
-
-geo_group <- x
+geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")

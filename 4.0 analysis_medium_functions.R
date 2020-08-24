@@ -44,14 +44,16 @@ analyse_medium_bias <- function(data, regressions, output_type, export_path){
     bind_rows(.id = "country_code") %>% 
     mutate(issue = case_when(as.numeric(horizon) %% 2 == 1 ~ "Fall",
                              T ~ "Spring"),
-           horizon = case_when(horizon == 1 | horizon == 2 ~ "H=0",
-                               horizon == 3 | horizon == 4 ~ "H=1")) %>% 
+           horizon = case_when(horizon == 1 | horizon == 2 ~ "H=3",
+                               horizon == 3 | horizon == 4 ~ "H=4",
+                               horizon == 5 | horizon == 6 ~ "H=5")) %>% 
     mutate(Estimate = round(Estimate,2))  %>% 
     mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
                                 (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
                                 TRUE ~ as.character(Estimate))) %>% 
     mutate(country = countrycode(country_code,"imf","country.name")) %>% 
     select(country_code, country, horizon, issue, Estimate)
+  
   
   # Produces output:
   
