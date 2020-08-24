@@ -54,11 +54,6 @@ comparison_wb %>%
   slice(1) %>% 
   select(country, group) %>% 
   arrange(group) %>%
-  mutate(group = case_when(group == "emerging_asia" ~ "Emerging Asia",
-                           group == "emerging_europe" ~ "Emerging Europe",
-                           group == "latin_america" ~ "Latin America",
-                           group == "middle_east" ~ "Middle East",
-                           group == "africa"~ "Africa")) %>%
   rename(Country = country, `Geo. group` = group) %>% 
   stargazer(summary = F,
             rownames = F,
