@@ -20,7 +20,7 @@ final_medium %>%
   map2(export_paths, ~ analyse_medium_bias(.x,regressions, "appendix_table",.y))
 
 
-# Figure 1: share of countries with medium-term biases ----
+# Figure 11: share of countries with medium-term biases ----
 
 
 export_paths=name_vars %>% 
@@ -36,7 +36,7 @@ footnote=c("The figure shows the share of countries for each forecast horizon an
   cat(file = "../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/aggregate_footnote.tex")
 
 
-# Table 1: magnitude of medium-term biases -----
+# Table 14: magnitude of medium-term biases -----
 
 export_paths=name_vars %>% 
   map_chr(~ paste0("../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_",.x,".tex"))
@@ -52,7 +52,7 @@ footnote=c("Summary statistics of country-by-country intercepts significant at 5
   cat(file = "../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_footnote.tex")
 
 
-# Figure 2: share of countries with medium-term biases - region -----
+# Figure 12: share of countries with medium-term biases - region -----
 
 export_paths=name_vars %>% 
   map_chr(~ paste0("../IEO_forecasts_material/output/figures/medium_term/bias/aggregate/",.x,"_"))
@@ -61,7 +61,7 @@ final_medium %>%
   map2(export_paths, ~ analyse_medium_bias(.x,regressions,"share_plot_geo",.y))
 
 
-# Table 2: magnitude of medium-term biases region ----
+# Table 15: magnitude of medium-term biases region ----
 
 export_paths=name_vars %>% 
   map_chr(~ paste0("../IEO_forecasts_material/output/tables/medium_term/bias/magnitude_aggregate_bias_",.x,"_group.tex"))
