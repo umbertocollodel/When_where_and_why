@@ -23,7 +23,7 @@ final_sr <- paths %>%
   map(~ .x %>% select(country_code,country,year,targety_first,targety_last,matches("variable[1-4]$"))) %>% 
   map(~ .x %>% merge(country_group, by = c("country_code"))) %>%
   map(~ .x %>% merge(geo_group, by = c("country_code"),all.x = T)) %>% 
-  map(~ .x %>% as.tibble())
+  map(~ .x %>% as_tibble())
 
 
 names(final_sr) <- names
