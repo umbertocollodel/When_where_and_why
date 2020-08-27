@@ -95,6 +95,7 @@ regressions %>%
                                  "Concessional"),
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahaead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
+            column.sep.width = "-10pt",
             df=F,
             out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp.tex")
 
