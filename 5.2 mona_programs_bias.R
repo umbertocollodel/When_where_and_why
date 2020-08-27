@@ -75,9 +75,11 @@ regression_data <- final_mona %>%
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional"))
 
-formulas=c("variable1 ~ amount_percent_quota",
+formulas=c("variable1 ~ 1",
+           "variable1 ~ amount_percent_quota",
            "variable1 ~ amount_percent_quota + months_remaining",
            "variable1 ~ amount_percent_quota + concessional",
+           "variable2 ~ 1",
            "variable2 ~ amount_percent_quota",
            "variable2 ~ amount_percent_quota + months_remaining",
            "variable2 ~ amount_percent_quota + concessional")
