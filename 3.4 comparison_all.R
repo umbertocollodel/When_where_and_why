@@ -39,11 +39,15 @@ inability_df %>%
   ylab("") +
   xlab("Real Growth Forecast Error (%)") +
   theme(legend.position = "bottom") +
+  xlim(-20,10) +
   labs(fill = "",col="") +
+  theme(legend.position = "bottom") +
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21),
+        strip.text.x = element_text(size=14),
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16))
+
 
   
 
