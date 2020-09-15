@@ -111,32 +111,6 @@ plot_evolution(variable4, wb4) %>%
 
 
 
-# By country group (not in the paper): ----
-
-# comparison_wb %>% 
-#   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
-#   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
-#   split(.$group) %>% 
-#   map(~ .x %>% group_by(year)) %>% 
-#   map(~ .x %>% mutate(median_1wb = median(wb1, na.rm = T), median_2wb = median(wb2, na.rm = T))) %>% 
-#   map(~ .x %>% mutate(median_1imf = median(variable1, na.rm = T), median_2imf = median(variable2, na.rm = T))) %>% 
-#   map(~ .x %>% ggplot(aes(year)) +
-#         geom_line(aes(y = median_2wb, group = 1, col = "WB"), size = 1) +
-#         geom_line(aes(y = median_2imf, group = 1, col = "IMF" ), size = 1) +
-#         theme_minimal() +
-#         xlab("") +
-#         ylab("") +
-#         labs(col = "Institution") +
-#         theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-#               legend.position = "bottom") +
-#         theme(axis.text = element_text(size = 18),
-#               axis.title = element_text(size = 21),
-#               legend.title = element_text(size = 18),
-#               legend.text = element_text(size = 16)
-#         ) +
-#         ylim(-4,4))
-
-
 # Figure 2: number of countries with lower RMSE for each institution ----
   
 raw <- comparison_wb %>% 
@@ -676,4 +650,85 @@ plot_rel_bias_aid(wb4) %>%
 footnote=c("Forecast error is the country-by-country median forecast error in the period 2010-2018. Engagement is total loans outstanding 
            in milions USD as of June 2014. Extensive engament is defined as total loans outstanding above the median of the distribution as of June 2014.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
+
+
+
+# Figure: scatterplot simple forecasts -----
+
+list <- list(comparison_wb %>% select(matches("1|group")),
+     comparison_wb %>% select(matches("2|group")),
+     comparison_wb %>% select(matches("3|group")),
+     comparison_wb %>% select(matches("4|group")))
+
+
+scatter_forecasts <- list %>% 
+  map(~ .x %>% 
+  ggplot(aes_string(names(.x)[[2]],names(.x)[[3]],col=names(.x)[[1]])) +
+  geom_point(size=4) +
+  geom_abline(intercept = 0,slope = 1, color = "red", size=1.2) +
+  theme_minimal() +
+  xlim(-20,20) +
+  ylim(-20,20) +
+  xlab("WEO Forecasts") +
+  ylab("GEP Forecasts") +
+  labs(col="") +
+  theme(legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)))
+
+scatter_forecasts %>% 
+  map2(c("currentJun","currentJan","aheadJun","aheadJan"), 
+       ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/scatter_",.y,".pdf"),plot = .x))
+
+
+
+# Table: percentage countries with lower RMSE by group and statistical significance of difference
+
+percentage <- group %>% 
+  merge(rmse_comparison, by=c("country_code")) %>% 
+  mutate_at(vars(ratio1:ratio4), funs(case_when(. < 0 ~ 1,
+                                                T ~ 0))) %>% 
+  ungroup() %>% 
+  group_by(group) %>% 
+  summarise_at(vars(ratio1:ratio4), mean, na.rm = T) %>% 
+  mutate_at(vars(contains("ratio")),funs(round(.,2))) %>% 
+  setNames(c("Geo.group","H=0,Jun.","H=0,Jan.", "H=1,Jun.","H=1,Jan.")) %>% 
+  mutate(label = "percentage")
+
+significance <- comparison_wb %>% 
+  mutate_at(vars(matches("variable|wb")),funs(targety_first - .)) %>%
+  filter(group == "Latin America") %>% 
+  print(n=Inf)
+  split(.$group) %>%
+  map(~ list(.x %>% select(matches("1")),
+       .x %>% select(matches("2")),
+       .x %>% select(matches("3")),
+       .x %>% select(matches("4")))) %>%
+  modify_depth(2, ~ .x %>% filter(complete.cases(.))) %>% 
+  modify_depth(2, ~ dm.test(.x[[1]],.x[[2]])) %>% 
+  modify_depth(2, ~.x[["statistic"]]) %>% 
+  map(~ .x %>% bind_cols()) %>% 
+  bind_rows(.id = "Geo. group") %>% 
+  setNames(c("Geo.group","H=0,Jun.","H=0,Jan.","H=1,Jun.","H=1,Jan.")) %>% 
+  mutate_at(vars(contains("=")), funs(round(.,2))) %>% 
+  mutate_at(vars(contains("=")),funs(case_when(. > 1.96 | . < -1.96 ~ str_replace(as.character(.), "$","**"),
+                                                                                  (. > 1.68 & . < 1.96) | (. < -1.68 & . > -1.96) ~ str_replace(as.character(.), "$", "*"),
+                                                                                  TRUE ~ as.character(.)))) %>% 
+  mutate(label = "DM_estimate")
+
+
+rbind(percentage,significance) %>% 
+  arrange(Geo.group) %>% 
+  select(Geo.group, label, everything()) %>% 
+  stargazer(out= "../IEO_forecasts_material/output/tables/comparison/WB_updated/accuracy/comparison.tex",
+            summary = F,
+            rownames = F)
+  
+  
+  
+
+
+
 
