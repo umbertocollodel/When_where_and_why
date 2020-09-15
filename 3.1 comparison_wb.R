@@ -699,8 +699,6 @@ percentage <- group %>%
 
 significance <- comparison_wb %>% 
   mutate_at(vars(matches("variable|wb")),funs(targety_first - .)) %>%
-  filter(group == "Latin America") %>% 
-  print(n=Inf)
   split(.$group) %>%
   map(~ list(.x %>% select(matches("1")),
        .x %>% select(matches("2")),
