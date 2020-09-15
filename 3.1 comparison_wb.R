@@ -695,7 +695,7 @@ percentage <- group %>%
   summarise_at(vars(ratio1:ratio4), mean, na.rm = T) %>% 
   mutate_at(vars(contains("ratio")),funs(round(.,2))) %>% 
   setNames(c("Geo.group","H=0,Jun.","H=0,Jan.", "H=1,Jun.","H=1,Jan.")) %>% 
-  mutate(label = "Percentage")
+  mutate(Variable = "Percentage")
 
 significance <- comparison_wb %>% 
   mutate_at(vars(matches("variable|wb")),funs(targety_first - .)) %>%
@@ -714,12 +714,12 @@ significance <- comparison_wb %>%
   mutate_at(vars(contains("=")),funs(case_when(. > 1.96 | . < -1.96 ~ str_replace(as.character(.), "$","**"),
                                                                                   (. > 1.68 & . < 1.96) | (. < -1.68 & . > -1.96) ~ str_replace(as.character(.), "$", "*"),
                                                                                   TRUE ~ as.character(.)))) %>% 
-  mutate(label = "DM Test")
+  mutate(Variable = "DM Test")
 
 
 rbind(percentage,significance) %>% 
   arrange(Geo.group) %>% 
-  select(Geo.group, label, everything()) %>% 
+  select(Geo.group, Variable, everything()) %>% 
   stargazer(out= "../IEO_forecasts_material/output/tables/comparison/WB_updated/accuracy/comparison.tex",
             summary = F,
             rownames = F)
