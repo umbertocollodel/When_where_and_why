@@ -1,5 +1,9 @@
-# 
-
+#' Get list of countries compared
+#' 
+#' @param data df with forecasts at different horizons for two different sources and actual values (named respectively variable1/2/3/4,
+#' wb1/2/3/4 and targety_first)
+#' @param export_path character string. Path to export table.
+#' @return Output is a tex table with name of countries in comparison df and geographical group.
 
 get_list_comparison <- function(data,export_path){
   comparison_wb %>% 
@@ -13,6 +17,17 @@ get_list_comparison <- function(data,export_path){
               out = paste0("../IEO_forecasts_material/output/tables/comparison/",export_path))
 }
 
+
+#' Produce scatterplot two institutions forecasts for different horizons
+#' 
+#' @param data df with forecasts at different horizons for two different sources and actual values (named respectively variable1/2/3/4,
+#' wb1/2/3/4 and targety_first)
+#' @param ylab character. Name of the y-axis.
+#' @param ylimits numeric vector. Limits of the y-axis.
+#' @param xlimits numeric vector. Limits of the x-axis.
+#' @param issues character string. Name of the different issues/forecast horizons.
+#' @param export_path character string. Main path to export graphs.
+#' @return Pdfs with scatterplots.
 
 get_scatterplot <- function(data, ylab, ylimits = c(-20,20), xlimits=c(-20,20), issues = c("currentJun","currentJan","aheadJun","aheadJan"), export_path){
   
@@ -45,6 +60,15 @@ get_scatterplot <- function(data, ylab, ylimits = c(-20,20), xlimits=c(-20,20), 
          ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/",exporth_path,.y,".pdf"),plot = .x))
   
 }
+
+#' Produce accuracy table comparison
+#' 
+#' @param data df with forecasts at different horizons for two different sources and actual values (named respectively variable1/2/3/4,
+#' wb1/2/3/4 and targety_first)
+#' @param issues_abbr character string. Name of the different issues/forecast horizons for the table.
+#' @param other_var character. Common start of comparison variable.
+#' @return Accuracy table with percentage countries with lower rmse and t-statistic of Diebold-Mariano
+#' for each geographical group.
 
 
 get_accuracy_summary <- function(data, issues_abbr, other_var){
