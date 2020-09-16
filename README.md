@@ -4,7 +4,7 @@ Background paper for the update of the 2014 forecast evaluation of the World Eco
 
 ## Author
 
-Umberto Collodel
+Umberto Collodel (umberto.collodel@gmail.com)
 
 ## Language
 
