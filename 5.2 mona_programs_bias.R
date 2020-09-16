@@ -101,7 +101,10 @@ regressions %>%
 
 # Footnote: 
 
-footnote=c("Dependent variable winsorized at the 10% level.") %>% 
+footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity robust standard errors in
+            parentheses.
+           ***: significant at 1% level, **: significant at 5% level,
+           *: significant at 10% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_footnote.tex")
 
   
@@ -151,7 +154,10 @@ reviews_data_regression %>%
 # Footnote:
 
 footnote=c("Dependent variable winsorized at the 10% level. The samples R1 and R2 include respectively
-           all first and second reviews made in the same year of program approval by the Board.") %>% 
+           all first and second reviews made in the same year of program approval by the Board.
+           Heteroskedasticity robust standard errors in parentheses.
+           ***: significant at 1% level, **: significant at 5% level,
+           *: significant at 10% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
 
 
