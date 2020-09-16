@@ -6,7 +6,7 @@
 #' @return Output is a tex table with name of countries in comparison df and geographical group.
 
 get_list_comparison <- function(data,export_path){
-  comparison_wb %>% 
+  data %>% 
     group_by(country) %>% 
     slice(1) %>% 
     select(country, group) %>% 
