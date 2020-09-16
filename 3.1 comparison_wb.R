@@ -61,7 +61,8 @@ get_scatterplot(comparison_wb, "GEP Forecasts",
 
 get_accuracy_summary(comparison_wb, 
                      c("H=0,Jun.", "H=0,Jan.","H=1,Jun.","H=1,Jan."), 
-                     "wb")
+                     "wb",
+                     "WB_updated/accuracy/comparison.tex")
 
 
 # Table appendix: comparison RMSE for all individual countries ----- 
@@ -223,6 +224,7 @@ plot_rel_bias_aid(wb4) %>%
 footnote=c("Forecast error is the country-by-country median forecast error in the period 2010-2018. Engagement is total loans outstanding 
            in milions USD as of June 2014. Extensive engament is defined as total loans outstanding above the median of the distribution as of June 2014.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
+
 
 
 
