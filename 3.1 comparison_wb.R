@@ -57,6 +57,9 @@ get_scatterplot(comparison_wb, "GEP Forecasts",
                 issues=c("currentJun","currentJan","aheadJun","aheadJan"),
                 export_path = "WB_updated/accuracy/scatter_")
 
+footnote=c("Red line is 45 degrees line.") %>% 
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/scatter_footnote.tex")
+
 # Table: summary of accuracy (percentage RMSE and significance across geo. group) -----
 
 get_accuracy_summary(comparison_wb, 
@@ -64,6 +67,12 @@ get_accuracy_summary(comparison_wb,
                      "wb",
                      "WB_updated/accuracy/comparison.tex")
 
+footnote=c("Percentage refers to the share of countries with a lower root mean squared error for WEO forecasts
+           compared to GEP forecasts.
+           DM Test is the test statistic associated with a two-sided Diebold-Mariano test where the null
+           is of equal accuracy between forecasts. ***: significant at 1% level, **: significant at 5% level,
+           *: significant at 10% level.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/comparison/WB_updated/accuracy/comparison_footnote.tex")
 
 # Table appendix: comparison RMSE for all individual countries ----- 
     
