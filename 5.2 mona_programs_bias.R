@@ -76,21 +76,24 @@ regression_data <- final_mona %>%
                                   T ~ "Non-concessional"))
 
 formulas=c("variable1 ~ 1",
-           "variable1 ~ amount_percent_quota",
+           "variable1 ~ after",
+           "variable1 ~ after + amount_percent_quota",
            "variable1 ~ amount_percent_quota + months_remaining",
            "variable1 ~ amount_percent_quota + concessional",
            "variable2 ~ 1",
-           "variable2 ~ amount_percent_quota",
+           "variable2 ~ after",
+           "variable2 ~ after + amount_percent_quota",
            "variable2 ~ amount_percent_quota + months_remaining",
            "variable2 ~ amount_percent_quota + concessional")
 
 regressions <- formulas %>% 
-  map(~ lm(.x,regression_data)) 
+  map(~ lm(.x,regression_data))
 
 # Export:
 
 regressions %>%
-  stargazer(covariate.labels = c("Total amount (% quota)",
+  stargazer(covariate.labels = c("Post-GFC",
+                                 "Total amount (% quota)",
                                  "Remaining months",
                                  "Concessional"),
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahaead)"),
