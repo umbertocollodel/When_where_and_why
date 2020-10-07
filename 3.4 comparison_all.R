@@ -1,5 +1,5 @@
 ############# Script to summarise previous tables on inability to predict recessions
-############# by major institutions:
+############# by major institutions and problems to forecast dynamics during financial crises:
 
 # Inability to predict recessions:
 
@@ -56,6 +56,85 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions
 
 
 
+# New part on financial crises: ----
 
+
+load("~/Dropbox/Early warning model of currency crisis/Betin_Collodel/2. Text mining IMF_data/datasets/comparison/other_data.RData")
+
+
+# Clean Laeven & Valencia database:
+
+laeven_clean <- x %>% 
+  select_at(vars(matches("LV|ISO3|year"))) %>% 
+  select(ISO3_Code,year,BC.LV,CC.LV,SD.LV) %>%
+  mutate(ISO3_Code = as.character(ISO3_Code)) %>% 
+  group_by(ISO3_Code,year) %>% 
+  summarise_at(vars(contains("LV")),mean,na.rm = T) %>% 
+  mutate_at(vars(contains("LV")),funs(case_when(. >0 ~ 1,
+                                                T~ 0))) %>%
+  mutate(country_code = countrycode(ISO3_Code,"iso3c","imf")) %>% 
+  ungroup() %>% 
+  mutate(triple = case_when(BC.LV == 1 & CC.LV == 1 & SD.LV == 1 ~ 1,
+                            T~0),
+         double_cc_sd = case_when(BC.LV == 0 & CC.LV ==1 & SD.LV ==1 ~ 1,
+                                  T ~ 0),
+         double_cc_bc = case_when(BC.LV == 1 & CC.LV ==1 & SD.LV ==0 ~ 1,
+                                  T ~ 0),
+         double_bc_sd = case_when(BC.LV == 1 & CC.LV ==0 & SD.LV ==1 ~ 1,
+                                  T ~ 0)) 
+
+
+# Calculate forecast errors when recessions are accompanied by multiplicity of financial crises: 
+
+financial_crises_fe <- final_sr$growth %>% 
+  merge(laeven_clean,all.x = T) %>% 
+  mutate_at(vars(matches("variable")),funs(targety_first - .)) %>% 
+  mutate(recession = case_when(targety_first <= 0 ~ "Recession",
+                                            T ~ "Non-recession")) %>%
+  mutate(triple = case_when(BC.LV == 1 & CC.LV == 1 & SD.LV == 1 ~ 1,
+                          T~0),
+         double_cc_sd = case_when(recession == "Recession" & BC.LV == 0 & CC.LV ==1 & SD.LV ==1 ~ 1,
+                                  T ~ 0),
+         double_cc_bc = case_when(recession == "Recession" & BC.LV == 1 & CC.LV ==1 & SD.LV ==0 ~ 1,
+                                  T ~ 0),
+         double_bc_sd = case_when(recession == "Recession" & BC.LV == 1 & CC.LV ==0 & SD.LV ==1 ~ 1,
+                                  T ~ 0),
+         single_bc = case_when(recession == "Recession" & BC.LV == 1 & CC.LV ==0 & SD.LV ==0 ~ 1,
+                               T~0),
+         single_cc = case_when(recession == "Recession" & BC.LV == 0 & CC.LV ==1 & SD.LV ==0 ~ 1,
+                               T~0),
+         single_sd = case_when(recession == "Recession" & BC.LV == 0 & CC.LV ==0 & SD.LV==1 ~ 1,
+                               T~0),
+         normal_recession = case_when(recession == "Recession" & BC.LV == 0 & CC.LV ==0 & SD.LV ==0 ~ 1,
+                                  T ~ 0)) %>% 
+  mutate(type = case_when(triple == 1 ~ "Triple+Recession",
+    double_cc_sd == 1 | double_cc_bc == 1 | double_bc_sd ==1 ~ "Twin+Recession",
+    single_bc == 1 | single_cc == 1 | single_sd ==1 ~ "Single+Recession",
+    normal_recession == 1 ~ "Normal Recession",
+    T ~ "No-Recession")) %>% 
+  gather("Horizon","value",variable1:variable4) %>% 
+  split(.$Horizon) %>% 
+  map(~ .x %>% group_by(type) %>% summarise(median = median(value, na.rm = T))) %>% 
+  map(~ .x %>% filter(type != "Triple+Recession")) %>% 
+  map(~ .x %>% arrange(median)) %>% 
+  bind_rows(.id = "horizon") %>%
+  spread(type,median) %>% 
+  select(horizon,`Normal Recession`,`Single+Recession`,`Twin+Recession`) %>% 
+  mutate(horizon = case_when(horizon == "variable1" ~ "H=0,F",
+                             horizon == "variable2" ~ "H=0,S",
+                             horizon == "variable3" ~ "H=1,F",
+                             T~ "H=1,S"))
+  
+
+financial_crises_fe %>% 
+stargazer(summary = F,
+          rownames = F,
+          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias_financial_crisis_growth.tex")
+  
+  
+
+  
+  
+  
   
 
