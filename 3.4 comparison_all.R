@@ -117,22 +117,29 @@ financial_crises_fe <- final_sr$growth %>%
   map(~ .x %>% group_by(type) %>% summarise(median = median(value, na.rm = T))) %>% 
   map(~ .x %>% filter(type != "Triple+Recession")) %>% 
   map(~ .x %>% arrange(median)) %>% 
-  bind_rows(.id = "horizon") %>%
+  bind_rows(.id = "Horizon") %>%
   spread(type,median) %>% 
-  select(horizon,`Normal Recession`,`Single+Recession`,`Twin+Recession`) %>% 
-  mutate(horizon = case_when(horizon == "variable1" ~ "H=0,F",
-                             horizon == "variable2" ~ "H=0,S",
-                             horizon == "variable3" ~ "H=1,F",
-                             T~ "H=1,S"))
+  select(Horizon,`Normal Recession`,`Single+Recession`,`Twin+Recession`) %>% 
+  mutate_at(vars(contains("Recession")),funs(round(.,2))) %>% 
+  mutate(Horizon = case_when(Horizon == "variable1" ~ "H=0,F",
+                             Horizon == "variable2" ~ "H=0,S",
+                             Horizon == "variable3" ~ "H=1,F",
+                             T~ "H=1,S")) 
   
+# Export:
 
 financial_crises_fe %>% 
 stargazer(summary = F,
           rownames = F,
-          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias_financial_crisis_growth.tex")
+          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_financial_crisis_growth.tex")
   
   
+# Footnote:
 
+footnote=c("Median forecast error during normal recessions and recessions accompanied by
+           single or twin financial crises. Dates for banking, currency and sovereign debt crises from Laeven & Valencia 
+           database.") %>% 
+  cat(file="../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_financial_crisis_growth_footnote.tex")
   
   
   
