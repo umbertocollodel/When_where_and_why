@@ -54,6 +54,10 @@ inability_df %>%
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions.pdf")
 
+footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
+           Recessions are periods of negative growth.") %>% 
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/inability_recessions_footnote.tex")
+
 
 
 # New part on financial crises: ----
