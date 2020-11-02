@@ -91,11 +91,12 @@ laeven_clean <- x %>%
 # Calculate forecast errors when recessions are accompanied by multiplicity of financial crises: 
 
 financial_crises_fe <- final_sr$growth %>% 
-  merge(laeven_clean,all.x = T) %>% 
+  merge(laeven_clean,all.x = T) %>%
+  as_tibble() %>% 
   mutate_at(vars(matches("variable")),funs(targety_first - .)) %>% 
   mutate(recession = case_when(targety_first <= 0 ~ "Recession",
                                             T ~ "Non-recession")) %>%
-  mutate(triple = case_when(BC.LV == 1 & CC.LV == 1 & SD.LV == 1 ~ 1,
+  mutate(triple = case_when(recession == "Recession" & BC.LV == 1 & CC.LV == 1 & SD.LV == 1 ~ 1,
                           T~0),
          double_cc_sd = case_when(recession == "Recession" & BC.LV == 0 & CC.LV ==1 & SD.LV ==1 ~ 1,
                                   T ~ 0),
@@ -116,36 +117,36 @@ financial_crises_fe <- final_sr$growth %>%
     single_bc == 1 | single_cc == 1 | single_sd ==1 ~ "Single+Recession",
     normal_recession == 1 ~ "Normal Recession",
     T ~ "No-Recession")) %>% 
-  gather("Horizon","value",variable1:variable4) %>% 
-  split(.$Horizon) %>% 
-  map(~ .x %>% group_by(type) %>% summarise(median = median(value, na.rm = T))) %>% 
-  map(~ .x %>% filter(type != "Triple+Recession")) %>% 
-  map(~ .x %>% arrange(median)) %>% 
-  bind_rows(.id = "Horizon") %>%
-  spread(type,median) %>% 
-  select(Horizon,`Normal Recession`,`Single+Recession`,`Twin+Recession`) %>% 
-  mutate_at(vars(contains("Recession")),funs(round(.,2))) %>% 
-  mutate(Horizon = case_when(Horizon == "variable1" ~ "H=0,F",
-                             Horizon == "variable2" ~ "H=0,S",
-                             Horizon == "variable3" ~ "H=1,F",
-                             T~ "H=1,S")) 
-  
+  filter(!type == "Triple+Recession") %>% 
+  gather("horizon","value",variable1:variable4) %>% 
+  mutate(horizon = case_when(horizon == "variable1" ~ "H=0,F",
+                             horizon == "variable2" ~ "H=0,S",
+                             horizon == "variable3" ~ "H=1,F",
+                             T ~ "H=1,S")) %>% 
+  ggplot(aes(x=value, type)) +
+  geom_density_ridges(scale=0.8, alpha = 0.6) +
+  facet_wrap(~ horizon) +
+  theme_minimal() +
+  ylab("") +
+  xlim(-25,10) +
+  xlab("Real Growth Forecast Error (%)") +
+  theme(legend.position = "bottom") +
+  labs(fill="") +
+  theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        strip.text.x = element_text(size=14),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16))
+
 # Export:
 
-financial_crises_fe %>% 
-stargazer(summary = F,
-          rownames = F,
-          out = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_financial_crisis_growth.tex")
+ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions_financial.pdf")
   
   
 # Footnote:
 
-footnote=c("Median forecast error during normal recessions and recessions accompanied by
-           single or twin financial crises. Dates for banking, currency and sovereign debt crises from Laeven & Valencia 
-           database.") %>% 
-  cat(file="../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_financial_crisis_growth_footnote.tex")
-  
-  
+footnote=c("Distribution of WEO forecast errors during episodes of recessions and recessions accompanied by financial crises") %>% 
+  cat(file="../IEO_forecasts_material/output/figures/comparison/inability_recessions_financial_footnote.tex")
   
   
 
