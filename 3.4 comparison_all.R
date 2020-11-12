@@ -8,13 +8,16 @@ inability_df <- list(final_sr$growth,
                      comparison_ec,
                      comparison_consensus %>% filter(forecaster == "Consensus (Mean)")) %>% 
   map(~ .x %>% mutate_at(vars(matches("variable\\d|wb\\d|ec\\d|consensus\\d")),funs(targety_first - .))) %>% 
-  map(~ .x %>% mutate(recession = case_when(targety_first <= 0 ~ "Recession",
-                                            T ~ "Non-recession"))) 
+  map(~ .x %>% group_by(country) %>% mutate(recession = case_when(targety_first <= 0 ~ "Recession",
+                                            T ~ "Non-recession"))) %>% 
+  map(~ .x %>% group_by(country) %>% mutate(recession = case_when(dplyr::lag(recession) == "Recession" & recession == "Non-recession" ~ "Recovery",
+                                                                  dplyr::lag(recession) == "Non-recession" & recession == "Recession" ~ "Trough",
+                                                                  T ~ recession)))
 
 
 inability_df[[1]] <- inability_df[[1]] %>% 
-  rename_at(vars(matches("variable")),funs(str_replace(.,"variable","if"))) 
-
+  rename_at(vars(matches("variable")),funs(str_replace(.,"variable","if"))) %>% 
+  select(country,year, targety_first, recession)
 
 
 inability_df %>% 
@@ -31,11 +34,11 @@ inability_df %>%
                                  horizon == 2 ~ "H=0,S",
                                  horizon == 3 ~ "H=1,F",
                                  T ~ "H=1,S")) %>% 
+  filter(recession == "Trough"|recession == "Recession") %>% 
   ggplot(aes(x=fe,y=institution, fill = recession)) +
   geom_density_ridges(col="white",alpha = 0.4, scale=0.95) +
   theme_minimal() +
   facet_wrap(~ horizon) +
-  scale_fill_manual(values = c("#0000ff","#ff0000")) +
   ylab("") +
   xlab("Real Growth Forecast Error (%)") +
   theme(legend.position = "bottom") +
@@ -54,8 +57,8 @@ inability_df %>%
 
 ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions.pdf")
 
-footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
-           Recessions are periods of negative growth.") %>% 
+footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters at different horizons.
+           The sample for each forecaster reflects data availability (refer to section 2). Recessions are periods of negative growth.") %>% 
   cat(file ="../IEO_forecasts_material/output/figures/comparison/inability_recessions_footnote.tex")
 
 
