@@ -112,6 +112,14 @@ get_accuracy_summary <- function(data, issues_abbr, other_var, export_path){
 
 
 
+
+#' Produce comparison distribution different forecasters
+#' 
+#' @param list nested list, with level i) different forecaster ii) type of target years included (e.g. recession, recovery, etc.)
+#' @param number number of elements to retain from every list in the second level
+#' @return Distribution plot for different forecasters at different horizons, discriminating between states of the economy.
+
+
 plot_distribution_comparison <- function(list, number){
   
   list %>% 
