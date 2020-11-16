@@ -55,6 +55,7 @@ inability_df %>%
 ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions.pdf")
 
 footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
+           The sample for each forecaster reflects data availability (refer to section 1).
            Recessions are periods of negative growth.") %>% 
   cat(file ="../IEO_forecasts_material/output/figures/comparison/inability_recessions_footnote.tex")
 
@@ -145,7 +146,9 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions
   
 # Footnote:
 
-footnote=c("Distribution of WEO forecast errors during episodes of recessions and recessions accompanied by financial crises") %>% 
+footnote=c("Distribution of real GDP growth WEO forecast errors for episodes of no-recession,  only recession and recession accompanied by a single or twin financial crises. 
+           Financial crises correspond to currency, banking and sovereign debt crises. 
+           The corresponding dummy is from ") %>% 
   cat(file="../IEO_forecasts_material/output/figures/comparison/inability_recessions_financial_footnote.tex")
   
   
