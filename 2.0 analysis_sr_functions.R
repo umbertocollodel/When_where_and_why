@@ -199,6 +199,67 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
 
 
 
+#' Analyse efficiency short-run forecasts
+#' 
+#' @param fe_df dataframe with forecast errors
+#' @param centre_df list of dataframes with growth forecasts centre countries
+#' @param list_regressions character vector. List of regressions to perform
+#' @param condition character string. Conditions to filter the dataframe before regressions: it allows comparison
+#' between different time periods and can be vectorized easily.
+#' @return List of dataframes for each centre country. Each dataframe contains point estimate regression for each forecast horizon and geographical group as
+#' well as upper and lower bounds CI.
 
+
+analyze_sr_efficiency <- function(fe_df, centre_df, list_regressions, condition){
   
+  regressions <- centre_countries %>% 
+    map(~ merge(fe,.x, by=c("year"))) %>%
+    map(~ .x %>% filter_(condition)) %>% 
+    map(~ as.tibble(.x)) %>% 
+    map(~ split(.x, .x$group)) %>% 
+    modify_depth(2, ~ map(list_regressions, function(x){
+      tryCatch(lm(x, .x), error = function(e){
+        cat(crayon::red("Could not run the regression. Check data\n"))
+      })})) 
+  
+  # Wrangle in table format: ----
+  
+  
+  confint <- regressions %>% 
+    modify_depth(3, ~ confint(.x)) %>% 
+    modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
+    modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
+    map(~ .x %>% bind_rows(.id = "group")) %>% 
+    map(~ .x %>% mutate_at(vars(matches("\\.")), funs(round(., 2))))  %>% 
+    map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
+                                            horizon == 2 ~ "H=0,S",
+                                            horizon == 3 ~ "H=1,F",
+                                            T ~ "H=1,S"))) %>% 
+    map(~ .x %>% setNames(c("group","horizon",paste0("lower",str_extract(condition,".{2}\\d{4}$")),paste0("upper",str_extract(condition,".{2}\\d{4}$")))))
+  
+  
+  estimates <- regressions %>% 
+    modify_depth(3, ~ summary(.x)) %>% 
+    modify_depth(3, ~ .x[["coefficients"]]) %>% 
+    modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
+    modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
+    map(~ .x %>% bind_rows(.id = "group")) %>% 
+    map(~ .x %>% mutate(Estimate = round(Estimate, 2)))  %>% 
+    map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
+                                            horizon == 2 ~ "H=0,S",
+                                            horizon == 3 ~ "H=1,F",
+                                            T ~ "H=1,S")))  %>% 
+    map(~ .x %>% select(group, horizon, Estimate)) %>% 
+    map(~ .x %>% setNames(c("group","horizon",paste0("estimate",str_extract(condition,".{2}\\d{4}$"))))) 
+  
+  
+  estimates %>%
+    map2(confint, ~ .x %>% merge(.y, by=c("group","horizon")))
+  
+}
+
+
+
+
+
 
