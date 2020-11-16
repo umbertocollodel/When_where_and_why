@@ -235,7 +235,7 @@ analyze_sr_efficiency <- function(fe_df, centre_df, list_regressions, condition)
                                             horizon == 2 ~ "H=0,S",
                                             horizon == 3 ~ "H=1,F",
                                             T ~ "H=1,S"))) %>% 
-    map(~ .x %>% setNames(c("group","horizon",paste0("lower",str_extract(condition,".{2}\\d{4}$")),paste0("upper",str_extract(condition,".{2}\\d{4}$")))))
+    map(~ .x %>% setNames(c("Group","horizon","lower","upper")))
   
   
   estimates <- regressions %>% 
@@ -250,16 +250,13 @@ analyze_sr_efficiency <- function(fe_df, centre_df, list_regressions, condition)
                                             horizon == 3 ~ "H=1,F",
                                             T ~ "H=1,S")))  %>% 
     map(~ .x %>% select(group, horizon, Estimate)) %>% 
-    map(~ .x %>% setNames(c("group","horizon",paste0("estimate",str_extract(condition,".{2}\\d{4}$"))))) 
+    map(~ .x %>% rename(Group = group)) 
   
   
   estimates %>%
-    map2(confint, ~ .x %>% merge(.y, by=c("group","horizon")))
+    map2(confint, ~ .x %>% merge(.y, by=c("Group","horizon")))
   
 }
-
-
-
 
 
 
