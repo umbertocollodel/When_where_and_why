@@ -1,6 +1,11 @@
 # IEO_forecasts
 
-Background paper for the update of the 2014 forecast evaluation of the World Economic Outlook. 
+
+This repositories makes available the code to produce all figures and tables in the paper:
+
+An, Collodel and Loungani (2021). "When (where and why) forecasters get it wrong?". Unpublished manuscript.
+
+Please cite us if you refer to our paper.
 
 ## Author
 
@@ -9,6 +14,10 @@ Umberto Collodel (umberto.collodel@gmail.com)
 ## Language
 
 R
+
+## Data:
+
+https://www.dropbox.com/sh/33sosx2ltq6vif4/AADbEPy8EGOPjfPsJh9fVWdRa?dl=0
 
 
 ## Organization
