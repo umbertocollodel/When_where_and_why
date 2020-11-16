@@ -1,15 +1,16 @@
-# Efficiency and explaining forecast errors
+############### Efficiency and explaining forecast errors
+
+
+# Prepare dataframes and set parameters for custom function: -----
 
 # Compute forecast errors:
 
 fe <- final_sr$growth %>% 
   mutate_at(vars(starts_with("variable")),.funs = funs(targety_first - .))  
 
-# Efficiency growth forecasts: -----
+# List of dataframes with centre countries growth forecasts:
 
 centre_countries_names = c("China","Germany","US")
-
-# Obtains forecast over different horizons for centre countries:
 
 centre_countries <- final_sr$growth %>%
   filter(country == "United States" | country == "China" | country == "Germany") %>%
@@ -17,64 +18,44 @@ centre_countries <- final_sr$growth %>%
   map(~ .x %>% rename_at(vars(starts_with("variable")),.funs = funs(str_replace(.,"variable","centre")))) %>% 
   map(~ .x %>% select(year, centre1, centre2, centre3, centre4))
 
-# Merge and regress by group:
-
+# Set list regression and filtering condition:
 
 list_regressions=c(variable1 ~ centre1, variable2 ~ centre2,
                    variable3 ~ centre3, variable4 ~ centre4)
 
-regressions <- centre_countries %>% 
-  map(~ merge(fe,.x, by=c("year"))) %>%
-  map(~ as.tibble(.x)) %>% 
-  map(~ split(.x, .x$group)) %>% 
-  modify_depth(2, ~ map(list_regressions, function(x){
-    tryCatch(lm(x, .x), error = function(e){
-      cat(crayon::red("Could not run the regression. Check data\n"))
-    })})) 
+conditions = c("year >= 2000 & year < 2010", "year >= 2010" )
 
-# Wrangle in table format: ----
+period = c("2000-2010","2010-2018")
+
+# Run function and wrangle resulting list into df -----
 
 
-confint <- regressions %>% 
-  modify_depth(3, ~ confint(.x)) %>% 
-  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
-  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
-  map(~ .x %>% bind_rows(.id = "group")) %>% 
-  map(~ .x %>% mutate_at(vars(matches("\\.")), funs(round(., 2))))  %>% 
-  map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
-                                          horizon == 2 ~ "H=0,S",
-                                          horizon == 3 ~ "H=1,F",
-                                          T ~ "H=1,S"))) %>% 
-  map(~ .x %>% setNames(c("Group","horizon","lower","upper")))
+efficiency_results <- conditions %>% 
+  map(~ analyze_sr_efficiency(fe, centre_countries, list_regressions, .x)) %>%
+  map(~ .x %>% bind_rows(.id = "centre_country")) %>% 
+  map2(period, ~ .x %>% mutate(period = .y)) %>% 
+  bind_rows() %>% 
+  as_tibble() %>% 
+  split(.$centre_country)
+
+
+
+efficiency_results %>%
+  map(~ .x %>% ggplot(aes(x=horizon)) +
+  geom_point(aes(y=Estimate, col = period), position = position_dodge(0.9), alpha = 0.6) +
+  geom_errorbar(aes(ymin=lower, ymax=upper, col = period),position = position_dodge(0.9), width = 0.3, alpha = 0.6) +
+  facet_wrap(~ Group) +
+  scale_color_manual(values = c("#00008B","#FF0000")) +
+  labs(col = "Period") +
+  xlab("") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 270,vjust = 0.5)) +
+  theme(strip.text.x = element_text(size = 16),
+          axis.text.x = element_text(size = 18),
+          axis.text.y = element_text(size = 18),
+          axis.title = element_text(size = 21),
+          legend.text = element_text(size = 16)))
   
-
-estimates <- regressions %>% 
-  modify_depth(3, ~ summary(.x)) %>% 
-  modify_depth(3, ~ .x[["coefficients"]]) %>% 
-  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
-  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
-  map(~ .x %>% bind_rows(.id = "group")) %>% 
-  map(~ .x %>% mutate(Estimate = round(Estimate, 2)))  %>% 
-  map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
-                                          horizon == 2 ~ "H=0,S",
-                                          horizon == 3 ~ "H=1,F",
-                                          T ~ "H=1,S")))  %>% 
-  map(~ .x %>% select(group, horizon, Estimate)) %>% 
-  map(~ .x %>% rename(Group = group)) 
-
-
-plot_sr_efficiency <- estimates %>%
-  map2(confint, ~ .x %>% merge(.y, by=c("Group","horizon"))) %>% 
-  map(~ .x %>% ggplot(aes(horizon, Estimate)) +
-        geom_errorbar(aes(ymin = lower, ymax = upper), color = "grey") +
-        geom_point(fill = "red", alpha = 0.6, shape = 21, size = 3) +
-        facet_wrap(~ Group) +
-        theme_minimal() +
-        xlab("") +
-        ylab("") +
-        theme(axis.text = element_text(size = 18),
-              axis.title = element_text(size = 21),
-              strip.text.x = element_text(size=14)))
 
 
 plot_sr_efficiency %>%
