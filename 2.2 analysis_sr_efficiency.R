@@ -18,7 +18,7 @@ centre_countries <- final_sr$growth %>%
   map(~ .x %>% rename_at(vars(starts_with("variable")),.funs = funs(str_replace(.,"variable","centre")))) %>% 
   map(~ .x %>% select(year, centre1, centre2, centre3, centre4))
 
-# Set list regression and filtering condition:
+# Set list regression, filtering condition and identifier for period:
 
 list_regressions=c(variable1 ~ centre1, variable2 ~ centre2,
                    variable3 ~ centre3, variable4 ~ centre4)
@@ -40,7 +40,9 @@ efficiency_results <- conditions %>%
 
 
 
-efficiency_results %>%
+# Plot and export: ----
+
+plot_sr_efficiency <- efficiency_results %>%
   map(~ .x %>% ggplot(aes(x=horizon)) +
   geom_point(aes(y=Estimate, col = period), position = position_dodge(0.9), alpha = 0.6) +
   geom_errorbar(aes(ymin=lower, ymax=upper, col = period),position = position_dodge(0.9), width = 0.3, alpha = 0.6) +
@@ -63,10 +65,9 @@ plot_sr_efficiency %>%
 
 # Footnote:
 
-footnote=c("The table shows results from regressions of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) China GDP growth (Table 4) , Germany GDP growth (Table 5) or US GDP growth (Table 6). 
-           The four columns report the estimated beta coefficient from these regressions.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/efficiency_footnote.tex")
-
+footnote=c("The figure shows the estimated coefficients from the regression of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) US GDP growth. 
+           The point estimate are reported with 95% confidence intervals. Regression sample divided in two periods.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/efficiency/efficiency_footnote.tex")
 
 
 
