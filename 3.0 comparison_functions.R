@@ -113,46 +113,6 @@ get_accuracy_summary <- function(data, issues_abbr, other_var, export_path){
 
 
 
-#' Produce comparison distribution different forecasters
-#' 
-#' @param list nested list, with level i) different forecaster ii) type of target years included (e.g. recession, recovery, etc.)
-#' @param number number of elements to retain from every list in the second level
-#' @return Distribution plot for different forecasters at different horizons, discriminating between states of the economy.
-
-
-plot_distribution_comparison <- function(list, number){
-  
-  list %>% 
-    map(~ .x[[number]]) %>% 
-    reduce(merge, all=T) %>% 
-    gather("institution","fe",if1:ncol(.)) %>%
-    separate(institution, c("institution","horizon"), sep = 2) %>% 
-    mutate(institution = case_when(institution == "wb" ~ "World Bank",
-                                   institution == "ec" ~ "European Commission",
-                                   institution == "if" ~ "IMF",
-                                   institution == "cn" ~ "Consensus (Mean)")) %>% 
-    mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
-                               horizon == 2 ~ "H=0,S",
-                               horizon == 3 ~ "H=1,F",
-                               T ~ "H=1,S")) %>% 
-    ggplot(aes(x=fe,y=institution, fill = recession)) +
-    geom_density_ridges(col="white",alpha = 0.4, scale=0.95) +
-    theme_minimal() +
-    facet_wrap(~ horizon) +
-    scale_fill_manual(values = c("#0000ff","#ff0000")) +
-    ylab("") +
-    xlab("Real Growth Forecast Error (%)") +
-    theme(legend.position = "bottom") +
-    xlim(-20,10) +
-    labs(fill = "",col="") +
-    theme(legend.position = "bottom") +
-    theme(axis.text = element_text(size = 18),
-          axis.title = element_text(size = 21),
-          strip.text.x = element_text(size=14),
-          legend.title = element_text(size = 18),
-          legend.text = element_text(size = 16))
-}
-
 
 
 
