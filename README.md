@@ -15,9 +15,15 @@ Umberto Collodel (umberto.collodel@gmail.com)
 
 R
 
-## Data:
+## Raw Data:
+
+Download all files in the folder
 
 https://www.dropbox.com/sh/33sosx2ltq6vif4/AADbEPy8EGOPjfPsJh9fVWdRa?dl=0
+
+`weo_rgdp`: GDP growth forecasts contained in Spring and Fall WEO publication
+`weo_january_ypdate`: GDP growth forecasts contained in January WEO publication
+`weo_july_update`: GDP growth forecast contained in July publication
 
 
 ## Organization
