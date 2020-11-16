@@ -35,50 +35,35 @@ regressions <- centre_countries %>%
 # Wrangle in table format: ----
 
 
-confint <- regressions %>% 
-  modify_depth(3, ~ confint(.x)) %>% 
-  modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
-  modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
-  map(~ .x %>% bind_rows(.id = "group")) %>% 
-  map(~ .x %>% mutate_at(vars(matches("\\.")), funs(round(., 2))))  %>% 
-  map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
-                                          horizon == 2 ~ "H=0,S",
-                                          horizon == 3 ~ "H=1,F",
-                                          T ~ "H=1,S"))) %>% 
-  map(~ .x %>% setNames(c("Group","horizon","lower","upper")))
-  
-
-estimates <- regressions %>% 
+table_sr_efficiency <- regressions %>% 
   modify_depth(3, ~ summary(.x)) %>% 
   modify_depth(3, ~ .x[["coefficients"]]) %>% 
   modify_depth(3, ~ .x %>% as_tibble() %>%  slice(2)) %>% 
   modify_depth(2, ~ .x %>% bind_rows(.id = "horizon")) %>% 
   map(~ .x %>% bind_rows(.id = "group")) %>% 
-  map(~ .x %>% mutate(Estimate = round(Estimate, 2)))  %>% 
+  map(~ .x %>% mutate(Estimate = round(Estimate, 2))) %>% 
+  map(~ .x %>% mutate(Estimate = case_when(`t value` > 1.96 | `t value` < -1.96 ~ str_replace(as.character(Estimate), "$","**"),
+                              (`t value` > 1.68 & `t value` < 1.96) | (`t value` < -1.68 & `t value` > -1.96) ~ str_replace(as.character(Estimate), "$", "*"),
+                              TRUE ~ as.character(Estimate)))) %>% 
   map(~ .x %>% mutate(horizon = case_when(horizon == 1 ~ "H=0,F",
                                           horizon == 2 ~ "H=0,S",
                                           horizon == 3 ~ "H=1,F",
-                                          T ~ "H=1,S")))  %>% 
+                                          T ~ "H=1,S"))) %>% 
+  map(~ .x %>% mutate(group = case_when(group == "africa" ~ "Africa",
+                                  group == "emerging_asia" ~ "Emerging Asia",
+                                  group == "europe" ~ "Europe",
+                                  group == "emerging_europe"~ "Emerging Europe",
+                                  group == "latin_america" ~ "Latin America",
+                                  T ~ "Middle East"))) %>% 
   map(~ .x %>% select(group, horizon, Estimate)) %>% 
-  map(~ .x %>% rename(Group = group)) 
+  map(~ .x %>% spread(horizon, Estimate)) %>% 
+  map(~ .x %>% rename(Group = group))
 
 
-plot_sr_efficiency <- estimates %>%
-  map2(confint, ~ .x %>% merge(.y, by=c("Group","horizon"))) %>% 
-  map(~ .x %>% ggplot(aes(horizon, Estimate)) +
-        geom_errorbar(aes(ymin = lower, ymax = upper), color = "grey") +
-        geom_point(fill = "red", alpha = 0.6, shape = 21, size = 3) +
-        facet_wrap(~ Group) +
-        theme_minimal() +
-        xlab("") +
-        ylab("") +
-        theme(axis.text = element_text(size = 18),
-              axis.title = element_text(size = 21),
-              strip.text.x = element_text(size=14)))
-
-
-plot_sr_efficiency %>%
-  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/short-run forecasts/efficiency/",.y,".pdf"),.x))
+table_sr_efficiency %>% 
+  iwalk(~ .x %>% stargazer(summary = F,
+                           rownames = F,
+                           out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/efficiency/",.y,".tex")))
 
 # Footnote:
 
