@@ -1,6 +1,8 @@
 ####### Script to prepare the MONA database
-# Note: for few programs there is a discrepancy between the date of approval
+# Note1: for few programs there is a discrepancy between the date of approval
 # in MONA data and the SPR sheet, that is why when merging the number of obs decreases.
+# Note2: programs in the MONA macroeconomic indicators database start in September 2020
+# Note3: not for all programs are available macroeconomic data
 
 
 # Clean MONA with macro-variables 2002-2020 ----
@@ -14,6 +16,7 @@ reviews=c("R0","R1","R2")
 
 mona_macro_raw <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020_macro.xlsx") %>%
   filter(Description == "Gross domestic product, constant prices") %>% 
+  filter(`Approval Year` <= 2018) %>% 
   split(.$`Review Type`) %>% 
   keep(~ .x %>% .$`Review Type` %>% unique() %in% reviews) %>%
   map(~ .x %>% select(`Arrangement Number`,`Country Name`,`Arrangement Type`,`Approval Date`,`Board Action Date`,
@@ -30,7 +33,6 @@ mona_macro_raw <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-
   map(~ .x %>% select(-country))
 
 
-
 # Clean sheet with details about program (amount approved, exceptional access etc.): ----
 # Note: origin for date format changes according to machine used.
 
@@ -38,7 +40,7 @@ mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.
   select(-c(1, 7, 18, 20, 22, 24, 26, 28, 30, 35, 37, 40)) %>% 
   slice(-1) %>% 
   row_to_names(1) %>%
-  select(`IFS Code`,`Date of Arrangement`,`Precautionary at program approval`,`Exceptional Access`,`Original Duration (Months)`,`Total amount disbursed`,`Total Approved Amount (percent of current quota)`) %>%
+  select(`IFS Code`,`Date of Arrangement`,`Precautionary at program approval`,`Exceptional Access`,`Original Duration (Months)`,`Total amount disbursed`,`Total Approved Amount (percent of quota)`) %>%
   setNames(c("country_code","date_approval","precautionary","exceptional_access","original_duration","amount_drawn","amount_percent_quota")) %>% 
   mutate(country = countrycode(country_code,"imf","country.name")) %>%
   mutate_at(vars(contains("amount")),funs(as.numeric(.))) %>%
@@ -46,7 +48,7 @@ mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.
                                                                   . == ".." ~ NA_character_,
                                                                   T ~ .))) %>%
   mutate(date_approval = as.Date(as.numeric(date_approval), origin = "1899-12-30")) %>%
-  filter(lubridate::year(date_approval) >= 2002) %>% 
+  filter(lubridate::year(date_approval) >= 2002 & lubridate::year(date_approval) <= 2018) %>% 
   select(country_code, country, everything()) 
 
 # Combine for dataframe with summary statistics: ----
