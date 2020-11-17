@@ -25,7 +25,7 @@ mona_macro_raw <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-
          `T` = ((`T` - `T-1`)/`T-1`)*100)) %>% 
   map(~ .x %>% select(-`T-1`)) %>%
   map(~ .x %>% setNames(c("program_id","country","program_type","date_approval","date_action","variable1","variable2"))) %>%
-  map(~ .x %>% mutate(year = lubridate::year(date_action))) %>% 
+  map(~ .x %>% mutate(year = lubridate::year(date_approval))) %>% 
   map(~ .x %>% mutate(year_ahead = year +1)) %>% 
   map(~ .x %>% mutate(country = str_to_sentence(tolower(country)))) %>% 
   map(~ .x %>% mutate(country_code = countrycode(country,"country.name","imf"))) %>% 
