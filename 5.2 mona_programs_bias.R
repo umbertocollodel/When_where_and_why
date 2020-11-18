@@ -14,6 +14,8 @@ final_mona <- rgdp_weo %>%
   as_tibble() 
 
 
+
+
 # Scatterplots relationship amount approved (% of quota) and forecast error: ----
 
 
@@ -70,7 +72,9 @@ regression_data <- final_mona %>%
   filter(review == "R0") %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.10,0.90)))) %>% 
-  mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
+  mutate(months_remaining = 12 - lubridate::month(date_action)) %>%
+  mutate(after = case_when(year > 2009 ~ 1,
+                           T ~ 0)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional"))
@@ -96,7 +100,7 @@ regressions %>%
                                  "Total amount (% quota)",
                                  "Remaining months",
                                  "Concessional"),
-            dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahaead)"),
+            dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             column.sep.width = "-10pt",
             df=F,
