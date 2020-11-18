@@ -21,11 +21,15 @@ Download all files in the folder
 
 https://www.dropbox.com/sh/33sosx2ltq6vif4/AADbEPy8EGOPjfPsJh9fVWdRa?dl=0
 
-`weo_rgdp`: GDP growth forecasts contained in Spring and Fall WEO publication 
+IMF Data:
 
-`weo_january_ypdate`: GDP growth forecasts contained in January WEO publication 
+`weo_rgdp`: GDP growth forecasts contained in Spring and Fall WEO publication, one sheet for each year/vintage 
 
-`weo_july_update`: GDP growth forecast contained in July publication 
+`weo_january_ypdate`: GDP growth forecasts contained in January WEO publication, one sheet for each year
+
+`weo_july_update`: GDP growth forecast contained in July publication, one sheet for each year
+
+
 
 
 ## Organization
