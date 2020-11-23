@@ -154,8 +154,7 @@ formula_reviews=c("variable1 ~ 1 + review_dummy",
 # Regress and export:
 
 regressions_reviews <- formula_reviews %>% 
-  map(~ lm(.x, reviews_data)) %>% 
-  map(~ summary(.x))
+  map(~ lm(.x, reviews_data))
 
 
 
