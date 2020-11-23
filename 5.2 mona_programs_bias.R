@@ -154,8 +154,7 @@ formula_reviews=c("variable1 ~ 1 + review_dummy",
 # Regress and export:
 
 regressions_reviews <- formula_reviews %>% 
-  map(~ lm(.x, reviews_data))
-
+  map(~ lm(.x, reviews_data)) 
 
 
 
@@ -170,9 +169,8 @@ regressions_reviews %>%
 
 # Footnote:
 
-footnote=c("Dependent variable winsorized at the 10% level. The samples R1 and R2 include respectively
-           all first and second reviews made in the same year of program approval by the Board.
-           Heteroskedasticity robust standard errors in parentheses.
+footnote=c("Dependent variable winsorized at the 10% level. The sample contains data at the inception of the
+            program and for the two subsequent reviews.
            ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
