@@ -143,10 +143,10 @@ reviews_data <- final_mona %>%
 
 formula_reviews=c("variable1 ~ 1 + review_dummy",
                   "variable1 ~ 1 + review_dummy + after + weeks_passed",
-                  "variable1 ~ 1 + review_dummy + after + after*review_dummy + weeks_passed",
+                  "variable1 ~ 1 + review_dummy + after + weeks_passed + after*review_dummy",
                   "variable2 ~ 1 + review_dummy",
                   "variable2 ~ 1 + review_dummy + after + weeks_passed",
-                  "variable2 ~ 1 + review_dummy + after + after*review_dummy + weeks_passed")
+                  "variable2 ~ 1 + review_dummy + after + weeks_passed +after*review_dummy")
                   
 
 
@@ -160,7 +160,7 @@ regressions_reviews <- formula_reviews %>%
 
 
 regressions_reviews %>% 
-  stargazer(covariate.labels = c("Review","Post-GFC","Review*Post-GFC"),
+  stargazer(covariate.labels = c("Review","Post-GFC","Weeks passed","Review*Post-GFC"),
             model.numbers = F,
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year-ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
