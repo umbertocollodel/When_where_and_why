@@ -126,31 +126,38 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
 reviews_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
   mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.10,0.90)))) %>% 
+  mutate(after = case_when(year > 2009 ~ 1,
+                           T ~ 0)) %>% 
+  mutate(review_dummy = case_when(review != "R0" ~ 1,
+                                  T ~ 0)) %>% 
   mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional")) %>% 
   arrange(country, date_approval,review, year)
 
-# Keep only reviews in the same year as approval(current-year forecasts) or 
-# year after approval(year-ahead forecasts)
 
-reviews_data_regression <- c(0,1) %>% 
-  map(~ reviews_data %>% mutate(same_year = case_when(year == lubridate::year(date_approval) + .x ~ 1,
-                               T ~ 0))) %>% 
-  map(~ .x %>% filter(same_year == 1)) %>% 
-  map(~ .x %>% split(.$review)) %>% 
-  flatten()
 
-formulas=c(rep("variable1 ~ amount_percent_quota",3),
-           rep("variable2 ~ amount_percent_quota",3))
-           
+# Formulas:
+
+formula_reviews=c("variable1 ~ 1 + review_dummy",
+                  "variable1 ~ 1 + review_dummy + after + after*review_dummy",
+                  "variable2 ~ 1 + review_dummy",
+                  "variable2 ~ 1 + review_dummy + after + after*review_dummy")
+
+
+
+
 # Regress and export:
 
-reviews_data_regression %>% 
-  map2(formulas, ~ lm(.y,.x)) %>%
-  stargazer(covariate.labels = c("Total amount (% quota)"),
-            column.labels = rep(c("R0", "R1","R2"),2),
+regressions_reviews <- formula_reviews %>% 
+  map(~ lm(.x, reviews_data)) 
+
+
+
+
+regressions_reviews %>% 
+  stargazer(covariate.labels = c("Review","Post-GFC","Review*Post-GFC"),
             model.numbers = F,
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year-ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
