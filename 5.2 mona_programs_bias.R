@@ -130,7 +130,8 @@ reviews_data <- final_mona %>%
                            T ~ 0)) %>% 
   mutate(review_dummy = case_when(review != "R0" ~ 1,
                                   T ~ 0)) %>% 
-  mutate(months_remaining = 12 - lubridate::month(date_action)) %>% 
+  mutate_at(vars(contains("date")),funs(as.POSIXct(.))) %>% 
+  mutate(weeks_passed = round(difftime(date_action, date_approval, units = "weeks"),0)) %>% 
   mutate(concessional = case_when(program_type == "SBA"| program_type == "EFF" |
                                     program_type == "PCL"| program_type == "PLL" ~ "Concessional",
                                   T ~ "Non-concessional")) %>% 
@@ -141,17 +142,20 @@ reviews_data <- final_mona %>%
 # Formulas:
 
 formula_reviews=c("variable1 ~ 1 + review_dummy",
-                  "variable1 ~ 1 + review_dummy + after + after*review_dummy",
+                  "variable1 ~ 1 + review_dummy + after + weeks_passed",
+                  "variable1 ~ 1 + review_dummy + after + after*review_dummy + weeks_passed",
                   "variable2 ~ 1 + review_dummy",
-                  "variable2 ~ 1 + review_dummy + after + after*review_dummy")
-
+                  "variable2 ~ 1 + review_dummy + after + weeks_passed",
+                  "variable2 ~ 1 + review_dummy + after + after*review_dummy + weeks_passed")
+                  
 
 
 
 # Regress and export:
 
 regressions_reviews <- formula_reviews %>% 
-  map(~ lm(.x, reviews_data)) 
+  map(~ lm(.x, reviews_data)) %>% 
+  map(~ summary(.x))
 
 
 
