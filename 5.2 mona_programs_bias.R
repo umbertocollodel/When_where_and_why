@@ -123,9 +123,11 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
 
 # Role of reviews: ----
 
+
+
 reviews_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.10,0.90)))) %>% 
+  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.05,0.95)))) %>% 
   mutate(after = case_when(year > 2009 ~ 1,
                            T ~ 0)) %>% 
   mutate(review_dummy = case_when(review != "R0" ~ 1,
@@ -144,10 +146,9 @@ reviews_data <- final_mona %>%
 formula_reviews=c("variable1 ~ 1 + review_dummy",
                   "variable1 ~ 1 + review_dummy + after",
                   "variable1 ~ 1 + review_dummy + after + weeks_passed",
-                  "variable1 ~ 1 + review_dummy + after + weeks_passed + after*review_dummy",
                   "variable2 ~ 1 + review_dummy",
-                  "variable2 ~ 1 + review_dummy + after + weeks_passed",
-                  "variable2 ~ 1 + review_dummy + after + weeks_passed +after*review_dummy")
+                  "variable2 ~ 1 + review_dummy + after",
+                  "variable2 ~ 1 + review_dummy + after + weeks_passed")
                   
 
 
@@ -155,12 +156,12 @@ formula_reviews=c("variable1 ~ 1 + review_dummy",
 # Regress and export:
 
 regressions_reviews <- formula_reviews %>% 
-  map(~ lm(.x, reviews_data)) 
+  map(~ lm(.x, reviews_data))
 
 
 
 regressions_reviews %>% 
-  stargazer(covariate.labels = c("Review","Post-GFC","Weeks passed","Review*Post-GFC"),
+  stargazer(covariate.labels = c("Review","Post-GFC","Weeks passed"),
             model.numbers = F,
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year-ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
@@ -170,7 +171,7 @@ regressions_reviews %>%
 
 # Footnote:
 
-footnote=c("Dependent variable winsorized at the 10% level. The sample contains data at the inception of the
+footnote=c("Dependent variable winsorized at the 5% level. The sample contains data at the inception of the
             program and for the two subsequent reviews.
            ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
