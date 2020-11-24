@@ -142,6 +142,7 @@ reviews_data <- final_mona %>%
 # Formulas:
 
 formula_reviews=c("variable1 ~ 1 + review_dummy",
+                  "variable1 ~ 1 + review_dummy + after",
                   "variable1 ~ 1 + review_dummy + after + weeks_passed",
                   "variable1 ~ 1 + review_dummy + after + weeks_passed + after*review_dummy",
                   "variable2 ~ 1 + review_dummy",
