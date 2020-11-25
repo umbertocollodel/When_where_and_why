@@ -127,7 +127,6 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
 
 reviews_data <- final_mona %>% 
   mutate_at(vars(contains("variable")),funs(targety_first - .)) %>%
-  mutate_at(vars(contains("variable")),funs(Winsorize(., na.rm = T, probs = c(0.05,0.95)))) %>% 
   mutate(after = case_when(year > 2009 ~ 1,
                            T ~ 0)) %>% 
   mutate(review_dummy = case_when(review != "R0" ~ 1,
@@ -177,5 +176,34 @@ footnote=c("Dependent variable winsorized at the 5% level. The sample contains d
            *: significant at 10% level.") %>% 
   cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
 
+
+
+# New path for Figures recession & non-recession years:
+
+
+
+
+
+reviews_data %>% 
+  filter(review == "R0") %>%
+  gather("horizon","value",variable1:variable2) %>% 
+  mutate(recession = case_when(targety_first > 0  ~ "Non-recession", T ~ "Recession")) %>% 
+  mutate(horizon = case_when(horizon == "variable1" ~ "Current year",
+                             T ~ "Year ahead")) %>% 
+  ggplot(aes(x=value, fill = recession)) + 
+  geom_density(col = "white",alpha = 0.4) + 
+  facet_wrap(~ horizon) +
+  scale_fill_manual(values = c("#0000ff","#ff0000")) +
+  xlab("") +
+  ylab("") +
+  labs(fill="") +
+  xlim(-30,10) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  theme(axis.text.y = element_blank(),
+        strip.text = element_text(size = 14))
+        
+  
+  
 
 
