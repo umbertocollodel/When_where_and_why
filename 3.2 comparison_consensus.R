@@ -33,6 +33,19 @@ group <- comparison_consensus %>%
 get_list_comparison(comparison_consensus, "consensus/country_sample.tex")
 
 
+
+# Figure: scatterplot Consensus and IMF forecasts ------
+
+
+get_scatterplot(comparison_consensus, "Consensus (Mean)",
+                issues=c("currentOct","currentApr","aheadOct","aheadApr"),
+                export_path = "consensus/accuracy/scatter_")
+
+footnote=c("Red line is 45 degrees line.") %>% 
+  cat(file ="../IEO_forecasts_material/output/figures/comparison/consensus/accuracy/scatter_footnote.tex")
+
+
+
 # Table appendix: comparison RMSE for all individual countries ----- 
 
 rmse_comparison <- comparison_consensus %>% 
