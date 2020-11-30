@@ -1,4 +1,5 @@
-#' Analyse short-run forecasts bias
+#' Analyse short-run forecasts bias  
+#' WEO
 #' 
 #' @param data df with forecasts at different horizons and actual values (named respectively variable1/2/3/4 
 #' and targety_first)
@@ -196,6 +197,115 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
     
     }
   }
+
+
+
+#' Analyse short-run forecasts bias 
+#' Publications other than WEO that require bootstrap because of small sample
+#' 
+#' @param data df with forecasts at different horizons and actual values (named respectively name_pattern1/2/3/4 
+#' and targety_first)
+#' @param seed numeric. Seed to replicate random sampling.
+#' @param name_pattern character string. Name pattern for variables of forecasts at 
+#' different horizons
+#' @param replications numeric. Number of bootstrapped samples by country and horizon
+#' @param name_issues character vector. Names of issues (season) of forecast publication
+#' First element is the last issue.
+#' @param export_path character string. Path to export table or graph.
+#' @return Output depends on parameter output type.
+#' #' The first produces a tex table with value of the intercept for each country and forecast horizon.
+#' The second produces two plots with the share of countries with significant intercept
+#' at each horizon (dividing between Spring and Fall.)
+#' The third produces a table with the summary statistics of biases for each horizon and type
+#' of bias i.e optimistic or pessimistic. For each horizon, Spring and Fall issues are pooled together.
+#' The fourth produces the same plots as the second, but dividing by WEO geographical group.
+#' The fifth produces the same table as the third, but dividing by WEO geographical group.
+#'
+
+
+analyse_sr_bias_others <- function(data, seed, name_pattern, replications, name_issues){
+
+set.seed(seed)
+
+
+bootstrap <- data %>% 
+  mutate_at(vars(contains(name_pattern)),funs(targety_first - .)) %>% 
+  select(country_code, country, year, group, contains(name_pattern)) %>% 
+  split(.$country) %>% 
+  map(~ .x %>% gather("horizon","value", 5:length(.x))) %>% 
+  map(~ .x %>% split(.x$horizon)) %>% 
+  modify_depth(2, ~ modelr::bootstrap(.x,n=replications)) %>% 
+  modify_depth(2,~ .x %>% pull(strap)) %>% 
+  modify_depth(3, ~ .x %>% as.data.frame() %>% summarise(estimate = mean(value, na.rm = T))) %>% 
+  modify_depth(2, ~ bind_rows(.x, .id = "replication_n")) %>% 
+  modify_depth(2, ~ .x %>% summarise(sd = sd(estimate, na.rm = T))) %>% 
+  map(~ bind_rows(.x, .id = "horizon")) %>% 
+  bind_rows(.id = "country")
+
+
+
+normal <-  data %>% 
+  mutate_at(vars(contains(name_pattern)),funs(targety_first - .)) %>% 
+  select(country_code, country, year, group, contains(name_pattern)) %>% 
+  split(.$country) %>% 
+  map(~ .x %>% gather("horizon","value", 5:length(.x))) %>% 
+  map(~ split(.x,.x$horizon)) %>% 
+  modify_depth(2, ~ lm(value ~ 1, .x)) %>% 
+  modify_depth(2, ~ summary(.x)) %>% 
+  modify_depth(2, ~ .x[["coefficients"]][1]) %>% 
+  modify_depth(2,~ data.frame(estimate = .x)) %>% 
+  map(~ bind_rows(.x, .id = "horizon")) %>% 
+  bind_rows(.id = "country")
+
+
+
+
+merge(normal,bootstrap) %>% 
+  as_tibble() %>% 
+  mutate(tstat = estimate/sd) %>%
+  mutate(horizon = as.numeric(str_extract(horizon,"\\d"))) %>% 
+  mutate(issue = case_when(horizon %% 2 == 1 ~ name_issues[1],
+                           T ~ name_issues[2]),
+         horizon = case_when(horizon == 1 | horizon == 2 ~ "H=0",
+                             horizon == 3 | horizon == 4 ~ "H=1")) %>% 
+  split(.$horizon) %>% 
+  map(~ .x %>% mutate(negative_significant = case_when(tstat <= -1.96 ~ 1,
+                                                       T~ 0))) %>% 
+  map(~ .x %>% mutate(positive_significant = case_when(tstat >= 1.96 ~ 1,
+                                                       T~ 0))) %>%
+  map(~ .x %>% split(.$issue)) %>% 
+  modify_depth(2, ~ .x %>% summarise_at(vars(contains("significant")), mean, na.rm = T)) %>% 
+  map(~ .x %>% bind_rows(.id = "issue")) %>%
+  bind_rows(.id = "horizon") %>% 
+  gather("sign","share",negative_significant:positive_significant) %>% 
+  mutate(sign = case_when(sign == "negative_significant" ~ "Optimistic",
+                          T ~ "Pessimistic")) %>%
+  split(.$issue) %>% 
+  map(~ .x %>% 
+        ggplot(aes(sign, share, fill = sign)) +
+        geom_col(width = 0.4) +
+        geom_text(aes(label = round(share,2)), size = 5, vjust = -0.5) +
+        facet_wrap(~ horizon) +
+        theme_minimal() +
+        ylim(0,1)  +
+        xlab("") +
+        ylab("Share of countries (%)") +
+        scale_fill_grey() +
+        theme(legend.position = "bottom") +
+        theme(strip.text.x = element_text(size = 16),
+              axis.text.x = element_blank(),
+              axis.text.y = element_text(size = 18),
+              axis.title = element_text(size = 21),
+              legend.text = element_text(size = 16)) +
+        theme(panel.grid.major.x = element_blank(),
+              panel.grid.minor.x = element_blank()) +
+        labs(fill = "")) %>% 
+  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias_others/",name_pattern,"_",.y,".pdf"),
+                        .x))
+
+}
+
+
 
 
 
