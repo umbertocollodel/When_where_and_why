@@ -1,10 +1,13 @@
+set.seed(253)
+
+
 bootstrap <- comparison_wb %>% 
   mutate_at(vars(contains("wb")),funs(targety_first - .)) %>% 
   select(country_code, country, year, group, contains("wb")) %>% 
   split(.$country) %>% 
   map(~ .x %>% gather("horizon","value", wb1:wb4)) %>% 
   map(~ split(.x,.x$horizon)) %>%
-  modify_depth(2, ~ modelr::bootstrap(.x,n=100)) %>% 
+  modify_depth(2, ~ modelr::bootstrap(.x,n=1000)) %>% 
   modify_depth(2,~ .x %>% pull(strap)) %>% 
   modify_depth(3, ~ .x %>% as.data.frame() %>% summarise(estimate = mean(value, na.rm = T))) %>% 
   modify_depth(2, ~ bind_rows(.x, .id = "replication_n")) %>% 
