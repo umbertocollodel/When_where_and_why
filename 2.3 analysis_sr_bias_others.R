@@ -20,9 +20,10 @@ analyse_sr_bias_others(comparison_wb, seed, "wb", replications, c("Summer","Wint
 
 
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the Global Economic
-           Prospects (Summer or Winter) with a 5\% statistically signicant negative or positive bias. Test of statistical
+           Prospects (Summer or Winter) with a 5% statistically signicant negative or positive bias. Test of statistical
            significance is run individually with country-by-country regressions where the standard errors are obtained
-           from a 1,000 replications bootstrap.")
+           from a 1,000 replications bootstrap.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/bias_others/wb_foonote.tex")
 
 
 # Run for European Commission ----
@@ -32,7 +33,7 @@ footnote=c("The figure shows the share of countries for each forecast horizon an
 name_issues=c("Fall","Spring")
 
 
-analyse_sr_bias_others(comparison_wb, seed, "wb", replications, c("Summer","Winter"))
+analyse_sr_bias_others(comparison_ec, seed, "ec", replications, c("Fall","Spring"))
 
 
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the Global Economic
