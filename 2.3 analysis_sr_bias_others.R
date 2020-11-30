@@ -74,3 +74,11 @@ merge(normal,bootstrap) %>%
         theme(panel.grid.major.x = element_blank(),
               panel.grid.minor.x = element_blank()) +
         labs(fill = ""))
+
+
+
+footnote=c("The figure shows the share of countries for each forecast horizon and issue of the Global Economic
+           Prospects (Summer or Winter) with a 5\% statistically signicant negative or positive bias. Test of statistical
+           significance is run individually with country-by-country regressions where the standard errors are obtained
+           from a 1,000 replications bootstrap.")
+
