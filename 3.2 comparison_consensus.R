@@ -37,7 +37,8 @@ get_list_comparison(comparison_consensus, "consensus/country_sample.tex")
 # Figure: scatterplot Consensus and IMF forecasts ------
 
 
-get_scatterplot(comparison_consensus, "Consensus (Mean)",
+get_scatterplot(comparison_consensus %>% filter(forecaster == "Consensus (Mean)"),
+                "Consensus (Mean)",
                 issues=c("currentOct","currentApr","aheadOct","aheadApr"),
                 export_path = "consensus/accuracy/scatter_")
 
