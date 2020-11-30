@@ -30,74 +30,7 @@ group <- comparison_consensus %>%
 
 # Table with list countries comparison ----
 
-comparison_consensus %>% 
-  group_by(country_code) %>% 
-  slice(1) %>% 
-  mutate(country_name = countrycode(country_code, "imf","country.name")) %>% 
-  mutate(group = case_when(group == "africa" ~ "Africa",
-                           group == "emerging_asia" ~ "Emerging Asia",
-                           group == "emerging_europe" ~ "Emerging Europe",
-                           group == "latin_america" ~ "Latin America",
-                           group == "middle_east" ~ "Middle East",
-                           T ~ "Advanced Economies")) %>% 
-  ungroup() %>% 
-  select(country_name, group) %>%
-  arrange(group,country_name) %>%
-  setNames(c("Country","Geo. group")) %>% 
-  stargazer(summary = F,
-            rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/consensus/list_countries.tex")
-
-# Figure 1: comparison of median forecast error: ----
-
-evolution_median_fe <- comparison_consensus %>%  
-  mutate_at(vars(contains("consensus")),funs(targety_first - .)) %>% 
-  mutate_at(vars(contains("variable")),funs(targety_first - .)) %>% 
-  group_by(year) %>% 
-  mutate_at(vars(matches("variable|consensus")), median, na.rm = T)
-
-
-plot_evolution <- function(variable1, variable2){
-  
-  variable1_quosure <- enquo(variable1)
-  variable2_quosure <- enquo(variable2)
-  
-  evolution_median_fe %>% 
-    filter(complete.cases(variable2)) %>% 
-    filter(forecaster == "Consensus (Mean)") %>% 
-    ggplot(aes(year)) +
-    geom_line(aes(y = !!variable1_quosure, group = 1, col = "IMF"), size = 1) +
-    geom_line(aes(y = !!variable2_quosure, group = 1, col = "Consensus (Mean)" ), size = 1) +
-    geom_hline(yintercept = 0) +
-    theme_minimal() +
-    xlab("") +
-    ylab("") +
-    labs(col = "Institution") +
-    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-          legend.position = "bottom") +
-    theme(axis.text = element_text(size = 18),
-          axis.title = element_text(size = 21),
-          legend.title = element_text(size = 18),
-          legend.text = element_text(size = 16)) +
-    theme(panel.grid.minor.x = element_blank(),
-          panel.grid.minor.y = element_blank()) +
-    ylim(-8,4)
-  
-}
-
-plot_evolution(variable1, consensus1) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/current_year_fall_comparison.pdf")
-
-plot_evolution(variable2, consensus2) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/current_year_spring_comparison.pdf")
-
-plot_evolution(variable3, consensus3) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/year_ahead_fall_comparison.pdf")
-
-plot_evolution(variable4, consensus4) %>% 
-  save.plot("../IEO_forecasts_material/output/figures/comparison/consensus/year_ahead_spring_comparison.pdf")
-
-
+get_list_comparison(comparison_consensus, "consensus/country_sample.tex")
 
 
 # Table appendix: comparison RMSE for all individual countries ----- 
