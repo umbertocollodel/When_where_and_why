@@ -19,14 +19,7 @@ group <- comparison_consensus %>%
   group_by(country_code) %>% 
   slice(1) %>% 
   select(country_code, group) %>% 
-  mutate(group = case_when(group == "europe" ~ "Advanced Economies",
-                           is.na(group) ~ "Advanced Economies",
-                           group == "emerging_asia" ~ "Emerging Asia",
-                           group == "latin_america" ~ "Latin America",
-                           group == "emerging_europe" ~ "Emerging Europe",
-                           group == "middle_east" ~ "Middle East",
-                           T ~ "Africa"))
-
+  filter(!is.na(group))
 
 # Table with list countries comparison ----
 
@@ -78,44 +71,23 @@ footnote=c("This table reports the ratio of the estimated RMSE for the WEO real 
 We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the CE forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
 cat(file ="../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full_footnote.tex")
 
-# Figure 3: share of countries with lower RMSE for IMF by region  ----
-# Enhancement: add the number of countries by plot
-
- group %>% 
-  merge(rmse_comparison, by=c("country_code")) %>% 
-  mutate_at(vars(ratio1:ratio4), funs(case_when(. < 0 ~ 1,
-                                                T ~ 0))) %>% 
-  ungroup() %>% 
-  group_by(group) %>% 
-  summarise_at(vars(ratio1:ratio4), mean, na.rm = T) %>% 
-  gather("horizon","share",ratio1:ratio4) %>% 
-  mutate(horizon = case_when(horizon == "ratio1"~ "H=0,F",
-                             horizon == "ratio2"~ "H=0,S",
-                             horizon == "ratio3"~ "H=1,F",
-                             T ~ "H=1,S")) %>% 
-  ggplot(aes(horizon, share)) +
-  geom_col(width = 0.3,col = "lightgrey",alpha = 0.6) +
-  facet_wrap(~ group) +
-  theme_minimal() +
-  ylab("Share of countries (%)") +
-  xlab("Horizon") +
-  theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1),
-         legend.position = "bottom") +
-  theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16)) +
-  theme(strip.text.x = element_text(size = 14, colour = "darkblue")) +
-  theme(panel.grid.major.x = element_blank(),
-        panel.grid.minor.y = element_blank())
 
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse.pdf")
+# Table: summary of accuracy (percentage RMSE and significance across geo. group) -----
 
-# Footnote:
+get_accuracy_summary(comparison_consensus %>% filter(forecaster == "Consensus (Mean)"), 
+                     c("H=0,Oct.", "H=0,Apr.","H=1,Oct.","H=1,Apr."), 
+                     "consensus",
+                     "consensus/accuracy/comparison.tex")
 
-footnote=c("The figure shows the share of countries for which WEO forecasts produce a lower RMSE compared to the mean of individual Consensus forecasts RMSE.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/comparison/consensus/comparison_rmse_footnote.tex")
+footnote=c("Percentage refers to the share of countries with a lower root mean squared error for WEO forecasts
+           compared to Consesus forecasts.
+           DM Test is the test statistic associated with a two-sided Diebold-Mariano test where the null
+           is of equal accuracy between forecasts. ***: significant at 1% level, **: significant at 5% level,
+           *: significant at 10% level.") %>% 
+  cat(file = "../IEO_forecasts_material/output/tables/comparison/consensus/accuracy/comparison_footnote.tex")
+
+
 
 # Uncertainty of consensus forecasts: ----
 
@@ -126,35 +98,6 @@ comparison_consensus %>%
   theme_minimal() +
   xlab("")
 
-
-# Table 1: forecast errors of both institutions during recessions and non-recessions ----
-
-
-
-main_table <- comparison_consensus %>% 
-  filter(forecaster == "Consensus (Mean)") %>% 
-  mutate(Recession = case_when(targety_first < 0 ~ "Recession",
-                               T ~ "Non-Recession")) %>% 
-  group_by(Recession) %>%
-  select(country_code, year, country, targety_first, contains("variable"), contains("consensus")) %>% 
-  mutate_at(vars(matches("variable|consensus")), funs(targety_first - .)) %>% 
-  summarise_at(vars(matches("variable|consensus")), median, na.rm = T) %>%
-  mutate_at(vars(matches("variable|consensus")), round, 2) %>%
-  select(Recession, consensus1, variable1, consensus2,variable2, consensus3, variable3, consensus4, variable4) %>%
-  setNames(c("Recession",
-             "Current-year, Fall (Consensus)","Current-year, Fall (IMF)",
-             "Current-year, Spring (Consensus)","Current-year, Spring (IMF)",
-             "Year-ahead, Fall (Consensus)","Year-ahead, Fall (IMF)",
-             "Year-ahead, Spring (Consensus)","Year-ahead, Spring (IMF)"))
-
-
-issues=c("Fall","Spring")
-
-issues %>% 
-  map(~ main_table %>% select(Recession, contains(.x))) %>% 
-  map2(issues, ~ .x %>% stargazer(rownames = F,
-                                  summary = F,
-                                  out = paste0("../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_",.y,".tex")))
 
 # Table: recessions and best forecaster median forecast error ----
 # Note: we keep Consensus (mean) in the df
