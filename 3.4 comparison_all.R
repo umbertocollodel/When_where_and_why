@@ -1,7 +1,27 @@
 ############# Script to summarise previous tables on inability to predict recessions
-############# by major institutions and problems to forecast dynamics during financial crises:
+############# by major institutions, problems to forecast dynamics during financial crises
+############# and frequency recessions
 
-# Inability to predict recessions:
+# Summary table frequency recessions: -----
+
+final_sr$growth %>% 
+  mutate(State = case_when(targety_first <= 0 ~ "Recession",
+                               T ~ "Non-recession")) %>% 
+  group_by(State) %>% 
+  count() %>% 
+  ungroup() %>% 
+  mutate(Frequency = round((n/sum(n))*100,2)) %>%
+  rename(Number = n) %>% 
+  stargazer(summary = F,
+            rownames = F,
+            out = "../IEO_forecasts_material/output/tables/comparison/frequency_recessions.tex")
+  
+  
+  
+  
+
+
+# Inability to predict recessions: -----
 
 inability_df <- list(final_sr$growth,
                      comparison_wb,
