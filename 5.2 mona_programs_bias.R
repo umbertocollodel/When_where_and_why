@@ -250,6 +250,8 @@ footnote=c("The figure shows the distribution of forecast errors for all program
             Consensus forecasts are matched by month.") %>% 
   cat(file = "../IEO_forecasts_material/output/figures/programs/comparison_footnote.tex")
 
+
+# TO DO: formal Kolgorov-Smirnov test and put consensus data in appropriate raw_data folder.
   
 
 
