@@ -222,6 +222,8 @@ comparison <- a %>%
 comparison %>% 
  map(~ .x %>% select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa)) %>% 
  map(~ .x %>% gather("forecaster","value",variable1:consensus1)) %>% 
+ map(~ .x %>% mutate(forecaster = case_when(forecaster == "consensus1" ~ "Consensus (Mean)",
+                               T ~ "IMF Mona"))) %>% 
  map(~ .x %>% mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession"))) %>% 
  map(~ .x %>% ggplot(aes(x=value, fill = recession)) + 
   geom_density(col = "white",alpha = 0.4) + 
@@ -234,7 +236,10 @@ comparison %>%
   theme_minimal() +
   theme(legend.position = "bottom") +
   theme(axis.text.y = element_blank(),
-        strip.text = element_blank()))
+        strip.text = element_text(size = 14))) %>% 
+  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/programs/comparison_",.y,".pdf"),.x))
+
+
 
 
   
