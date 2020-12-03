@@ -180,29 +180,12 @@ footnote=c("Dependent variable winsorized at the 5% level. The sample contains d
 
 # New path for Figures recession & non-recession years: ----
 
-reviews_data %>% 
-  filter(review == "R0") %>%
-  gather("horizon","value",variable1:variable2) %>% 
-  mutate(recession = case_when(targety_first > 0  ~ "Non-recession", T ~ "Recession")) %>% 
-  mutate(horizon = case_when(horizon == "variable1" ~ "Current year",
-                             T ~ "Year ahead")) %>% 
-  ggplot(aes(x=value, fill = recession)) + 
-  geom_density(col = "white",alpha = 0.4) + 
-  facet_wrap(~ horizon) +
-  scale_fill_manual(values = c("#0000ff","#ff0000")) +
-  xlab("") +
-  ylab("") +
-  labs(fill="") +
-  xlim(-30,10) +
-  theme_minimal() +
-  theme(legend.position = "bottom") +
-  theme(axis.text.y = element_blank(),
-        strip.text = element_text(size = 14))
-
 
 a <- c("variable1","variable2") %>% 
   map(~ reviews_data %>% filter(review == "R0" & complete.cases(get(.x)))) %>% 
-  map(~ .x %>% mutate(month = lubridate::month(date_approval)))
+  map(~ .x %>% mutate(month = lubridate::month(date_approval))) %>% 
+  map(~ .x %>% remove_empty()) %>% 
+  map(~ .x %>% rename_at(vars(contains("2")), funs(str_replace(.,"2","1"))))
   
   
 
@@ -214,16 +197,33 @@ a_cf <- c("1:12","13:24") %>%
   map(~ .x %>% rename(country_code = ccode,
          year = targety)) %>% 
   map(~ .x %>% mutate(year = as.character(year))) %>% 
-  map(~ .x %>% mutate(consensus1 = ggdpa - consensus1))
+  map(~ .x %>% mutate(consensus1 = ggdpa - consensus1)) %>% 
+  map(~ .x %>% mutate(month = case_when(month == 24 ~ 12,
+                                        month == 23 ~ 11,
+                                        month == 22 ~ 10,
+                                        month == 21 ~ 9,
+                                        month == 20 ~ 8,
+                                        month == 19 ~ 7,
+                                        month == 18 ~ 6,
+                                        month == 17 ~ 5,
+                                        month == 16 ~ 4,
+                                        month == 15 ~ 3,
+                                        month == 14 ~ 2,
+                                        month == 13 ~ 1,
+                                        T ~ month)))
 
 
-a %>% 
+comparison <- a %>% 
  map2(a_cf, ~ merge(.x,.y, by=c("country_code","year","month"))) %>% 
- map(~ .x %>% as_tibble()) %>% 
-  select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa) %>% 
-  gather("forecaster","value",variable1:consensus1) %>% 
-  mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession")) %>% 
-ggplot(aes(x=value, fill = recession)) + 
+ map(~ .x %>% as_tibble()) 
+
+
+
+comparison %>% 
+ map(~ .x %>% select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa)) %>% 
+ map(~ .x %>% gather("forecaster","value",variable1:consensus1)) %>% 
+ map(~ .x %>% mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession"))) %>% 
+ map(~ .x %>% ggplot(aes(x=value, fill = recession)) + 
   geom_density(col = "white",alpha = 0.4) + 
   facet_wrap(~ forecaster) +
   scale_fill_manual(values = c("#0000ff","#ff0000")) +
@@ -234,18 +234,10 @@ ggplot(aes(x=value, fill = recession)) +
   theme_minimal() +
   theme(legend.position = "bottom") +
   theme(axis.text.y = element_blank(),
-        strip.text = element_text(size = 14))
+        strip.text = element_blank()))
 
 
   
-ks_test <- merge(a,a_cf, by=c("country_code","year","month")) %>% 
-  as_tibble() %>% 
-  select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa) %>% 
-  mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession")) %>% 
-  filter(recession == "Recession")
 
-
- 
-ks.test(ks_test$variable1,ks_test$consensus1)
 
 
