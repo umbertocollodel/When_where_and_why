@@ -178,11 +178,7 @@ footnote=c("Dependent variable winsorized at the 5% level. The sample contains d
 
 
 
-# New path for Figures recession & non-recession years:
-
-
-
-
+# New path for Figures recession & non-recession years: ----
 
 reviews_data %>% 
   filter(review == "R0") %>%
@@ -202,8 +198,64 @@ reviews_data %>%
   theme(legend.position = "bottom") +
   theme(axis.text.y = element_blank(),
         strip.text = element_text(size = 14))
-        
+
+
+a <- reviews_data %>% 
+  filter(review == "R0" & complete.cases(variable1)) %>% 
+  mutate(month = lubridate::month(date_approval))
   
   
+
+a_cf <- read_xlsx("~/Desktop/consensus_data.xlsx") %>% 
+  select(ccode, Country, targety,ggdpa, num_range("cf_ggdp",1:12)) %>% 
+  gather("month","consensus1",cf_ggdp1:cf_ggdp12) %>% 
+  mutate(month = as.numeric(str_extract(month,"\\d+"))) %>% 
+  mutate(month = case_when(month == 1 ~ 12,
+                           month == 2 ~ 11,
+                           month == 3 ~ 10,
+                           month == 4~ 9,
+                           month == 5 ~ 8,
+                           month == 6 ~ 7,
+                           month == 7 ~ 6,
+                           month == 8~ 5,
+                           month == 9 ~ 4,
+                           month == 10~ 3,
+                           month == 11 ~ 2,
+                           T ~ 1)) %>%
+  rename(country_code = ccode,
+         year = targety) %>% 
+  mutate(year = as.character(year)) %>% 
+  mutate(consensus1 = ggdpa - consensus1)
+
+
+merge(a,a_cf, by=c("country_code","year","month")) %>% 
+  as_tibble() %>% 
+  select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa) %>% 
+  gather("forecaster","value",variable1:consensus1) %>% 
+  mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession")) %>% 
+ggplot(aes(x=value, fill = recession)) + 
+  geom_density(col = "white",alpha = 0.4) + 
+  facet_wrap(~ forecaster) +
+  scale_fill_manual(values = c("#0000ff","#ff0000")) +
+  xlab("") +
+  ylab("") +
+  labs(fill="") +
+  xlim(-30,10) +
+  theme_minimal() +
+  theme(legend.position = "bottom") +
+  theme(axis.text.y = element_blank(),
+        strip.text = element_text(size = 14))
+
+
+  
+ks_test <- merge(a,a_cf, by=c("country_code","year","month")) %>% 
+  as_tibble() %>% 
+  select(country_code, Country, year, month, date_approval, variable1, consensus1, ggdpa) %>% 
+  mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession")) %>% 
+  filter(recession == "Recession")
+
+
+ 
+ks.test(ks_test$variable1,ks_test$consensus1)
 
 
