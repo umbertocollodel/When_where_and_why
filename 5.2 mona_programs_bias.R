@@ -235,12 +235,20 @@ comparison %>%
   xlim(-30,10) +
   theme_minimal() +
   theme(legend.position = "bottom") +
-  theme(axis.text.y = element_blank(),
-        strip.text = element_text(size = 14))) %>% 
+    theme(axis.text = element_text(size = 18),
+          axis.title = element_text(size = 21),
+          strip.text.x = element_text(size=14),
+          legend.title = element_text(size = 18),
+          legend.text = element_text(size = 16))) %>% 
   iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/programs/comparison_",.y,".pdf"),.x))
 
 
+# Footnote:
 
+footnote=c("The figure shows the distribution of forecast errors for all programs in the period 2002-2018.
+            Forecast for the current year in the Mona database are formulated at the date of program inception. 
+            Consensus forecasts are matched by month.") %>% 
+  cat(file = "../IEO_forecasts_material/output/figures/programs/comparison_footnote.tex")
 
   
 
