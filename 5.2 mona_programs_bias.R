@@ -252,6 +252,15 @@ footnote=c("The figure shows the distribution of forecast errors for all program
 
 
 # TO DO: formal Kolgorov-Smirnov test and put consensus data in appropriate raw_data folder.
+
+# Kolgorov-Smirnov: -----
+
+comparison %>% 
+  map(~ .x %>% mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession"))) %>% 
+  map(~ ks.test(.x$variable1,.x$consensus1)) %>% 
+  map(~ .x$p.value) %>% 
+  map(~ data.frame(`Kolgorov-Smirnov Test P-Value`= .x)) %>% 
+  bind_rows()
   
 
 
