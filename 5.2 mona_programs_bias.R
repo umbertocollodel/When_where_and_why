@@ -255,13 +255,15 @@ footnote=c("The figure shows the distribution of forecast errors for all program
 
 # Kolgorov-Smirnov: -----
 
+
+names(comparison) <- c("Current Year","Year-ahead")
+
 comparison %>% 
-  map(~ .x %>% mutate(recession = case_when(ggdpa > 0  ~ "Non-recession", T ~ "Recession"))) %>% 
-  map(~ ks.test(.x$variable1,.x$consensus1)) %>% 
-  map(~ .x$p.value) %>% 
-  map(~ data.frame(`Kolgorov-Smirnov Test P-Value`= .x)) %>% 
-  bind_rows()
-  
-
-
-
+  map(~ .x %>% select(country, year, variable1,consensus1)) %>%
+  map(~ .x %>% filter(complete.cases(consensus1))) %>%
+  map(~ suppressWarnings(ks.test(.x$variable1, .x$consensus1))) %>% 
+  map(~ data.frame(`KS Test Statistic` = .x$statistic,`KS Test P-value`= .x$p.value)) %>% 
+  bind_rows(.id = "Horizon") %>% 
+  stargazer(summary = F,
+            nrow = F,
+            out = "../IEO_forecasts_material/output/tables/programs/kolgorov_smirnov.tex")
