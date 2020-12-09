@@ -4,20 +4,27 @@
 
 # Summary table frequency recessions: -----
 
-final_sr$growth %>% 
-  mutate(State = case_when(targety_first <= 0 ~ "Recession",
-                               T ~ "Non-recession")) %>% 
-  group_by(State) %>% 
-  count() %>% 
-  ungroup() %>% 
-  mutate(Frequency = round((n/sum(n))*100,2)) %>%
-  rename(Number = n) %>% 
+forecaster=c("IMF","World Bank","European Commission","Consensus")
+
+
+list(IMF = final_sr$growth, 
+     `World Bank` = comparison_wb, 
+     `European Commission` = comparison_ec, 
+     `Consensus` = comparison_consensus) %>%
+  map(~ .x %>% mutate(State = case_when(targety_first <= 0 ~ "Recession",
+                               T ~ "Non-recession"))) %>% 
+  map(~ .x %>% group_by(State)) %>% 
+  map(~ .x %>% count()) %>% 
+  map(~ .x %>% ungroup()) %>% 
+  map(~ .x %>% mutate(Frequency = round((n/sum(n))*100,2))) %>%
+  map(~ .x %>% rename(Number = n)) %>%
+  bind_rows(.id = "Forecaster") %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/comparison/frequency_recessions.tex")
   
   
-  
+
   
 
 
