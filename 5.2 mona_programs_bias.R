@@ -116,8 +116,51 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
 
   
   
+# Comparison with Consensus -----
+
+consensus_programs <- c("1:12","13:24") %>% 
+  map(~  read_xlsx("~/Desktop/consensus_data.xlsx") %>% select(ccode, Country, targety,ggdpa, num_range("cf_ggdp",eval(parse(text=.x))))) %>% 
+  map(~ .x %>% gather("month","consensus1",5:length(.x))) %>% 
+  map(~ .x %>% mutate(month = as.numeric(str_extract(month,"\\d+")))) %>% 
+  map(~ .x %>% mutate(month = rev(month))) %>%
+  map(~ .x %>% mutate(consensus1 = ggdpa - consensus1)) %>% 
+  map(~ .x %>% select(-ggdpa,-Country)) %>% 
+  map(~ .x %>% rename(country_code = ccode,
+                      year = targety)) %>% 
+  map(~ .x %>% mutate(year = as.character(year))) %>% 
+  map(~ .x %>% mutate(month = case_when(month == 24 ~ 12,
+                                        month == 23 ~ 11,
+                                        month == 22 ~ 10,
+                                        month == 21 ~ 9,
+                                        month == 20 ~ 8,
+                                        month == 19 ~ 7,
+                                        month == 18 ~ 6,
+                                        month == 17 ~ 5,
+                                        month == 16 ~ 4,
+                                        month == 15 ~ 3,
+                                        month == 14 ~ 2,
+                                        month == 13 ~ 1,
+                                        T ~ month)))
+
+comparison_data <- consensus_programs %>% 
+  map(~ merge(.x, regression_data %>% 
+  mutate(month = lubridate::month(date_approval)))) %>% 
+  map(~ as_tibble(.x)) %>% 
+  map(~ .x %>% select(country, year, month, variable1, variable2, consensus1, amount_percent_quota, months_remaining,after, concessional))  
 
 
+
+formulas=c("variable1 ~ amount_percent_quota",
+           "consensus1 ~ amount_percent_quota")
+
+
+formulas %>% 
+  map(~ lm(.x, comparison_data[[1]] %>% 
+  filter(complete.cases(variable1)))) 
+
+formulas %>% 
+  map(~ lm(.x, comparison_data[[2]] %>% 
+             filter(complete.cases(variable2)))) 
 
 
 
