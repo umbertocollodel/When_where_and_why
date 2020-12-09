@@ -150,18 +150,48 @@ comparison_data <- consensus_programs %>%
 
 
 
-formulas=c("variable1 ~ amount_percent_quota",
+formulas1=c("variable1 ~ amount_percent_quota",
            "consensus1 ~ amount_percent_quota")
 
+formulas2=c("variable2 ~ amount_percent_quota",
+            "consensus1 ~ amount_percent_quota")
 
-formulas %>% 
+
+
+
+current_year <- formulas1 %>% 
   map(~ lm(.x, comparison_data[[1]] %>% 
   filter(complete.cases(variable1)))) 
 
-formulas %>% 
+year_ahead <- formulas2 %>% 
   map(~ lm(.x, comparison_data[[2]] %>% 
              filter(complete.cases(variable2)))) 
 
+  
+list(current_year, year_ahead) %>% 
+  modify_depth(2, ~ data.frame(confint(.x))) %>% 
+  modify_depth(2, ~  .x %>% slice(2)) %>% 
+  modify_depth(2, ~ .x %>% setNames(c("lower","upper"))) %>% 
+  flatten() %>% 
+  bind_rows() %>% 
+  mutate(forecaster = rep(c("Mona","Consensus"),2)) %>% 
+  mutate(horizon = c(rep("Current year",2), rep("Year-ahead",2))) %>% 
+  ggplot(aes(forecaster, ymin = lower*100, ymax= upper*100, col = forecaster)) +
+    geom_errorbar(width = 0.3) +
+    facet_wrap(~ horizon) +
+    coord_flip() +
+    theme_minimal() +
+    xlab("") +
+    scale_y_continuous(limits = c(-0.5,0.5),breaks = c(-0.5,0,0.5)) +
+    theme(legend.position = "none") +
+    theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+    theme(axis.text = element_text(size = 18),
+        axis.title = element_text(size = 21),
+        strip.text.x = element_text(size=14),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16)) 
+
+  ggsave("../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big.pdf")
 
 
 # Role of reviews: ----
