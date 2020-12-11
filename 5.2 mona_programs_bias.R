@@ -118,12 +118,14 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
   
 # Comparison with Consensus -----
 
+# Cleaning consensus programs data: one df with current-year and one with year-ahead
+
 consensus_programs <- c("1:12","13:24") %>% 
-  map(~  read_xlsx("~/Desktop/consensus_data.xlsx") %>% select(ccode, Country, targety,ggdpa, num_range("cf_ggdp",eval(parse(text=.x))))) %>% 
-  map(~ .x %>% gather("month","consensus1",5:length(.x))) %>% 
+  map(~  read_xlsx("../IEO_forecasts_material/raw_data/consensus/zidong_program_consensus.xlsx") %>% select(ccode, Country, targety,ggdpa, num_range("cf_ggdp",eval(parse(text=.x))))) %>% 
+  imap(~ .x %>% pivot_longer(5:length(.x), "month", values_to = paste0("consensus",.y))) %>% 
   map(~ .x %>% mutate(month = as.numeric(str_extract(month,"\\d+")))) %>% 
   map(~ .x %>% mutate(month = rev(month))) %>%
-  map(~ .x %>% mutate(consensus1 = ggdpa - consensus1)) %>% 
+  map(~ .x %>% mutate_at(vars(contains("consensus")),funs(ggdpa - .))) %>% 
   map(~ .x %>% select(-ggdpa,-Country)) %>% 
   map(~ .x %>% rename(country_code = ccode,
                       year = targety)) %>% 
@@ -143,21 +145,21 @@ consensus_programs <- c("1:12","13:24") %>%
                                         T ~ month)))
 
 comparison_data <- consensus_programs %>% 
-  map(~ merge(.x, regression_data %>% 
-  mutate(month = lubridate::month(date_approval)))) %>% 
+  map(~ merge(.x, regression_data %>% mutate(month = lubridate::month(date_approval)))) %>% 
   map(~ as_tibble(.x)) %>% 
-  map(~ .x %>% select(country, year, month, variable1, variable2, consensus1, amount_percent_quota, months_remaining,after, concessional))  
+  map(~ .x %>% select(country, year, month, variable1, variable2, contains("consensus"), amount_percent_quota, months_remaining,after, concessional))  
 
 
+# Creation formulas to run for each of them:
 
 formulas1=c("variable1 ~ amount_percent_quota",
            "consensus1 ~ amount_percent_quota")
 
 formulas2=c("variable2 ~ amount_percent_quota",
-            "consensus1 ~ amount_percent_quota")
+            "consensus2 ~ amount_percent_quota")
 
 
-
+# Running:
 
 current_year <- formulas1 %>% 
   map(~ lm(.x, comparison_data[[1]] %>% 
@@ -167,6 +169,7 @@ year_ahead <- formulas2 %>%
   map(~ lm(.x, comparison_data[[2]] %>% 
              filter(complete.cases(variable2)))) 
 
+# Plot the results:
   
 list(current_year, year_ahead) %>% 
   modify_depth(2, ~ data.frame(confint(.x))) %>% 
@@ -182,12 +185,14 @@ list(current_year, year_ahead) %>%
     coord_flip() +
     theme_minimal() +
     xlab("") +
-    scale_y_continuous(limits = c(-0.5,0.5),breaks = c(-0.5,0,0.5)) +
+    scale_y_continuous(limits = c(-0.5,0.25),breaks = c(-0.5,-0.25,0,0.25)) +
     theme(legend.position = "none") +
     theme(axis.text.x = element_text(angle = 270, vjust = 0.5, hjust=1)) +
+    theme(panel.spacing.x=unit(1.5, "lines"),panel.spacing.y=unit(1.5, "lines")) +
+    theme(panel.grid.major.y = element_blank()) +
     theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21),
-        strip.text.x = element_text(size=14),
+        strip.text.x = element_text(size=15),
         legend.title = element_text(size = 18),
         legend.text = element_text(size = 16)) 
 
