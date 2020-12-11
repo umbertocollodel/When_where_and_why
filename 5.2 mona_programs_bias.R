@@ -199,6 +199,14 @@ list(current_year, year_ahead) %>%
   ggsave("../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big.pdf")
 
 
+# Footnote:
+  
+  footnote=c("The figure shows 95% confidence intervals obtained regressing the forecast
+             errors for programs on the amount of the program (in % of country quota).
+             Data for forecasts are, respectively, from MONA and Consensus. 
+             The sample of programs corresponds to data availability for Consensus") %>% 
+    cat(file= "../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big_footnote.tex")
+  
 # Role of reviews: ----
 
 
