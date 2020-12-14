@@ -171,7 +171,7 @@ year_ahead <- formulas2 %>%
 
 # Plot the results:
   
-list(current_year, year_ahead) %>% 
+comparison_plot <- list(current_year, year_ahead) %>% 
   modify_depth(2, ~ data.frame(confint(.x))) %>% 
   modify_depth(2, ~  .x %>% slice(2)) %>% 
   modify_depth(2, ~ .x %>% setNames(c("lower","upper"))) %>% 
@@ -179,9 +179,10 @@ list(current_year, year_ahead) %>%
   bind_rows() %>% 
   mutate(forecaster = rep(c("Mona","Consensus"),2)) %>% 
   mutate(horizon = c(rep("Current year",2), rep("Year-ahead",2))) %>% 
-  ggplot(aes(forecaster, ymin = lower*100, ymax= upper*100, col = forecaster)) +
+  split(.$horizon) %>% 
+  map(~ .x %>% 
+    ggplot(aes(forecaster, ymin = lower*100, ymax= upper*100, col = forecaster)) +
     geom_errorbar(width = 0.3) +
-    facet_wrap(~ horizon) +
     coord_flip() +
     theme_minimal() +
     xlab("") +
@@ -191,12 +192,10 @@ list(current_year, year_ahead) %>%
     theme(panel.spacing.x=unit(1.5, "lines"),panel.spacing.y=unit(1.5, "lines")) +
     theme(panel.grid.major.y = element_blank()) +
     theme(axis.text = element_text(size = 18),
-        axis.title = element_text(size = 21),
-        strip.text.x = element_text(size=15),
-        legend.title = element_text(size = 18),
-        legend.text = element_text(size = 16)) 
+        axis.title = element_text(size = 21))) 
 
-  ggsave("../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big.pdf")
+comparison_plot %>% 
+  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big_",.y,".pdf"),.x))
 
 
 # Footnote:
