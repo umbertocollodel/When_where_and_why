@@ -80,7 +80,7 @@ mona_summary %>%
   mutate_at(vars(contains("amount")),round,2) %>% 
   mutate(date_approval = as.character(date_approval)) %>%
   select(program_id, country, date_approval, program_type, amount_percent_quota) %>% 
-  setNames(c("Program ID","Country","Date Approval","Type of program")) %>% 
+  setNames(c("Program ID","Country","Date Approval","Type of program","Total amount (% quota)")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/programs/list_programs.tex")
