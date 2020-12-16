@@ -78,8 +78,9 @@ mona_summary %>%
   arrange(country) %>% 
   mutate(exceptional_access = str_replace(exceptional_access, "n.a.","/")) %>%
   mutate_at(vars(contains("amount")),round,2) %>% 
-  mutate(date = as.character(date)) %>% 
-  setNames(c("Program ID","Country","Date","Year","Type of program","Precautionary at approval","Exceptional access","Total amount drawn (mln SDR)","Total amount (% quota)")) %>% 
+  mutate(date_approval = as.character(date_approval)) %>%
+  select(program_id, country, date_approval, program_type, amount_percent_quota, precautionary, exceptional_access) %>% 
+  setNames(c("Program ID","Country","Date Approval","Type of program","Total amount (% quota)","Precautionary","Exceptional access")) %>% 
   stargazer(summary = F,
             rownames = F,
             out = "../IEO_forecasts_material/output/tables/programs/list_programs.tex")
