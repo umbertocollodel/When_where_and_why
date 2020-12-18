@@ -81,12 +81,12 @@ regression_data <- final_mona %>%
 
 formulas=c("variable1 ~ 1",
            "variable1 ~ after",
-           "variable1 ~ after + amount_percent_quota",
+           "variable1 ~ amount_percent_quota",
            "variable1 ~ amount_percent_quota + months_remaining",
            "variable1 ~ amount_percent_quota + concessional",
            "variable2 ~ 1",
            "variable2 ~ after",
-           "variable2 ~ after + amount_percent_quota",
+           "variable2 ~ amount_percent_quota",
            "variable2 ~ amount_percent_quota + months_remaining",
            "variable2 ~ amount_percent_quota + concessional")
 
