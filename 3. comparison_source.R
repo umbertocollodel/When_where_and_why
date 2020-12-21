@@ -6,3 +6,10 @@
 save.plot <- function(x,filename){
   ggsave(filename,x)
 }
+
+# Source and produce output: ----
+
+
+list.files() %>% 
+  str_subset("^3.\\d") %>%
+  walk(~ source(.x))
