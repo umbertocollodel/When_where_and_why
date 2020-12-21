@@ -4,7 +4,7 @@
 
 # Read tables document:
 
-tables <- pdf_text("../IEO_forecasts_material/raw_data/world bank/World_Bank_Financial_Statements_2014.pdf") %>% 
+tables <- pdf_text("../When_where_and_why_material/raw_data/world bank/World_Bank_Financial_Statements_2014.pdf") %>% 
   str_subset("SUMMARY STATEMENT OF LOANS") %>% 
   str_split("\n") %>% 
   map(~ .x %>% as_tibble()) %>% 
@@ -32,7 +32,7 @@ ibrd_stat  <- rbind(first_part, second_part) %>%
 
 ## IDA: ----
 
-tables <- pdf_text("../IEO_forecasts_material/raw_data/world bank/World_Bank_Financial_Statements_2014.pdf") %>% 
+tables <- pdf_text("../When_where_and_why_material/raw_data/world bank/World_Bank_Financial_Statements_2014.pdf") %>% 
   str_subset("OF\\s*DEVELOPMENT CREDITS") %>% 
   str_split("\n") %>% 
   map(~ .x %>% as_tibble()) %>% 
@@ -72,7 +72,7 @@ wb_aid <- list(ibrd_stat, ida_stat) %>%
 
 wb_aid %>% 
   as_tibble() %>% 
-  saveRDS(file = "../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
+  saveRDS(file = "../When_where_and_why_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
 
 
 # Analysis: ----

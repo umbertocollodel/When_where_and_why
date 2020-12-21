@@ -300,7 +300,7 @@ merge(normal,bootstrap) %>%
         theme(panel.grid.major.x = element_blank(),
               panel.grid.minor.x = element_blank()) +
         labs(fill = "")) %>% 
-  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias_others/",name_pattern,"_",.y,".pdf"),
+  iwalk(~ ggsave(paste0("../When_where_and_why_material/output/figures/short-run forecasts/bias_others/",name_pattern,"_",.y,".pdf"),
                         .x))
 
 }

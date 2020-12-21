@@ -35,6 +35,6 @@ footnote=c("The figure shows the share of countries for each forecast horizon an
            statistically significant negative or positive bias. Test of statistical significance is run 
            individually with country-by-country regressions where the standard errors are obtained
            from a 1,000 replications bootstrap.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/bias_others/bias_others_foonote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/short-run forecasts/bias_others/bias_others_foonote.tex")
 
   

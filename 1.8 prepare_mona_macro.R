@@ -14,7 +14,7 @@ reviews=c("R0","R1","R2")
 # Correction in last subsection, but dataframe still useful for summary stats.
 
 
-mona_macro_raw <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-2020_macro.xlsx") %>%
+mona_macro_raw <- read_excel("../When_where_and_why_material/raw_data/mona/mona_2002-2020_macro.xlsx") %>%
   filter(Description == "Gross domestic product, constant prices") %>% 
   filter(`Approval Year` <= 2018) %>% 
   split(.$`Review Type`) %>% 
@@ -36,7 +36,7 @@ mona_macro_raw <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_2002-
 # Clean sheet with details about program (amount approved, exceptional access etc.): ----
 # Note: origin for date format changes according to machine used.
 
-mona_amount <- read_excel("../IEO_forecasts_material/raw_data/mona/mona_amounts.xlsx") %>% 
+mona_amount <- read_excel("../When_where_and_why_material/raw_data/mona/mona_amounts.xlsx") %>% 
   select(-c(1, 7, 18, 20, 22, 24, 26, 28, 30, 35, 37, 40)) %>% 
   slice(-1) %>% 
   row_to_names(1) %>%
@@ -83,8 +83,8 @@ final_mona <- mona_macro_raw %>%
 
 final_mona_raw %>% 
   select(-year_ahead) %>% 
-  saveRDS("../IEO_forecasts_material/intermediate_data/mona/mona_summary_stat.RDS")
+  saveRDS("../When_where_and_why_material/intermediate_data/mona/mona_summary_stat.RDS")
 
 final_mona %>% 
-  saveRDS("../IEO_forecasts_material/intermediate_data/mona/mona_macro_clean.RDS")
+  saveRDS("../When_where_and_why_material/intermediate_data/mona/mona_macro_clean.RDS")
 

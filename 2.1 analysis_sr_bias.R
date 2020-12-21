@@ -14,7 +14,7 @@ name_vars=names(final_sr)
 # Appendix B table: H=0 & H=1 ----
 
 export_paths=name_vars %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/by_country/",.x,".tex"))
+  map_chr(~ paste0("../When_where_and_why_material/output/tables/short-run forecasts/bias/by_country/",.x,".tex"))
 
 final_sr %>% 
   map2(export_paths, ~ analyse_sr_bias(.x,regressions, "appendix_table",.y))
@@ -24,7 +24,7 @@ final_sr %>%
 
 
 export_paths=name_vars %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.x,"_"))
+  map_chr(~ paste0("../When_where_and_why_material/output/figures/short-run forecasts/bias/aggregate/",.x,"_"))
 
 final_sr %>% 
   map2(export_paths, ~ analyse_sr_bias(.x,regressions, "share_plot",.y))
@@ -33,13 +33,13 @@ final_sr %>%
 footnote=c("The figure shows the share of countries for each forecast horizon and issue of the World Economic
            Outlook (Fall or Spring) with a 5% statistically significant negative or positive bias. Test of statistical
            significance is run individually with country-by-country regressions.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/aggregate_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/short-run forecasts/bias/aggregate/aggregate_footnote.tex")
 
 
 # Table 1: magnitude of short-term biases -----
 
 export_paths=name_vars %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_",.x,".tex"))
+  map_chr(~ paste0("../When_where_and_why_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_",.x,".tex"))
 
 
 final_sr %>% 
@@ -49,13 +49,13 @@ final_sr %>%
 
 footnote=c("Summary statistics of country-by-country intercepts significant at 5% level.
            Fall and Spring issues of WEO pooled together by horizon.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_footnote.tex")
 
 
 # Figure 2: share of countries with short-term biases - region -----
 
 export_paths=name_vars %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/aggregate/",.x,"_"))
+  map_chr(~ paste0("../When_where_and_why_material/output/figures/short-run forecasts/bias/aggregate/",.x,"_"))
 
 final_sr %>% 
   map2(export_paths, ~ analyse_sr_bias(.x,regressions,"share_plot_geo",.y))
@@ -64,7 +64,7 @@ final_sr %>%
 # Table 2: magnitude of short-term biases region ----
 
 export_paths=name_vars %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_",.x,"_group.tex"))
+  map_chr(~ paste0("../When_where_and_why_material/output/tables/short-run forecasts/bias/magnitude_aggregate_bias_",.x,"_group.tex"))
 
 final_sr %>% 
   map2(export_paths, ~ analyse_sr_bias(.x,regressions,"magnitude_table_geo",.y))
@@ -103,7 +103,7 @@ full_sample_recession %>%
   map(~ .x %>% setNames(c("Geo. group","Recession","H=0,F","H=0,S","H=1,F","H=1,S"))) %>% 
   imap(~ .x %>% stargazer(summary = F,
             rownames = F,
-            out = paste0("../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession_",.y,".tex")))
+            out = paste0("../When_where_and_why_material/output/tables/short-run forecasts/bias/bias_recession_",.y,".tex")))
   
   
 
@@ -111,7 +111,7 @@ full_sample_recession %>%
 
 footnote=c("Median forecast error by horizon, issue and geographical group. Recessions are
            defined as periods of negative growth.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/short-run forecasts/bias/bias_recession_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/short-run forecasts/bias/bias_recession_footnote.tex")
 
 
 
@@ -158,6 +158,6 @@ figures_fe <- final_sr %>%
 
 
 figures_fe %>% 
-  walk2(names(figures_fe),~ ggsave(paste0("../IEO_forecasts_material/output/figures/short-run forecasts/bias/evolution/all/",.y,".pdf"),.x))
+  walk2(names(figures_fe),~ ggsave(paste0("../When_where_and_why_material/output/figures/short-run forecasts/bias/evolution/all/",.y,".pdf"),.x))
 
 

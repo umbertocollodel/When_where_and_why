@@ -29,7 +29,7 @@
 #' and so on...
 #' 
   
-wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_eme.xlsx",
+wrangle_consensus_forecasts <- function(path = "../When_where_and_why_material/raw_data/consensus/gdp_2008_2019_eme.xlsx",
                                         correction = FALSE,
                                         n_col = 12){
 
@@ -128,8 +128,8 @@ wrangle_consensus_forecasts <- function(path = "../IEO_forecasts_material/raw_da
 # Create and export final dataframe: -----
 
 
-advanced <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_firstweek.xlsx",T,12) 
-emerging <- wrangle_consensus_forecasts("../IEO_forecasts_material/raw_data/consensus/gdp_2008_2019_secondweek.xlsx",F,11)
+advanced <- wrangle_consensus_forecasts("../When_where_and_why_material/raw_data/consensus/gdp_2008_2019_firstweek.xlsx",T,12) 
+emerging <- wrangle_consensus_forecasts("../When_where_and_why_material/raw_data/consensus/gdp_2008_2019_secondweek.xlsx",F,11)
 
 
 consensus_clean <- rbind(advanced, emerging) %>% 
@@ -147,8 +147,8 @@ consensus_clean <- consensus_clean %>%
 # Export:
 
 
-saveRDS(consensus_clean, file = "../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RDS")
+saveRDS(consensus_clean, file = "../When_where_and_why_material/intermediate_data/consensus/gdp_consensus_cleaned.RDS")
 
 cat(crayon::green(paste0("Consesus data succesfully cleaned.\nExported RData in directory:"
-                         ," ../IEO_forecasts_material/intermediate_data/consensus")))
+                         ," ../When_where_and_why_material/intermediate_data/consensus")))
 

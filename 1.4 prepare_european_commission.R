@@ -15,7 +15,7 @@ names <- urls %>%
 urls %>% 
   walk2(names, ~ tryCatch(
                   expression = {
-                    download.file(.x, paste0("../IEO_forecasts_material/raw_data/european commision/",.y))
+                    download.file(.x, paste0("../When_where_and_why_material/raw_data/european commision/",.y))
                     cat(crayon::green(paste0(.y," succesfully downloaded.\n")))
                     },
                   error = function(e){
@@ -33,9 +33,9 @@ names <- names %>%
   sort()
 
 
-list.files("../IEO_forecasts_material/raw_data/european commision/") %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/raw_data/european commision/",.x)) %>% 
-  map2(names, ~ unzip(.x, exdir = paste0("../IEO_forecasts_material/raw_data/european commision/",.y)))
+list.files("../When_where_and_why_material/raw_data/european commision/") %>% 
+  map_chr(~ paste0("../When_where_and_why_material/raw_data/european commision/",.x)) %>% 
+  map2(names, ~ unzip(.x, exdir = paste0("../When_where_and_why_material/raw_data/european commision/",.y)))
 
 
 cat(crayon::green("Unzipped downloaded files.\n"))
@@ -43,12 +43,12 @@ cat(crayon::green("Unzipped downloaded files.\n"))
 
 # Load all text files with gdp data (6th sheet) ----
 
-list_df <- list.files("../IEO_forecasts_material/raw_data/european commision/") %>% 
-  map_chr(~ paste0("../IEO_forecasts_material/raw_data/european commision/",.x)) %>% 
+list_df <- list.files("../When_where_and_why_material/raw_data/european commision/") %>% 
+  map_chr(~ paste0("../When_where_and_why_material/raw_data/european commision/",.x)) %>% 
   str_subset("\\.zip",negate = T) %>% 
   map(~ list.files(.x)) %>% 
   map(~ .x %>% str_subset("AMECO6")) %>% 
-  map2_chr(names, ~ paste0("../IEO_forecasts_material/raw_data/european commision/",.y,"/",.x)) %>% 
+  map2_chr(names, ~ paste0("../When_where_and_why_material/raw_data/european commision/",.y,"/",.x)) %>% 
   map(~ read.csv(.x, sep = ";"))
 
 # Assign names:
@@ -143,7 +143,7 @@ country_with_gaps=c("Albania","Serbia")
 
   final_forecasts %>%
   filter(!country %in% country_with_gaps) 
-  saveRDS(final_forecasts, file = "../IEO_forecasts_material/intermediate_data/european commission/ec_gdp_cleaned.rds")
+  saveRDS(final_forecasts, file = "../When_where_and_why_material/intermediate_data/european commission/ec_gdp_cleaned.rds")
 
 
 

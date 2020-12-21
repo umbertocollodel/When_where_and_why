@@ -61,13 +61,13 @@ plot_sr_efficiency <- efficiency_results %>%
 
 
 plot_sr_efficiency %>%
-  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/short-run forecasts/efficiency/",.y,".pdf"),.x))
+  iwalk(~ ggsave(paste0("../When_where_and_why_material/output/figures/short-run forecasts/efficiency/",.y,".pdf"),.x))
 
 # Footnote:
 
 footnote=c("The figure shows the estimated coefficients from the regression of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) US GDP growth. 
            The point estimate are reported with 95% confidence intervals. Regression sample divided in two periods.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/short-run forecasts/efficiency/efficiency_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/short-run forecasts/efficiency/efficiency_footnote.tex")
 
 
 

@@ -4,16 +4,16 @@ rm(list = ls())
 
 # Load economic and geographical groups:
 
-country_group <- read_xlsx("../IEO_forecasts_material/raw_data/country_group.xlsx") %>% 
+country_group <- read_xlsx("../When_where_and_why_material/raw_data/country_group.xlsx") %>% 
   rename(country_code = ifscode) %>% 
   select(country_code, adv, eme, lidc)
 
-geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
+geo_group <- readRDS("../When_where_and_why_material/intermediate_data/country_group_geography_clean.RDS")
 
 # Load dataset:
 
-paths=c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RDS",
-        "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RDS")
+paths=c("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RDS",
+        "../When_where_and_why_material/intermediate_data/inflation_cleaned.RDS")
 
 names=c("growth",
         "inflation")

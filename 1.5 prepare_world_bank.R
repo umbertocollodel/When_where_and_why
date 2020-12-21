@@ -3,7 +3,7 @@
 # further to remove undesirable features.
 # Note 2: only current-year and year-ahead forecasts in dataframe furnished.
 
-original_wb <- read_xlsx("../IEO_forecasts_material/raw_data/world bank/GEP_forecast_vintages_06232020.xlsx",
+original_wb <- read_xlsx("../When_where_and_why_material/raw_data/world bank/GEP_forecast_vintages_06232020.xlsx",
           sheet = "Table_long") %>% 
   select(1:4) %>% 
   setNames(c("date_publication","country","year_forecasted","wb")) %>%
@@ -55,7 +55,7 @@ final_forecasts <-  forecasts %>%
 
 # Export:
 
-saveRDS(final_forecasts, file ="../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds")
+saveRDS(final_forecasts, file ="../When_where_and_why_material/intermediate_data/world bank/gdp_wb_cleaned.rds")
 
 cat(crayon::green("World Bank forecasts succesfully cleaned.\nExported intermediate data in directory:../IEO_forecasts_material/intermediate_data/world bank"))
 

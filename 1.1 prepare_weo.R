@@ -27,7 +27,7 @@
 
 
 
-wrangle_weo_forecasts <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", year_exclude = "2019") {
+wrangle_weo_forecasts <- function(path = "../When_where_and_why_material/raw_data/weo_rgdp.xlsx", year_exclude = "2019") {
 
 path = path
 
@@ -131,7 +131,7 @@ return(final_forecasts)
 
 
 
-get_last_weo <- function(path = "../IEO_forecasts_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
+get_last_weo <- function(path = "../When_where_and_why_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
   
   last_actual <- read_xlsx(path, sheet = last_edition) %>% 
   slice(1: which(Country == "Zimbabwe")) %>% # remove composite indicators
@@ -229,17 +229,17 @@ return(first_actual)
 
 # Set paramaters:
 
-paths = c("../IEO_forecasts_material/raw_data/weo_rgdp.xlsx",
-          "../IEO_forecasts_material/raw_data/weo_pcpi.xlsx",
-          "../IEO_forecasts_material/raw_data/cagdp.xlsx")
+paths = c("../When_where_and_why_material/raw_data/weo_rgdp.xlsx",
+          "../When_where_and_why_material/raw_data/weo_pcpi.xlsx",
+          "../When_where_and_why_material/raw_data/cagdp.xlsx")
 
 last_edition = c(rep("apr2020",3))
 
 name_variables = c("growth","inflation","cagdp")
 
-export_names = c("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RDS",
-                 "../IEO_forecasts_material/intermediate_data/inflation_cleaned.RDS",
-               "../IEO_forecasts_material/intermediate_data/cagdp_cleaned.RDS")
+export_names = c("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RDS",
+                 "../When_where_and_why_material/intermediate_data/inflation_cleaned.RDS",
+               "../When_where_and_why_material/intermediate_data/cagdp_cleaned.RDS")
 
                
 

@@ -70,10 +70,10 @@ forecasts <- forecasts %>%
 
 # Revert column order for for some df depending on path: (later on improve this part of the code, not elegant)
 
-if(path == "../IEO_forecasts_material/raw_data/weo_january_update.xlsx"){
+if(path == "../When_where_and_why_material/raw_data/weo_january_update.xlsx"){
 forecasts[[1]] <- forecasts[[1]] %>% 
   select(Series_code, jan2009, everything())
-} else if(path == "../IEO_forecasts_material/raw_data/weo_july_update.xlsx"){
+} else if(path == "../When_where_and_why_material/raw_data/weo_july_update.xlsx"){
   forecasts[[3]] <- forecasts[[3]] %>% 
     select(Series_code,sep2011, everything())
 }
@@ -98,8 +98,8 @@ final_forecasts <-  forecasts %>%
 
 # Set parameters and run: ----
 
-paths = c("../IEO_forecasts_material/raw_data/weo_january_update.xlsx",
-          "../IEO_forecasts_material/raw_data/weo_july_update.xlsx")
+paths = c("../When_where_and_why_material/raw_data/weo_january_update.xlsx",
+          "../When_where_and_why_material/raw_data/weo_july_update.xlsx")
 
 
 updates <- paths %>% 
@@ -125,7 +125,7 @@ weo_updates <- updates %>%
 # Export:
 
 
-saveRDS(weo_updates, file = "../IEO_forecasts_material/intermediate_data/rgdp_update_cleaned.RDS")
+saveRDS(weo_updates, file = "../When_where_and_why_material/intermediate_data/rgdp_update_cleaned.RDS")
 
 
 

@@ -4,11 +4,11 @@
 
 # Prepare country group:
 
-groups <- list.files("../IEO_forecasts_material/raw_data/country_group_geography/") %>% 
+groups <- list.files("../When_where_and_why_material/raw_data/country_group_geography/") %>% 
   str_remove(".xlsx")
 
-country_group_geography <- list.files("../IEO_forecasts_material/raw_data/country_group_geography/") %>% 
-  map_chr(~ paste0("~/Dropbox/IMF/IEO_forecasts_material/raw_data/country_group_geography/",.x)) %>% 
+country_group_geography <- list.files("../When_where_and_why_material/raw_data/country_group_geography/") %>% 
+  map_chr(~ paste0("~/Dropbox/When_where_and_why/When_where_and_why_material/raw_data/country_group_geography/",.x)) %>% 
   map(~ read_excel(.x)) %>% 
   map(~ .x %>% rename(country_code= 1))
 
@@ -28,7 +28,7 @@ country_group_geography <- country_group_geography %>%
 
 
 
-saveRDS(country_group_geography, file = "..//IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
+saveRDS(country_group_geography, file = "../When_where_and_why_material//intermediate_data/country_group_geography_clean.RDS")
   
   
   
