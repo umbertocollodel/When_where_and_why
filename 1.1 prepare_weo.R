@@ -1,6 +1,7 @@
 # DESCRIPTION: the script produces the final dataframe for the comparison between forecasted values in WEO
 # and actual values and saves it in the intermediate data directory of the project.
-
+## FOR EXTERNAL USERS ONLY: in the "Set paramters" section, change your path to the raw files and 
+## export path to the one desired.
 
 # Wrangling weo forecasts function ----
 
