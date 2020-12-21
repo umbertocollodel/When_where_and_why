@@ -34,6 +34,8 @@ IMF Data:
 
 ## Organization
 
+0. Main Source
+
 1. Preparation datasets
 
 2. Short-term analysis (current-year and year-ahead): bias and efficiency
@@ -44,7 +46,7 @@ IMF Data:
 
 5. Programs and forecast errors
 
-
+The main sourcing file runs the entire project.
 The main file of each section cleans the global environment, installs and loads the packages required 
 and sources all the scripts in the section. The function file contains custom functions to generate tables and produce graphs for the section. Individual files run the function and export the output.
 
