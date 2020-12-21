@@ -47,3 +47,12 @@ IMF Data:
 
 The main file of each section cleans the global environment, installs and loads the packages required 
 and sources all the scripts in the section. The function file contains custom functions to generate tables and produce graphs for the section. Individual files run the function and export the output.
+
+
+## License
+
+The data and codes are under the MIT license. This means that you can use everything as you please for research or commercial purposes, as long as you refer back to us.
+
+## Contributing
+
+If you find irregularities or bugs, please open an issue here.
