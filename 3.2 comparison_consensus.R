@@ -2,7 +2,7 @@
 
 # Prepare the data ----
 
-load("../IEO_forecasts_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/consensus/gdp_consensus_cleaned.RData")
 
 consensus <- x %>% 
   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","consensus"))) %>% 
@@ -36,7 +36,7 @@ get_scatterplot(comparison_consensus %>% filter(forecaster == "Consensus (Mean)"
                 export_path = "consensus/accuracy/scatter_")
 
 footnote=c("Red line is 45 degrees line.") %>% 
-  cat(file ="../IEO_forecasts_material/output/figures/comparison/consensus/accuracy/scatter_footnote.tex")
+  cat(file ="../When_where_and_why_material/output/figures/comparison/consensus/accuracy/scatter_footnote.tex")
 
 
 
@@ -63,13 +63,13 @@ rmse_comparison %>%
   setNames(c("Country","H=0,F","H=0,S","H=1,F","H=1,S")) %>% 
   stargazer(summary= F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
+            out = "../When_where_and_why_material/output/tables/comparison/consensus/rmse_comparison_full.tex")
   
 # Footnote:
 
 footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the Consensus Economics (CE) forecasts. 
 We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the CE forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
-cat(file ="../IEO_forecasts_material/output/tables/comparison/consensus/rmse_comparison_full_footnote.tex")
+cat(file ="../When_where_and_why_material/output/tables/comparison/consensus/rmse_comparison_full_footnote.tex")
 
 
 
@@ -85,7 +85,7 @@ footnote=c("Percentage refers to the share of countries with a lower root mean s
            DM Test is the test statistic associated with a two-sided Diebold-Mariano test where the null
            is of equal accuracy between forecasts. ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/comparison/consensus/accuracy/comparison_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/comparison/consensus/accuracy/comparison_footnote.tex")
 
 
 
@@ -136,14 +136,14 @@ list(filter_best_forecaster(consensus1),filter_best_forecaster(consensus2),
   setNames(c("Recession","Current-year, Fall","Current-year, Spring","Year-ahead, Fall","Year-ahead, Spring")) %>% 
   stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best.tex")
+            out = "../When_where_and_why_material/output/tables/comparison/consensus/comparison_recession_best.tex")
   
 
 # Footnote:
 
 footnote=c("The table shows the median forecast error for the 'best' Consensus forecasters i.e. the one that produce forecasts
            closest to the actual value for recession periods.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/comparison/consensus/comparison_recession_best_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/comparison/consensus/comparison_recession_best_footnote.tex")
 
 
 

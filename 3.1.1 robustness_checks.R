@@ -2,10 +2,10 @@
 
 # Fall-spring data
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RData")
 rgdp_fall_spring <- x
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_jan_update.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_jan_update.RData")
 rgdp_jan <- x %>% select(-variable2)
 
 rgdp_fall_spring_clean1 <- rgdp_fall_spring %>% 
@@ -22,12 +22,12 @@ merge(rgdp_jan,rgdp_fall_spring_clean1) %>%
 # Second robustness check: are current-year WEO Spring forecasts different from WEO current-year July forecasts? -----
 
 
-update <- readRDS("../IEO_forecasts_material/intermediate_data/rgdp_update_cleaned.RDS")
+update <- readRDS("../When_where_and_why_material/intermediate_data/rgdp_update_cleaned.RDS")
 
 update_july_clean <- update %>% 
   select(country_code, year, variable1)
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RData")
 rgdp_fall_spring <- x
 
 rgdp_fall_spring_clean2 <- rgdp_fall_spring %>% 

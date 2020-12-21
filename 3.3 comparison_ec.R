@@ -2,17 +2,17 @@
 
 # Prepare dataframe: ----
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RData")
 
 
-ec <- readRDS("../IEO_forecasts_material/intermediate_data/european commission/ec_gdp_cleaned.rds") %>%
+ec <- readRDS("../When_where_and_why_material/intermediate_data/european commission/ec_gdp_cleaned.rds") %>%
   rename_at(vars(matches("variable")), funs(str_replace(.,"variable","ec"))) %>% 
   select(-country)
 
 # Geographical group:
 
 
-geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
+geo_group <- readRDS("../When_where_and_why_material/intermediate_data/country_group_geography_clean.RDS")
 
 
 comparison_ec <- x %>% 
@@ -43,7 +43,7 @@ get_scatterplot(comparison_ec, "EC Forecasts",
                 export_path = "EC/accuracy/scatter_")
 
 footnote=c("Red line is 45 degrees line.") %>% 
-  cat(file ="../IEO_forecasts_material/output/figures/comparison/EC/accuracy/scatter_footnote.tex")
+  cat(file ="../When_where_and_why_material/output/figures/comparison/EC/accuracy/scatter_footnote.tex")
 
 # Table appendix: comparison RMSE for all individual countries ----- 
 
@@ -66,12 +66,12 @@ rmse_comparison %>%
   setNames(c("Country","H=0,Oct.", "H=0,Apr.","H=1,Oct.","H=1,Apr.")) %>% 
   stargazer(summary= F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/EC/full_rmse.tex")
+            out = "../When_where_and_why_material/output/tables/comparison/EC/full_rmse.tex")
 # Footnote:
 
 footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the AMECO forecasts. 
            We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the AMECO forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
-  cat(file ="../IEO_forecasts_material/output/tables/comparison/EC/full_rmse_footnote.tex")
+  cat(file ="../When_where_and_why_material/output/tables/comparison/EC/full_rmse_footnote.tex")
 
 
 # Table: summary of accuracy (percentage RMSE and significance across geo. group) -----
@@ -86,7 +86,7 @@ footnote=c("Percentage refers to the share of countries with a lower root mean s
            DM Test is the test statistic associated with a two-sided Diebold-Mariano test where the null
            is of equal accuracy between forecasts. ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/comparison/EC/accuracy/comparison_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/comparison/EC/accuracy/comparison_footnote.tex")
 
 
 
@@ -118,7 +118,7 @@ comparison_ec %>%
         legend.text = element_text(size = 16)) +
   theme(strip.text = element_text(size = 16))
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/EC/event_study_sdc.pdf")
+ggsave("../When_where_and_why_material/output/figures/comparison/EC/event_study_sdc.pdf")
   
 
 

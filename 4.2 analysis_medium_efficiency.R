@@ -65,13 +65,13 @@ table_medium_efficiency <- regressions %>%
 table_medium_efficiency %>% 
   iwalk(~ .x %>% stargazer(summary = F,
                            rownames = F,
-                           out = paste0("../IEO_forecasts_material/output/tables/medium_term/efficiency/",.y,".tex")))
+                           out = paste0("../When_where_and_why_material/output/tables/medium_term/efficiency/",.y,".tex")))
 
 # Footnote:
 
 footnote=c("The table shows results from regressions of year(t + h) errors in the WEO GDP growth forecasts made in year(t) on an intercept and the year(t) forecast of year(t + h) China GDP growth (Table 16) , Germany GDP growth (Table 17) or US GDP growth (Table 18). 
            The four columns report the estimated beta coefficient from these regressions.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/medium_term/efficiency/efficiency_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/medium_term/efficiency/efficiency_footnote.tex")
 
 
 

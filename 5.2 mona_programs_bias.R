@@ -5,7 +5,7 @@
 
 # Need actual value of real GDP
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RData")
 rgdp_weo <- x
 
 final_mona <- rgdp_weo %>%
@@ -52,15 +52,15 @@ final_mona %>%
 # Run the function and export: 
 
 plot_rel_bias_big(variable1) %>% 
-  ggsave(filename = "../IEO_forecasts_material/output/figures/programs/bias_big/current_year.pdf")
+  ggsave(filename = "../When_where_and_why_material/output/figures/programs/bias_big/current_year.pdf")
 
 plot_rel_bias_big(variable2) %>% 
-  ggsave(filename = "../IEO_forecasts_material/output/figures/programs/bias_big/year_ahead.pdf")
+  ggsave(filename = "../When_where_and_why_material/output/figures/programs/bias_big/year_ahead.pdf")
 
 # Footnote:
 
 footnote=c("Includes all programs in the period 2002-2018.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/programs/bias_big/bias_big_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/programs/bias_big/bias_big_footnote.tex")
 
 
 
@@ -104,7 +104,7 @@ regressions %>%
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             column.sep.width = "-10pt",
             df=F,
-            out = "../IEO_forecasts_material/output/tables/programs/regressions/gdp.tex")
+            out = "../When_where_and_why_material/output/tables/programs/regressions/gdp.tex")
 
 # Footnote: 
 
@@ -112,7 +112,7 @@ footnote=c("Dependent variable winsorized at the 10% level. Heteroskedasticity r
             parentheses.
            ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/programs/regressions/gdp_footnote.tex")
 
   
   
@@ -195,7 +195,7 @@ comparison_plot <- list(current_year, year_ahead) %>%
         axis.title = element_text(size = 21))) 
 
 comparison_plot %>% 
-  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big_",.y,".pdf"),.x))
+  iwalk(~ ggsave(paste0("../When_where_and_why_material/output/figures/programs/bias_big/comparison_bias_big_",.y,".pdf"),.x))
 
 
 # Footnote:
@@ -205,7 +205,7 @@ comparison_plot %>%
              multiplying by 100.
              Data for forecasts are, respectively, from MONA and Consensus. 
              The sample of programs corresponds to data availability for Consensus") %>% 
-    cat(file= "../IEO_forecasts_material/output/figures/programs/bias_big/comparison_bias_big_footnote.tex")
+    cat(file= "../When_where_and_why_material/output/figures/programs/bias_big/comparison_bias_big_footnote.tex")
   
 # Role of reviews: ----
 
@@ -251,7 +251,7 @@ regressions_reviews %>%
             dep.var.labels = c("GDP forecast error (current year)","GDP forecast error (year-ahead)"),
             omit.stat = c("rsq","adj.rsq","res.dev","ser"),
             df=F,
-            out= "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews.tex")
+            out= "../When_where_and_why_material/output/tables/programs/regressions/gdp_reviews.tex")
 
 
 # Footnote:
@@ -260,7 +260,7 @@ footnote=c("Dependent variable winsorized at the 5% level. The sample contains d
             program and for the two subsequent reviews.
            ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/programs/regressions/gdp_reviews_footnote.tex")
 
 
 
@@ -326,7 +326,7 @@ comparison %>%
           strip.text.x = element_text(size=14),
           legend.title = element_text(size = 18),
           legend.text = element_text(size = 16))) %>% 
-  iwalk(~ ggsave(paste0("../IEO_forecasts_material/output/figures/programs/comparison_",.y,".pdf"),.x))
+  iwalk(~ ggsave(paste0("../When_where_and_why_material/output/figures/programs/comparison_",.y,".pdf"),.x))
 
 
 # Footnote:
@@ -334,7 +334,7 @@ comparison %>%
 footnote=c("The figure shows the distribution of forecast errors for all programs in the period 2002-2018.
             Forecast for the current year in the Mona database are formulated at the date of program inception. 
             Consensus forecasts are matched by month.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/programs/comparison_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/programs/comparison_footnote.tex")
 
 
 # TO DO: formal Kolgorov-Smirnov test and put consensus data in appropriate raw_data folder.
@@ -352,4 +352,4 @@ comparison %>%
   bind_rows(.id = "Horizon") %>% 
   stargazer(summary = F,
             nrow = F,
-            out = "../IEO_forecasts_material/output/tables/programs/kolgorov_smirnov.tex")
+            out = "../When_where_and_why_material/output/tables/programs/kolgorov_smirnov.tex")

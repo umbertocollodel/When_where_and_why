@@ -14,7 +14,7 @@ get_list_comparison <- function(data,export_path){
     rename(Country = country, `Geo. group` = group) %>% 
     stargazer(summary = F,
               rownames = F,
-              out = paste0("../IEO_forecasts_material/output/tables/comparison/",export_path))
+              out = paste0("../When_where_and_why_material/output/tables/comparison/",export_path))
 }
 
 
@@ -56,7 +56,7 @@ get_scatterplot <- function(data, ylab, ylimits = c(-20,20), xlimits=c(-20,20), 
   
   scatter_forecasts %>% 
     walk2(issues, 
-         ~ ggsave(paste0("../IEO_forecasts_material/output/figures/comparison/",export_path,.y,".pdf"),plot = .x))
+         ~ ggsave(paste0("../When_where_and_why_material/output/figures/comparison/",export_path,.y,".pdf"),plot = .x))
   
 }
 
@@ -105,7 +105,7 @@ get_accuracy_summary <- function(data, issues_abbr, other_var, export_path){
   rbind(percentage,significance) %>% 
     arrange(Geo.group) %>% 
     select(Geo.group, Variable, everything()) %>% 
-    stargazer(out= paste0("../IEO_forecasts_material/output/tables/comparison/",export_path),
+    stargazer(out= paste0("../When_where_and_why_material/output/tables/comparison/",export_path),
               summary = F,
               rownames = F)
 }

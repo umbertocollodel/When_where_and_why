@@ -7,24 +7,24 @@
 
 # World Bank data (complete) from Ayuhan:
 
-gep_data <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
+gep_data <- readRDS("../When_where_and_why_material/intermediate_data/world bank/gdp_wb_cleaned.rds") %>% 
   filter(!country %in% country_to_exclude)
   
 
 # IMF WEO updates data:
 
-weo_updates <- readRDS("../IEO_forecasts_material/intermediate_data/rgdp_update_cleaned.RDS")
+weo_updates <- readRDS("../When_where_and_why_material/intermediate_data/rgdp_update_cleaned.RDS")
 
 # Actual values: (fall issue of next year WEO)
 
-load("../IEO_forecasts_material/intermediate_data/rgdp_cleaned.RData")
+load("../When_where_and_why_material/intermediate_data/rgdp_cleaned.RData")
 
 target <- x %>% 
   select(country_code, country, year, targety_first)
 
 # Geographical group:
 
-geo_group <- readRDS("../IEO_forecasts_material/intermediate_data/country_group_geography_clean.RDS")
+geo_group <- readRDS("../When_where_and_why_material/intermediate_data/country_group_geography_clean.RDS")
 
 
 # Bind all together:
@@ -37,7 +37,7 @@ comparison_wb <- list(weo_updates, gep_data, target) %>%
   as_tibble()
 
 comparison_wb %>% 
-  saveRDS("../IEO_forecasts_material/intermediate_data/world bank/comparison_wb.RDS")
+  saveRDS("../When_where_and_why_material/intermediate_data/world bank/comparison_wb.RDS")
 
 # Dataframe with geographical group countries ----
 
@@ -58,7 +58,7 @@ get_scatterplot(comparison_wb, "GEP Forecasts",
                 export_path = "WB_updated/accuracy/scatter_")
 
 footnote=c("Red line is 45 degrees line.") %>% 
-  cat(file ="../IEO_forecasts_material/output/figures/comparison/WB_updated/accuracy/scatter_footnote.tex")
+  cat(file ="../When_where_and_why_material/output/figures/comparison/WB_updated/accuracy/scatter_footnote.tex")
 
 # Table: summary of accuracy (percentage RMSE and significance across geo. group) -----
 
@@ -72,7 +72,7 @@ footnote=c("Percentage refers to the share of countries with a lower root mean s
            DM Test is the test statistic associated with a two-sided Diebold-Mariano test where the null
            is of equal accuracy between forecasts. ***: significant at 1% level, **: significant at 5% level,
            *: significant at 10% level.") %>% 
-  cat(file = "../IEO_forecasts_material/output/tables/comparison/WB_updated/accuracy/comparison_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/tables/comparison/WB_updated/accuracy/comparison_footnote.tex")
 
 # Table appendix: comparison RMSE for all individual countries ----- 
     
@@ -95,17 +95,17 @@ footnote=c("Percentage refers to the share of countries with a lower root mean s
       setNames(c("Country","H=0,Jul.", "H=0,Jan.","H=1,Jul.","H=1,Jan.")) %>% 
       stargazer(summary= F,
                 rownames = F,
-                out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full.tex")
+                out = "../When_where_and_why_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full.tex")
     
     # Footnote:
     
     footnote=c("This table reports the ratio of the estimated RMSE for the WEO real GDP growth forecasts versus the RMSE for the Global Economic Prospect (GEP) forecasts. 
                We have subtracted one, so that values greater than zero suggest that the WEO forecasts are less accurate than the GEP forecasts, while values below zero suggest that the WEO forecasts are more accurate.") %>% 
-      cat(file ="../IEO_forecasts_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full_footnote.tex")
+      cat(file ="../When_where_and_why_material/output/tables/comparison/WB_updated/appendix/rmse_comparison_full_footnote.tex")
     
 # Forecast errors bias and aid ----
 
-wb_aid <- readRDS("../IEO_forecasts_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
+wb_aid <- readRDS("../When_where_and_why_material/intermediate_data/world bank/wb_aid_cleaned.RDS")
 
 aid_comparison <- merge(comparison_wb, wb_aid) %>% 
   mutate_at(vars(contains("variable")), funs(targety_first - .)) %>% 
@@ -135,7 +135,7 @@ aid_comparison %>%
   setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.", "H=1, Jul.","H=1, Jan.")) %>% 
   stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_bias/aid_errors.tex")
+            out = "../When_where_and_why_material/output/tables/comparison/WB_updated/aid_bias/aid_errors.tex")
 
 
 footnote=c("Extensive engament is defined as total loans outstanding above the median of the distribution
@@ -167,7 +167,7 @@ c(0.75,0.95) %>%
   map(~ .x %>% setNames(c("Source","Type of Engament","H=0, Jul.","H=0, Jan.","H=1, Jul.","H=1, Jan."))) %>% 
   map2(names, ~ .x %>% stargazer(summary = F,
                          rownames = F,
-                         out = paste0("../IEO_forecasts_material/output/tables/comparison/WB_updated/aid_bias/aid_errors_",.y,".tex")))
+                         out = paste0("../When_where_and_why_material/output/tables/comparison/WB_updated/aid_bias/aid_errors_",.y,".tex")))
 
 
 # Figure 7 & 8 - scatterplot bias and WB aid: ----
@@ -213,26 +213,26 @@ list_scatter %>%
 # Run the function and export:
 
 plot_rel_bias_aid(wb1) %>%
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJul.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../When_where_and_why_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJul.pdf"),.x))
 
   
 plot_rel_bias_aid(wb2) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJan.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../When_where_and_why_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_currentJan.pdf"),.x))
 
 
 plot_rel_bias_aid(wb3) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJul.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../When_where_and_why_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJul.pdf"),.x))
 
 
 plot_rel_bias_aid(wb4) %>% 
-  iwalk(~ ggsave(filename = paste0("../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJan.pdf"),.x))
+  iwalk(~ ggsave(filename = paste0("../When_where_and_why_material/output/figures/comparison/WB_updated/aid_bias/",.y,"_aheadJan.pdf"),.x))
 
 
 # Footnote:
 
 footnote=c("Forecast error is the country-by-country median forecast error in the period 2010-2018. Engagement is total loans outstanding 
            in milions USD as of June 2014. Extensive engament is defined as total loans outstanding above the median of the distribution as of June 2014.") %>% 
-  cat(file = "../IEO_forecasts_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
+  cat(file = "../When_where_and_why_material/output/figures/comparison/WB_updated/aid_error_footnote.tex")
 
 
 

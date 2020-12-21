@@ -21,7 +21,7 @@ list(IMF = final_sr$growth,
   bind_rows(.id = "Forecaster") %>% 
   stargazer(summary = F,
             rownames = F,
-            out = "../IEO_forecasts_material/output/tables/comparison/frequency_recessions.tex")
+            out = "../When_where_and_why_material/output/tables/comparison/frequency_recessions.tex")
   
   
 
@@ -79,12 +79,12 @@ inability_df %>%
   
 
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions.pdf")
+ggsave("../When_where_and_why_material/output/figures/comparison/inability_recessions.pdf")
 
 footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
            The sample for each forecaster reflects data availability (refer to section 1).
            Recessions are periods of negative growth.") %>% 
-  cat(file ="../IEO_forecasts_material/output/figures/comparison/inability_recessions_footnote.tex")
+  cat(file ="../When_where_and_why_material/output/figures/comparison/inability_recessions_footnote.tex")
 
 
 
@@ -168,7 +168,7 @@ financial_crises_fe <- final_sr$growth %>%
 
 # Export:
 
-ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions_financial.pdf")
+ggsave("../When_where_and_why_material/output/figures/comparison/inability_recessions_financial.pdf")
   
   
 # Footnote:
@@ -176,7 +176,7 @@ ggsave("../IEO_forecasts_material/output/figures/comparison/inability_recessions
 footnote=c("Distribution of real GDP growth WEO forecast errors for episodes of no-recession,  only recession and recession accompanied by a single or twin financial crises. 
            Financial crises correspond to currency, banking and sovereign debt crises. 
            The corresponding dummy is from ") %>% 
-  cat(file="../IEO_forecasts_material/output/figures/comparison/inability_recessions_financial_footnote.tex")
+  cat(file="../When_where_and_why_material/output/figures/comparison/inability_recessions_financial_footnote.tex")
   
   
 
