@@ -9,8 +9,8 @@ Please cite us if you refer to our paper.
 
 ## Author
 
-Umberto Collodel (umberto.collodel@gmail.com) \\
-Zidong An (zidong.an@ruc.edu.cn) \\
+Umberto Collodel (umberto.collodel@gmail.com) <br/>
+Zidong An (zidong.an@ruc.edu.cn) <br/>
 Prakash Loungani (ploungani@imf.org)
 
 ## Language
@@ -38,7 +38,7 @@ The folder contains:
 
 * Consensus Data
 
-`gdp_2008_2019_firstweek`:  GDP growth forecasts contained in April and September version of Consensus survey, one sheet for each year/vintage - mainly advanced economies available in the first week \\
+`gdp_2008_2019_firstweek`:  GDP growth forecasts contained in April and September version of Consensus survey, one sheet for each year/vintage - mainly advanced economies available in the first week <br/>
 `gdp_2008_2019_secondweek`:  GDP growth forecasts contained in April and September version of Consensus survey, one sheet for each year/vintage - mainly emerking markets and low income economies in the second week
 
 * MONA Data
