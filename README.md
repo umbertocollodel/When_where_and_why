@@ -9,8 +9,8 @@ Please cite us if you refer to our paper.
 
 ## Author
 
-Umberto Collodel (umberto.collodel@gmail.com)
-Zidong An (zidong.an@ruc.edu.cn)
+Umberto Collodel (umberto.collodel@gmail.com) \\
+Zidong An (zidong.an@ruc.edu.cn) \\
 Prakash Loungani (ploungani@imf.org)
 
 ## Language
