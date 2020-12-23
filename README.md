@@ -21,14 +21,30 @@ Download all files in the folder
 
 https://www.dropbox.com/sh/33sosx2ltq6vif4/AADbEPy8EGOPjfPsJh9fVWdRa?dl=0
 
-IMF Data:
+
+The folder contains:
+
+* IMF World Economic Outlook Data
 
 `weo_rgdp`: GDP growth forecasts contained in Spring and Fall WEO publication, one sheet for each year/vintage 
-
 `weo_january_ypdate`: GDP growth forecasts contained in January WEO publication, one sheet for each year
-
 `weo_july_update`: GDP growth forecast contained in July publication, one sheet for each year
 
+* World Bank GEP Data
+
+`GEP_forecast_vintages_06232020`: GDP growth forecasts contained in Summer and Winter GEP publication, both long and wide format
+
+* Consensus Data
+
+`gdp_2008_2019_firstweek`:  GDP growth forecasts contained in April and September version of Consensus survey, one sheet for each year/vintage - mainly advanced economies available in the first week
+`gdp_2008_2019_secondweek`  GDP growth forecasts contained in April and September version of Consensus survey, one sheet for each year/vintage - mainly emerking markets and low income economies in the second week
+
+* MONA Data
+
+`mona_2002-2020_macro`: forecasts for main macroeconomic variables for inception of program and subsequent reviews
+
+
+Note: the script retrieves European Commission forecasts from AMECO directly scraping the [website](https://ec.europa.eu/info/business-economy-euro/indicators-statistics/economic-databases/macro-economic-database-ameco/ameco-archive_en") and downloanding them, this is why they are not available as raw data.
 
 
 
