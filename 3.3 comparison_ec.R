@@ -17,7 +17,9 @@ geo_group <- readRDS("../When_where_and_why_material/intermediate_data/country_g
 
 comparison_ec <- x %>% 
   merge(ec, by=c("country_code","year")) %>%
-  merge(geo_group,by=c("country_code"), all.x = T) %>% 
+  merge(geo_group,by=c("country_code"), all.x = T) %>%
+  mutate(group = case_when(is.na(group) ~ "Other Adv. Economies",
+         T~ group)) %>% 
   select(country_code, country,group, year, targety_first, variable1, variable2, variable3, variable4,
          ec1,ec2,ec3,ec4) %>% 
   as_tibble() 
