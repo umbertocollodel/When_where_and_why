@@ -131,7 +131,7 @@ return(final_forecasts)
 
 
 
-get_last_weo <- function(path = "../When_where_and_why_material/raw_data/weo_rgdp.xlsx", last_edition = "apr2020"){
+get_last_weo <- function(path = "../When_where_and_why_material/raw_data/weo_rgdp.xlsx", last_edition = "oct2020"){
   
   last_actual <- read_xlsx(path, sheet = last_edition) %>% 
   slice(1: which(Country == "Zimbabwe")) %>% # remove composite indicators
@@ -142,9 +142,10 @@ get_last_weo <- function(path = "../When_where_and_why_material/raw_data/weo_rgd
   mutate(country_code = str_extract(country_code,"\\d{3}")) %>% 
   mutate(targety_last = as.numeric(targety_last)) %>% 
   arrange(country_code, year)
-
   
-  if(str_detect(path, paste(c("pcpi"),collapse = "|"))){
+  # For real GDP and CPI calculate growth rates, for others e.g. Current Account not needed:
+  
+  if(str_detect(path, paste(c("pcpi","rgdp"),collapse = "|"))){
     last_actual <- last_actual %>% 
       group_by(country_code) %>%
       mutate(targety_last = ((targety_last - dplyr::lag(targety_last,1))/dplyr::lag(targety_last,1))*100) %>% 
@@ -163,13 +164,10 @@ get_last_weo <- function(path = "../When_where_and_why_material/raw_data/weo_rgd
 get_first_settled_weo <- function(path){
   
 #' Getting weo actual values (October WEO issue of the following year)
-#' 
 #' From excel sheets with all issues of weo publication, gets all the first settled actual values.
 #' 
 #' @param path path to the xlsx workbook in the locale.
-#' 
 #' @return tibble with two identifiers (imf code and year) and actual value of variable.
-#' 
 #' @details Format sheets: every sheet must have observations starting from 7th column, otherwise problems
 #' with gather. 
 #' @details Aggregate areas forecasts excluded.
@@ -233,7 +231,7 @@ paths = c("../When_where_and_why_material/raw_data/weo_rgdp.xlsx",
           "../When_where_and_why_material/raw_data/weo_pcpi.xlsx",
           "../When_where_and_why_material/raw_data/cagdp.xlsx")
 
-last_edition = c(rep("apr2020",3))
+last_edition = c("oct2020", rep("apr2020",2))
 
 name_variables = c("growth","inflation","cagdp")
 
@@ -266,7 +264,7 @@ final <- first_actual %>%
                       variable1, variable2, variable3, variable4, variable5,
                       variable6,variable7,variable8,variable9,variable10,
                       variable11, variable12)) %>% 
-  map(~ .x %>% as.tibble())
+  map(~ .x %>% as_tibble())
 
 names(final) <- name_variables
 
@@ -279,10 +277,5 @@ final %>%
 # If I want a thruthful comparison between forecast errors using different target, should add complete.cases(targety_last).
 # sometimes revised series start much later (data quality before not considered good enough).
 
-
-####################################################
-
-
-# The first actual seems always worse for recessions compared to the last actual
 
 
