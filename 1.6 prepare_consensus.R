@@ -133,8 +133,7 @@ emerging <- wrangle_consensus_forecasts("../When_where_and_why_material/raw_data
 
 
 consensus_clean <- rbind(advanced, emerging) %>% 
-  arrange(country, year) %>% 
-  filter(year < 2019)
+  arrange(country, year) 
 
 
 # Problem of duplicates:

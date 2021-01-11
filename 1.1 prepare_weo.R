@@ -274,6 +274,9 @@ names(final) <- name_variables
 final %>% 
   walk2(export_names, ~ saveRDS(.x, file = .y))
 
+cat(crayon::green("WEO forecasts succesfully cleaned.\nExported intermediate data in directory:../IEO_forecasts_material/intermediate_data"))
+
+
 # If I want a thruthful comparison between forecast errors using different target, should add complete.cases(targety_last).
 # sometimes revised series start much later (data quality before not considered good enough).
 
