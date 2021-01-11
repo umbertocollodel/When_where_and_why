@@ -9,7 +9,9 @@ consensus <- x %>%
   select(-country)
 
 comparison_consensus <- final_sr$growth %>%
-  merge(consensus, by = c("country_code","year")) %>% 
+  merge(consensus, by = c("country_code","year")) %>%
+  mutate(group = case_when(is.na(group) ~ "Other Adv. Economies",
+                           T~ group)) %>% 
   as_tibble()
 
 # Dataframe with geographical groups:
