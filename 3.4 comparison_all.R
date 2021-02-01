@@ -109,7 +109,7 @@ comparison_consensus %>%
   ggplot(aes(value, fill = recession)) +
   geom_density(col="white",alpha = 0.4) +
   theme_minimal() +
-  facet_wrap(~ horizon) +
+  facet_wrap(~ horizon, scales = "free_y") +
   scale_fill_manual(values = c("#0000ff","#ff0000")) +
   ylab("") +
   xlab("Real Growth Forecast Error (%)") +
@@ -130,10 +130,11 @@ ggsave("../When_where_and_why_material/output/figures/comparison/inability_reces
 
 # Footnote:
 
-footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
-           The sample for each forecaster reflects data availability (refer to section 1).
-           Recessions are periods of negative growth.") %>% 
-  cat(file ="../When_where_and_why_material/output/figures/comparison/inability_recessions_footnote.tex")
+footnote=c("Distribution of real GDP growth forecast errors for a subsample of individual private forecasters.
+            The subsample is composed by forecasters that for each country, year and horizon produce the forecast closest
+            to the actual value.
+            Recessions are periods of negative growth.") %>% 
+  cat(file ="../When_where_and_why_material/output/figures/comparison/inability_recessions_best_forecaster_footnote.tex")
 
   
   
