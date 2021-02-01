@@ -87,6 +87,58 @@ footnote=c("Distribution of real GDP growth forecast errors for main institution
   cat(file ="../When_where_and_why_material/output/figures/comparison/inability_recessions_footnote.tex")
 
 
+# Inability to predict recessions (individual Consensus forecasters) -----
+
+
+comparison_consensus %>%
+  filter(forecaster != "Consensus (Mean)") %>% 
+  mutate(recession = case_when(targety_first <= 0 ~ "Recession",
+         T~ "Non-recession")) %>% 
+  mutate_at(vars(contains("consensus")), funs(targety_first - .)) %>% 
+  select(country_code, country, year, forecaster, targety_first, contains("consensus"), recession) %>% 
+  gather("horizon", "value", consensus1:consensus4) %>% 
+  split(.$horizon) %>% 
+  map(~ .x %>% mutate(abs_value = abs(value))) %>%
+  map(~ .x %>% group_by(country,year) %>% arrange(country, year,abs_value)) %>% 
+  map(~ .x %>% slice(1)) %>% 
+  bind_rows() %>% 
+  mutate(horizon = case_when(horizon == "consensus1" ~ "H=0,F",
+                             horizon == "consensus2" ~ "H=0,S",
+                             horizon == "consensus3" ~ "H=1,F",
+                             T ~ "H=1,S")) %>% 
+  ggplot(aes(value, fill = recession)) +
+  geom_density(col="white",alpha = 0.4) +
+  theme_minimal() +
+  facet_wrap(~ horizon) +
+  scale_fill_manual(values = c("#0000ff","#ff0000")) +
+  ylab("") +
+  xlab("Real Growth Forecast Error (%)") +
+  theme(legend.position = "bottom") +
+  labs(fill = "",col="") +
+  theme(legend.position = "bottom") +
+  theme(axis.text = element_text(size = 18),
+        axis.text.y = element_blank(),
+        axis.title = element_text(size = 21),
+        strip.text.x = element_text(size=14),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 16))
+
+
+# Export:
+
+ggsave("../When_where_and_why_material/output/figures/comparison/inability_recessions_best_forecaster.pdf")
+
+# Footnote:
+
+footnote=c("Distribution of real GDP growth forecast errors for main institutional and private forecasters.
+           The sample for each forecaster reflects data availability (refer to section 1).
+           Recessions are periods of negative growth.") %>% 
+  cat(file ="../When_where_and_why_material/output/figures/comparison/inability_recessions_footnote.tex")
+
+  
+  
+
+
 
 # New part on financial crises: ----
 
