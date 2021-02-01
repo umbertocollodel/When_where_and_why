@@ -25,7 +25,7 @@ group <- comparison_consensus %>%
 
 # Table with list countries comparison ----
 
-get_list_comparison(comparison_consensus, "consensus/country_sample.tex")
+get_list_comparison_consensus(comparison_consensus, "consensus/country_sample.tex")
 
 
 

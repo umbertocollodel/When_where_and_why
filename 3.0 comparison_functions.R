@@ -18,6 +18,32 @@ get_list_comparison <- function(data,export_path){
 }
 
 
+#' Get list of countries compared for Consensus
+#' 
+#' We use a separate function to know for which subsample of countries we have individual level forecasts
+#' Previous function only for aggregate
+#' 
+#' @param data df with forecasts at different horizons for Consensus and WEO (variable 1/2/3/4 and consensus 1/2/3/4)
+#' @param export_path character string. Path to export table.
+#' @return Output is a tex table with name of countries in comparison df and geographical group.
+
+get_list_comparison_consensus <- function(data,export_path){
+  
+  data %>% 
+    mutate(individual_level = case_when(forecaster != "Consensus (Mean)" ~ "Yes",
+                                        T ~ 'No')) %>% 
+    group_by(country) %>% 
+    arrange(forecaster) %>% 
+    slice(1) %>% 
+    select(country, group, individual_level) %>% 
+    arrange(group) %>%
+    rename(Country = country, `Geo. group` = group, `Individual Level` = individual_level) %>% 
+    stargazer(summary = F,
+              rownames = F,
+              out = paste0("../When_where_and_why_material/output/tables/comparison/",export_path))
+}
+
+
 #' Produce scatterplot two institutions forecasts for different horizons
 #' 
 #' @param data df with forecasts at different horizons for two different sources and actual values (named respectively variable1/2/3/4,
