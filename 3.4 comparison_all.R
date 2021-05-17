@@ -171,7 +171,7 @@ laeven_clean <- x %>%
 
 # Calculate forecast errors when recessions are accompanied by multiplicity of financial crises: 
 
-financial_crises_fe <- final_sr$growth %>% 
+final_sr$growth %>% 
   merge(laeven_clean,all.x = T) %>%
   as_tibble() %>% 
   mutate_at(vars(matches("variable")),funs(targety_first - .)) %>% 
@@ -205,13 +205,14 @@ financial_crises_fe <- final_sr$growth %>%
                              horizon == "variable3" ~ "H=1,F",
                              T ~ "H=1,S")) %>% 
   ggplot(aes(x=value, type)) +
-  geom_density_ridges(scale=0.8, alpha = 0.6) +
+  geom_density_ridges_gradient(aes(fill=stat(x)),scale=1.4) +
   facet_wrap(~ horizon) +
   theme_minimal() +
   ylab("") +
   xlim(-25,10) +
   xlab("Real Growth Forecast Error (%)") +
-  theme(legend.position = "bottom") +
+  scale_fill_gradient2(low = "red", high = "white", limits=c(-18,10), oob = squish) +
+  theme(legend.position = "none") +
   labs(fill="") +
   theme(axis.text = element_text(size = 18),
         axis.title = element_text(size = 21),
