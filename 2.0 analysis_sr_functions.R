@@ -39,7 +39,7 @@ analyse_sr_bias <- function(data, regressions, output_type, export_path){
     modify_depth(2, ~ tryCatch(.x[["coefficients"]], error = function(e){
       cat(crayon::red("Could not run regression. Check dataframe \n"))
     })) %>% 
-    map(~ discard(.x, ~ length(.x) != 4)) %>% 
+    map(~ purrr::discard(.x, ~ length(.x) != 4)) %>% 
     modify_depth(2, ~ as.data.frame(.x)) %>% 
     map(~ bind_rows(.x, .id = "horizon")) %>% 
     bind_rows(.id = "country_code") %>% 
