@@ -1,11 +1,11 @@
 # When_where_and_why
 
-
 This repositories makes available the code to produce all figures and tables in the paper:
-
 An, Collodel and Loungani (2021). "When (where and why) forecasters get it wrong?". Unpublished manuscript.
-
 Please cite us if you refer to our paper.
+
+We assemble a large panel of real GDP forecasts from multiple sources and with these new data study the performance of different forecasters over time and the determinants of forecast errors. We find that a) forecasters are extremely precise during normal periods, but never predict the onset and extent of a recession b) forecasts from different sources are extremely correlated and c) that political economy considerations play an important role in understanding forecast errors.
+
 
 ## Author
 
