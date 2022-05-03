@@ -6,7 +6,7 @@ Please cite us if you refer to our paper.
 
 We assemble a large panel of real GDP forecasts from multiple sources and with these new data study the performance of different forecasters over time and the determinants of forecast errors. We find that a) forecasters are extremely precise during normal periods, but never predict the onset and extent of a recession b) forecasts from different sources are extremely correlated and c) that political economy considerations play an important role in understanding forecast errors.
 
-![Forecast errors during normal times and recessions: a dismal perfomance](../When_where_why_material/output/figures/comparison/inability_recessions.png)
+![Forecast errors during normal times and recessions: a dismal perfomance](https://www.dropbox.com/home/When_where_and_why/When_where_and_why_material/output/figures/comparison?preview=inability_recessions.png)
 
 
 ## Author
